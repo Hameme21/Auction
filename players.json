@@ -1,0 +1,12 @@
+{
+  "A": [
+    {
+      "name": "Player A1",
+      "price": 100
+    },
+    {
+      "name": "Player A2",
+      "price": 100
+    }
+  ]
+}

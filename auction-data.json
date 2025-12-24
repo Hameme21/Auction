@@ -1,0 +1,15 @@
+{
+  "teams": [],
+  "players": {
+    "A": [
+      {
+        "name": "Hamim",
+        "price": 100,
+        "step": 10
+      }
+    ]
+  },
+  "sold": {
+    "A": {}
+  }
+}

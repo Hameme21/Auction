@@ -1,4 +1,4 @@
-// server.js
+// server.js - Complete Auction Server
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -24,6 +24,7 @@ function loadData() {
   try {
     if (fs.existsSync(PERSIST_FILE)) {
       const data = JSON.parse(fs.readFileSync(PERSIST_FILE, 'utf8'));
+      // Initialize missing structures if any
       if (!data.teams) data.teams = [];
       if (!data.categories) data.categories = [];
       if (!data.playersSnapshot) data.playersSnapshot = {};
@@ -54,8 +55,8 @@ let state = loadData() || {
   passRecords: {}
 };
 
+// Global sold tracker
 let SOLD_PLAYERS = new Set();
-// Rebuild sold set
 if(state.teams) {
   state.teams.forEach(t => {
     if(t.purchases) Object.values(t.purchases).forEach(name => { if(name) SOLD_PLAYERS.add(name); });
@@ -66,7 +67,7 @@ io.on('connection', (socket) => {
   const publicTeams = state.teams.map(t => ({ id: t.id, name: t.name })); 
   socket.emit('init:auth', { teams: publicTeams });
 
-  // Auth
+  // --- AUTH ---
   socket.on('auth:login', (payload) => {
     const { type, password, teamId } = payload;
     if (type === 'admin') {
@@ -84,7 +85,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Admin: Update Config
+  // --- ADMIN CONFIG ---
   socket.on('admin:updateConfig', (payload) => {
     if (socket.handshake.auth.token !== ADMIN_PASS) return;
     
@@ -103,7 +104,6 @@ io.on('connection', (socket) => {
     io.emit('state:updated', state); 
   });
 
-  // Admin: Delete Category
   socket.on('admin:deleteCategory', (payload) => {
     if (socket.handshake.auth.token !== ADMIN_PASS) return;
     state.categories = state.categories.filter(c => c.id !== payload.id);
@@ -117,15 +117,15 @@ io.on('connection', (socket) => {
     io.emit('state:updated', state);
   });
 
-  // --- RESET LOGIC ---
+  // --- RESET HANDLERS ---
 
-  // 1. Reset Individual Player (NEW)
+  // 1. Reset Individual Player
   socket.on('admin:resetPlayer', (payload) => {
     if (socket.handshake.auth.token !== ADMIN_PASS) return;
     const { category, name } = payload;
     const key = `${category}:${name}`;
 
-    // Refund team if sold
+    // Refund Team
     state.teams.forEach(t => {
       if(t.purchases && t.purchases[category] === name) {
         const pricePaid = Number(state.soldPrices[key]) || 0;
@@ -134,14 +134,14 @@ io.on('connection', (socket) => {
       }
     });
 
-    // Clear global sold status and price records
+    // Clear Data
     SOLD_PLAYERS.delete(name);
     if(state.activeBids[key]) delete state.activeBids[key];
     if(state.soldPrices[key]) delete state.soldPrices[key];
 
     saveData(state);
     io.emit('state:updated', state);
-    io.emit('admin:toast', { type: 'success', msg: `Player ${name} reset.` });
+    io.emit('admin:toast', { type: 'success', msg: `Player '${name}' reset.` });
   });
 
   // 2. Reset Category
@@ -149,19 +149,18 @@ io.on('connection', (socket) => {
     if (socket.handshake.auth.token !== ADMIN_PASS) return;
     const catId = payload.id;
     
-    // Refund Teams
     state.teams.forEach(t => {
       if(t.purchases && t.purchases[catId]) {
         const pName = t.purchases[catId];
         const key = `${catId}:${pName}`;
         const pricePaid = Number(state.soldPrices[key]) || 0;
+        
         t.purse = Number(t.purse) + pricePaid;
         delete t.purchases[catId];
         SOLD_PLAYERS.delete(pName);
       }
     });
 
-    // Wipe Prices
     const prefix = catId + ':';
     Object.keys(state.activeBids).forEach(key => { if(key.startsWith(prefix)) delete state.activeBids[key]; });
     Object.keys(state.soldPrices).forEach(key => { if(key.startsWith(prefix)) delete state.soldPrices[key]; });
@@ -208,8 +207,10 @@ io.on('connection', (socket) => {
     io.emit('admin:toast', { type: 'error', msg: 'System FULL RESET.' });
   });
 
-  // --- AUCTION ---
-  socket.on('bid:request', (payload) => io.emit('admin:toast', { type: 'info', msg: `Bid Request: ${payload.teamName} for ${payload.playerName}` }));
+  // --- AUCTION FLOW ---
+  socket.on('bid:request', (payload) => {
+    io.emit('admin:toast', { type: 'info', msg: `Bid Request: ${payload.teamName} for ${payload.playerName}` });
+  });
 
   socket.on('player:bid', (payload) => {
     if (socket.handshake.auth.token !== ADMIN_PASS) return;
@@ -239,6 +240,7 @@ io.on('connection', (socket) => {
     team.purchases[category] = name;
     SOLD_PLAYERS.add(name);
 
+    // Persist Sold Price
     const key = `${category}:${name}`;
     state.soldPrices[key] = numericPrice;
     if(state.activeBids[key]) delete state.activeBids[key];

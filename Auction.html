@@ -23,6 +23,7 @@
     button.green{background:#10b981;}
     button.red{background:#ef4444;}
     button.yellow{background:#f59e0b;}
+    button.blue{background:#3b82f6;}
     input, select { background:var(--glass); border:1px solid rgba(255,255,255,0.1); color: white; padding: 8px; border-radius: 6px; width: 100%; }
 
     /* Player Card */
@@ -121,7 +122,10 @@
         <h1>Players Auction System</h1>
         <div class="small" id="roleDisplay">Not Logged In</div>
       </div>
-      <button id="btnResetSystem" class="red hidden" style="font-size:11px; padding:4px 8px;">Reset System</button>
+      <div class="flex">
+        <button id="btnExportAdmin" class="blue hidden" style="font-size:11px; padding:4px 8px; margin-right:5px;">Export Data (CSV)</button>
+        <button id="btnResetSystem" class="red hidden" style="font-size:11px; padding:4px 8px;">Reset System</button>
+      </div>
     </div>
 
     <div class="grid">
@@ -168,7 +172,10 @@
           <div id="scoreboard" style="margin-top:10px"></div>
         </div>
         <div class="card hidden" id="myTeamCard">
-          <strong>My Team Dashboard</strong>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>My Team Dashboard</strong>
+            <button id="btnExportTeam" class="ghost" style="font-size:10px; padding:2px 6px;">Export Squad (CSV)</button>
+          </div>
           <div id="myTeamContent" style="margin-top:10px"></div>
         </div>
       </div>
@@ -207,6 +214,8 @@
     const toastContainer = document.getElementById('toastContainer');
     const hammer = document.getElementById('hammer');
     const btnResetSystem = document.getElementById('btnResetSystem');
+    const btnExportAdmin = document.getElementById('btnExportAdmin');
+    const btnExportTeam = document.getElementById('btnExportTeam');
 
     if(hammer) {
       hammer.addEventListener('animationend', () => {
@@ -317,9 +326,11 @@
       if(CURRENT_USER.role === 'admin') {
         adminConfigCard.classList.remove('hidden');
         btnResetSystem.classList.remove('hidden');
+        btnExportAdmin.classList.remove('hidden'); // Show Admin Export
         renderTeamConfigForm();
       } else {
         btnResetSystem.classList.add('hidden');
+        btnExportAdmin.classList.add('hidden');
       }
       if (CURRENT_USER.role === 'team') myTeamCard.classList.remove('hidden');
     }
@@ -422,7 +433,6 @@
         el.dataset.name = p.name;
         el.dataset.cat = catId;
         
-        // Priority: Sold Price > Active Bid > Base Price
         const soldPrice = STATE.soldPrices && STATE.soldPrices[`${catId}:${p.name}`];
         const activeBid = STATE.activeBids && STATE.activeBids[`${catId}:${p.name}`];
         const displayPrice = soldPrice || activeBid || p.price || catConfig.base;
@@ -442,7 +452,6 @@
            actionHTML = `<button class="btn-bid-req ghost">Bid Request</button>`;
         }
 
-        // NEW: Player Reset Button for Admin
         if(CURRENT_USER.role === 'admin') {
            actionHTML += `<button class="yellow small" style="margin-left:4px" title="Reset Player" onclick="resetPlayer('${catId}', '${p.name}')">↺</button>`;
         }
@@ -549,6 +558,59 @@
       setTimeout(() => t.remove(), 4000);
     }
 
+    // -- CSV EXPORT LOGIC --
+    function downloadCSV() {
+        // Headers
+        let rows = [["Category", "Player Name", "Base Price", "Sold Price", "Status", "Buyer Team"]];
+
+        // Iterate all categories and players
+        STATE.categories.forEach(cat => {
+            const players = STATE.playersSnapshot[cat.id] || [];
+            players.forEach(p => {
+                const base = cat.base;
+                let soldPrice = 0;
+                let status = "Unsold";
+                let buyer = "-";
+
+                // Check if sold
+                const buyerTeam = STATE.teams.find(t => t.purchases && t.purchases[cat.id] === p.name);
+                if (buyerTeam) {
+                    status = "Sold";
+                    buyer = buyerTeam.name;
+                    const key = `${cat.id}:${p.name}`;
+                    soldPrice = STATE.soldPrices[key] || base;
+                } else {
+                    // Check active bid
+                    const key = `${cat.id}:${p.name}`;
+                    if (STATE.activeBids[key]) {
+                        status = "Bidding";
+                        soldPrice = STATE.activeBids[key];
+                    } else {
+                        soldPrice = base;
+                    }
+                }
+
+                rows.push([cat.id, p.name, base, soldPrice, status, buyer]);
+            });
+        });
+
+        // Convert to CSV format
+        let csvContent = "data:text/csv;charset=utf-8," 
+            + rows.map(e => e.join(",")).join("\n");
+            
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "auction_summary.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Bind export buttons
+    btnExportAdmin.addEventListener('click', downloadCSV);
+    btnExportTeam.addEventListener('click', downloadCSV);
+
     // -- Admin Logic --
     function openSoldConfirmation(cat, name, price) {
       pendingSold = { category: cat, name, price: Number(price) };
@@ -617,7 +679,6 @@
       if(confirm('Reset this team? All purchases will be cleared.')) socket.emit('admin:resetTeam', { id });
     };
 
-    // NEW: Player Reset Helper
     window.resetPlayer = (category, name) => {
       if(confirm(`Reset player '${name}'? This will refund the owner.`)) {
         socket.emit('admin:resetPlayer', { category, name });

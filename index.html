@@ -114,6 +114,10 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .tab-nav { display: flex; background: rgba(0,0,0,0.28); border-radius: 12px; padding: 4px; border: 1px solid rgba(255,255,255,0.08); }
 .tab { flex: 1; padding: 10px; cursor: pointer; color: var(--muted); border-radius: 9px; text-align: center; font-size: 13px; font-weight: 600; font-family: var(--font-display); transition: all 0.18s; }
 .tab.active { background: linear-gradient(135deg, rgba(47,125,246,0.96), rgba(37,212,255,0.94)); color: #021126; box-shadow: 0 10px 24px var(--accent-glow); }
+.login-role-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
+.login-role-btn { min-width: 0; width: 100%; padding: 13px 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.045); color: var(--muted); font-family: var(--font-display); letter-spacing: 0.04em; }
+.login-role-btn.active { background: linear-gradient(135deg, rgba(47,125,246,0.96), rgba(37,212,255,0.94)); color: #021126; border-color: rgba(120,183,255,0.55); box-shadow: 0 10px 24px var(--accent-glow); }
+@media (max-width: 480px) { .login-role-grid { grid-template-columns: 1fr; } .login-role-btn { min-height: 46px; } }
 
 #topNav a { cursor: pointer; color: var(--muted); font-weight: 500; font-size: 13px; font-family: var(--font-display); padding: 7px 12px; border-radius: 10px; white-space: nowrap; transition: all 0.18s; text-decoration: none; display: inline-block; }
 #topNav a.active { color: #021126; background: linear-gradient(135deg, var(--accent), var(--cyan)); border: 1px solid rgba(120,183,255,0.45); box-shadow: 0 8px 24px rgba(47,125,246,0.22); }
@@ -461,11 +465,12 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
     <p style="color:var(--muted);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;margin-top:6px">Premium live bidding console · 2026</p>
   </div>
   <div class="portal-card">
-    <div class="tab-nav" style="margin-bottom:24px">
-      <div class="tab active" onclick="switchTab('manager')">Manager</div>
-      <div class="tab" onclick="switchTab('participant')">Join Session</div>
+    <div class="login-role-grid" aria-label="Choose login role">
+      <button type="button" class="login-role-btn" data-login-role="manager" onclick="selectLoginRole('manager')">Manager</button>
+      <button type="button" class="login-role-btn" data-login-role="team" onclick="selectLoginRole('team')">Teams</button>
+      <button type="button" class="login-role-btn" data-login-role="listener" onclick="selectLoginRole('listener')">Viewer</button>
     </div>
-    <div id="managerForm">
+    <div id="managerForm" class="hidden">
       <label>Host ID</label>
       <input id="mUser" placeholder="Session identifier…">
       <label>Security Key</label>
@@ -476,7 +481,7 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
     <div id="participantForm" class="hidden">
       <label>Target Host ID</label>
       <input id="pHostId" placeholder="Enter host session key…">
-      <button onclick="connectToHost()" class="btn-primary" style="width:100%;padding:13px;margin-top:6px;font-family:var(--font-display);letter-spacing:0.05em">Enter Auction Room</button>
+      <button id="participantConnectBtn" onclick="connectToHost()" class="btn-primary" style="width:100%;padding:13px;margin-top:6px;font-family:var(--font-display);letter-spacing:0.05em">Enter Auction Room</button>
     </div>
     <div id="portalMsg" style="margin-top:14px;font-size:12px;font-weight:600;color:var(--danger)"></div>
   </div>
@@ -485,8 +490,8 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
 <div id="teamAuthOverlay" class="hidden">
   <div class="portal-card" style="text-align:center">
     <img id="loginTeamLogo" class="hidden" style="width:68px;height:68px;border-radius:50%;margin:0 auto 20px;border:2px solid var(--accent);object-fit:cover">
-    <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;margin-bottom:22px">Auction Access</h3>
-    <label>Access Level</label>
+    <h3 id="teamAuthTitle" style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;margin-bottom:22px">Auction Access</h3>
+    <label id="loginRoleLabel">Access Level</label>
     <select id="loginRole" onchange="toggleTeamPass()">
       <option value="listener">Viewer — No Bidding</option>
       <option value="team">Team Representative</option>
@@ -928,6 +933,7 @@ const fileInput = document.getElementById('globalFileInput');
 
 let pendingAuthSession = null;
 let restoringSession = false;
+let selectedLoginRole = null;
 
 function getSavedSession() {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
@@ -1200,16 +1206,42 @@ function setupFileUpload(el, cb) {
   el.ondrop = (e) => { e.preventDefault(); el.style.borderColor = ''; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); };
 }
 
-window.switchTab = (tab) => {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
-  document.getElementById('managerForm').classList.toggle('hidden', tab !== 'manager');
-  document.getElementById('participantForm').classList.toggle('hidden', tab !== 'participant');
+function applyParticipantAuthRole(role) {
+  const loginRole = document.getElementById('loginRole');
+  const roleLabel = document.getElementById('loginRoleLabel');
+  const title = document.getElementById('teamAuthTitle');
+  const isFixedRole = role === 'team' || role === 'listener';
+  loginRole.value = role === 'team' ? 'team' : 'listener';
+  loginRole.classList.toggle('hidden', isFixedRole);
+  roleLabel.classList.toggle('hidden', isFixedRole);
+  title.textContent = role === 'team' ? 'Teams Login' : 'Viewer Login';
+  toggleTeamPass();
+}
+
+window.selectLoginRole = (role) => {
+  selectedLoginRole = role;
+  document.querySelectorAll('.login-role-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.loginRole === role);
+  });
+  document.getElementById('managerForm').classList.toggle('hidden', role !== 'manager');
+  document.getElementById('participantForm').classList.toggle('hidden', role === 'manager');
+  const portalMsg = document.getElementById('portalMsg');
+  portalMsg.style.color = 'var(--danger)';
+  portalMsg.textContent = '';
+  const connectBtn = document.getElementById('participantConnectBtn');
+  if (connectBtn) connectBtn.textContent = role === 'listener' ? 'Continue as Viewer' : 'Continue as Team';
+  setTimeout(() => document.getElementById(role === 'manager' ? 'mUser' : 'pHostId')?.focus(), 0);
 };
+window.switchTab = (tab) => selectLoginRole(tab === 'participant' ? 'team' : tab);
 window.managerLogin = () => { const u = document.getElementById('mUser').value.trim(), p = document.getElementById('mPass').value; if (u && p) { pendingAuthSession = { kind: 'manager', username: u, password: p }; socket.emit('manager:login', { username: u, password: p }); } };
 window.managerRegister = () => { const u = document.getElementById('mUser').value.trim(), p = document.getElementById('mPass').value; if (u && p) { pendingAuthSession = { kind: 'manager', username: u, password: p }; socket.emit('manager:register', { username: u, password: p }); } };
-window.connectToHost = () => { const h = document.getElementById('pHostId').value.trim(); if (h) { pendingAuthSession = { kind: 'participant', hostId: h }; socket.emit('participant:connect', h); } };
-window.toggleTeamPass = () => { const isTeam = document.getElementById('loginRole').value === 'team'; document.getElementById('teamSelectGroup').classList.toggle('hidden', !isTeam); document.getElementById('passGroup').classList.toggle('hidden', !isTeam); };
+window.connectToHost = () => { const h = document.getElementById('pHostId').value.trim(), role = selectedLoginRole === 'listener' ? 'listener' : 'team'; if (h) { pendingAuthSession = { kind: 'participant', hostId: h, role }; socket.emit('participant:connect', h); } };
+window.toggleTeamPass = () => {
+  const isTeam = document.getElementById('loginRole').value === 'team';
+  document.getElementById('teamSelectGroup').classList.toggle('hidden', !isTeam);
+  document.getElementById('passGroup').classList.toggle('hidden', !isTeam);
+  if (!isTeam) document.getElementById('loginTeamLogo').classList.add('hidden');
+};
 window.enterAuction = () => { const role = document.getElementById('loginRole').value, teamId = document.getElementById('loginTeamId').value, pass = document.getElementById('loginPass').value; pendingAuthSession = { kind: 'participant', hostId: CURRENT_USER.hostId, role, teamId, password: pass }; socket.emit('team:login', { hostId: CURRENT_USER.hostId, teamId, password: pass, role }); };
 window.previewTeamLogo = () => { const t = STATE.teams.find(x => x.id === document.getElementById('loginTeamId').value), img = document.getElementById('loginTeamLogo'); if (t?.logo) { img.src = t.logo; img.classList.remove('hidden'); } else img.classList.add('hidden'); };
 window.selectLoginTeam = (teamId) => {
@@ -1396,6 +1428,7 @@ socket.on('init:teams_available', data => {
     sel.innerHTML += `<option value="${t.id}">${t.name}</option>`;
     logoList.innerHTML += `<button type="button" class="ghost" data-team-id="${t.id}" onclick="selectLoginTeam('${t.id}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:9px 6px;border-color:rgba(255,255,255,0.08);min-width:0">${teamAvatarHTML(t, 34)}<span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:10px">${t.name}</span></button>`;
   });
+  applyParticipantAuthRole(pendingAuthSession?.role || selectedLoginRole || 'listener');
   portal.classList.add('hidden'); teamAuthOverlay.classList.remove('hidden');
 });
 socket.on('auction:enter', data => {
@@ -1409,7 +1442,7 @@ socket.on('auction:enter', data => {
   pendingAuthSession = null;
   finishEnterApp(getSavedSession()?.sectionId);
 });
-socket.on('auth:team_error', msg => { document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); teamAuthOverlay.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('teamAuthMsg').textContent = msg; });
+socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.role || selectedLoginRole || 'team'; document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); applyParticipantAuthRole(failedRole); teamAuthOverlay.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('teamAuthMsg').textContent = msg; });
 socket.on('state:updated', s => { STATE = s; renderAll(); });
 
 socket.on('player:bid', pl => {

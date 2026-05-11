@@ -20,27 +20,27 @@ window.setTimeout(function() {
 }, 4500);
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #020917;
-  --surface: #071528;
-  --card: rgba(8,24,45,0.9);
-  --card-border: rgba(148,197,255,0.16);
-  --text: #f2f8ff;
-  --muted: #95acc8;
-  --accent: #2f7df6;
-  --accent-2: #78b7ff;
-  --accent-glow: rgba(47,125,246,0.32);
-  --cyan: #25d4ff;
-  --cyan-glow: rgba(37,212,255,0.24);
-  --emerald: #38d996;
-  --emerald-glow: rgba(56,217,150,0.23);
-  --amber: #f4b94f;
+  --bg: #00111f;
+  --surface: #071526;
+  --card: rgba(16,32,50,0.96);
+  --card-border: rgba(121,255,119,0.16);
+  --text: #f3f7ff;
+  --muted: #9da8b9;
+  --accent: #66ff63;
+  --accent-2: #66ff63;
+  --accent-glow: rgba(102,255,99,0.3);
+  --cyan: #47e9ff;
+  --cyan-glow: rgba(71,233,255,0.22);
+  --emerald: #66ff63;
+  --emerald-glow: rgba(102,255,99,0.26);
+  --amber: #ffc20a;
   --danger: #ef4444;
   --rtm: #ff5ea8;
   --rtm-glow: rgba(255,94,168,0.25);
-  --font-display: 'Syne', sans-serif;
+  --font-display: 'Bebas Neue', 'Oswald', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --radius: 10px;
@@ -435,6 +435,475 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
   header .header-right button { padding: 6px 10px; font-size: 11px; }
   #roleDisplay { display: none; }
 }
+
+/* Premier League Auction command theme */
+body { background: var(--bg); color: var(--text); }
+body::before {
+  background:
+    linear-gradient(90deg, rgba(102,255,99,0.04) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(102,255,99,0.03) 0 1px, transparent 1px 100%),
+    radial-gradient(circle at 78% 18%, rgba(102,255,99,0.12), transparent 28%),
+    linear-gradient(180deg, #00111f 0%, #061526 58%, #00111f 100%);
+  background-size: 72px 72px, 72px 72px, auto, auto;
+  animation: none;
+}
+body::after { background: linear-gradient(90deg, transparent, rgba(255,194,10,0.06), transparent); height: 1px; bottom: auto; top: 96px; }
+
+h1, h2, h3, h4, .dash-card, button, .chip, #topNav a, .mnav-label { letter-spacing: 0.03em; }
+.glass, .portal-card, .modal, .player-tile, .score-tile, .team-config-card {
+  background: linear-gradient(180deg, rgba(18,36,57,0.96), rgba(12,27,45,0.96));
+  border-color: rgba(154,177,204,0.2);
+  border-radius: 4px;
+  box-shadow: 0 20px 46px rgba(0,0,0,0.28);
+}
+.glass { backdrop-filter: blur(14px); }
+
+button { border-radius: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+.btn-primary, button.green {
+  background: #66ff63;
+  color: #031321;
+  box-shadow: 0 0 24px rgba(102,255,99,0.25);
+}
+.btn-primary:hover:not(:disabled), button.green:hover:not(:disabled) {
+  background: #7dff78;
+  box-shadow: 0 0 32px rgba(102,255,99,0.35);
+}
+button.yellow { background: #ffc20a; color: #06111d; }
+button.pink { background: #ffc20a; color: #06111d; box-shadow: 0 0 24px rgba(255,194,10,0.22); }
+button.red { background: #221a23; color: #ffb5b5; border: 1px solid rgba(255,181,181,0.55); }
+button.ghost { border-radius: 4px; border-color: rgba(154,177,204,0.2); background: rgba(21,39,61,0.86); color: #d7deeb; }
+input, select, textarea { border-radius: 4px; background: rgba(7,18,31,0.88); border-color: rgba(154,177,204,0.2); }
+input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72); box-shadow: 0 0 0 3px rgba(102,255,99,0.12); }
+
+.brand-logo { border-radius: 4px; background: #66ff63; box-shadow: 0 0 20px rgba(102,255,99,0.28); }
+.chip { border-radius: 3px; }
+.chip-cyan, .chip-purple, .chip-emerald { background: rgba(102,255,99,0.09); color: #66ff63; border-color: rgba(102,255,99,0.24); }
+.chip-pink { background: rgba(255,194,10,0.12); color: #ffc20a; border-color: rgba(255,194,10,0.34); }
+
+@media (min-width: 900px) {
+  #appContainer { padding-left: 250px; padding-top: 96px; }
+  #appContainer::before {
+    content: "PREMIER LEAGUE AUCTION";
+    position: fixed;
+    left: 250px;
+    right: 0;
+    top: 0;
+    height: 64px;
+    z-index: 3600;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    border-bottom: 1px solid rgba(255,194,10,0.34);
+    background: rgba(0,17,31,0.96);
+    color: #66ff63;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.4vw, 3.25rem);
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+  #appContainer::after {
+    content: attr(data-live-ticker);
+    position: fixed;
+    left: 250px;
+    right: 0;
+    top: 64px;
+    height: 32px;
+    z-index: 3600;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0 32px;
+    border-bottom: 1px solid rgba(255,194,10,0.34);
+    background: rgba(0,17,31,0.96);
+    color: #b78b00;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  header {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    width: 250px;
+    height: 100vh !important;
+    padding: 26px 18px !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 46px !important;
+    border-right: 1px solid rgba(154,177,204,0.14);
+    border-bottom: 0 !important;
+    background: #041525 !important;
+    box-shadow: 20px 0 46px rgba(0,0,0,0.24);
+  }
+  header > div:first-child { align-items: flex-start !important; flex-direction: column; gap: 6px !important; }
+  header > div:first-child .brand-logo { display: none; }
+  header > div:first-child > span:last-child {
+    color: #66ff63 !important;
+    font-family: var(--font-display) !important;
+    font-size: 2.65rem !important;
+    line-height: 0.9;
+    max-width: 160px;
+    white-space: normal;
+  }
+  header > div:first-child > span:last-child::after {
+    content: "FRANCHISE PORTAL";
+    display: block;
+    margin-top: 9px;
+    color: #aeb6c3;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+  #topNav {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  #topNav a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    padding: 0 18px !important;
+    border-radius: 4px !important;
+    color: #d8deea;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  #topNav a.active {
+    color: #f2fff1 !important;
+    background: rgba(102,255,99,0.16) !important;
+    border: 0 !important;
+    border-right: 4px solid #66ff63 !important;
+    box-shadow: 0 0 24px rgba(102,255,99,0.16);
+  }
+  header .header-right {
+    margin-top: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  #roleDisplay { max-width: none !important; justify-content: center; }
+  header .desktop-exit-btn { width: 100%; height: 48px; color: #031321 !important; background: #66ff63 !important; border-color: transparent !important; }
+  #mainContentContainer { max-width: 1320px !important; padding: 24px 32px 48px !important; }
+  #mobileBottomNav, .mobile-exit-btn { display: none !important; }
+}
+
+#sectionDashboard > div:first-child { margin-bottom: 18px !important; }
+#sectionDashboard > div:first-child > div { color: #66ff63 !important; font-weight: 800; }
+#sectionDashboard h2 {
+  color: #e6edf8;
+  font-size: clamp(2rem, 3vw, 2.75rem) !important;
+  font-style: italic;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.45);
+}
+.admin-command-row { display: grid; grid-template-columns: 1fr repeat(3, minmax(160px, 210px)); gap: 16px; align-items: end; }
+.admin-command-meta { display: flex; gap: 30px; flex-wrap: wrap; color: #d7deeb; }
+.admin-command-meta span { position: relative; padding-left: 12px; font-size: 13px; }
+.admin-command-meta span::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 7px; height: 7px; border-radius: 50%; background: #66ff63; box-shadow: 0 0 12px rgba(102,255,99,0.5); }
+.admin-command-meta span:nth-child(2)::before { background: #ffc20a; box-shadow: 0 0 12px rgba(255,194,10,0.45); }
+.admin-command-card { min-height: 58px; justify-content: center; }
+.admin-franchise-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 16px; }
+.admin-franchise-card {
+  min-height: 255px;
+  padding: 22px;
+  border: 1px solid rgba(154,177,204,0.2);
+  background: #132337;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.admin-franchise-card.is-critical { border-color: rgba(255,194,10,0.7); }
+.admin-franchise-card .team-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 22px; }
+.admin-franchise-card .team-mark { width: 62px; height: 62px; border-radius: 4px; background: #23354d; display: grid; place-items: center; border: 1px solid rgba(154,177,204,0.18); overflow: hidden; }
+.admin-franchise-card .team-budget-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #66ff63;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  background: conic-gradient(#66ff63 var(--budget-angle), rgba(154,177,204,0.16) 0);
+  position: relative;
+}
+.admin-franchise-card .team-budget-ring::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #132337; }
+.admin-franchise-card .team-budget-ring span { position: relative; z-index: 1; }
+.admin-franchise-card h3 { font-size: 1.65rem; line-height: 0.92; color: #dfe7f8; text-shadow: 2px 2px 0 rgba(0,0,0,0.45); }
+.team-money-row { display: flex; justify-content: space-between; gap: 12px; margin: 10px 0 18px; color: #d7deeb; font-size: 12px; }
+.team-money-row strong { color: #66ff63; }
+.team-money-row .critical { color: #ffc20a; }
+.team-purchase-list { border-top: 1px solid rgba(154,177,204,0.14); padding-top: 12px; display: grid; gap: 9px; }
+.team-purchase-list .line { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.team-purchase-list .price { color: #ffc20a; font-family: var(--font-mono); font-weight: 800; }
+.admin-lower-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(250px, 0.85fr); gap: 16px; }
+.next-player-panel { display: grid; grid-template-columns: minmax(0, 1fr) 280px; min-height: 210px; overflow: hidden; }
+.next-player-copy { padding: 26px 30px; }
+.next-player-copy h3 { font-size: clamp(2.4rem, 4vw, 3.65rem); line-height: 0.9; color: #dfe7f8; }
+.next-player-art { background: radial-gradient(circle at 50% 20%, rgba(102,255,99,0.17), transparent 26%), linear-gradient(135deg, rgba(16,32,50,0.2), rgba(0,0,0,0.25)); display: grid; place-items: center; color: rgba(223,231,248,0.16); font-family: var(--font-display); font-size: 8rem; }
+.stat-panel { padding: 26px; }
+.stat-bar { height: 5px; background: rgba(154,177,204,0.12); margin: 9px 0 18px; }
+.stat-bar span { display: block; height: 100%; background: #66ff63; }
+.stat-highlight { color: #ffc20a; font-family: var(--font-display); font-size: 2.15rem; line-height: 1; }
+
+#sectionLiveAuction { grid-template-columns: minmax(0, 1fr) 320px !important; gap: 18px !important; }
+#auctionPlayerPopup, #auctionIdleState {
+  background: #102135;
+  border-radius: 6px;
+  border-color: rgba(154,177,204,0.24);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.32);
+}
+.live-card-content { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); min-height: 585px; padding: 18px; gap: 18px; }
+.live-photo-panel { aspect-ratio: auto; max-height: none; height: 100%; min-height: 0 !important; border-radius: 6px; box-shadow: 0 0 34px rgba(102,255,99,0.16); }
+.live-photo-frame { border-radius: 6px; background: #071321; border-color: rgba(102,255,99,0.28); }
+.live-photo-frame::after { background: linear-gradient(to top, rgba(16,33,53,0.98) 0%, rgba(16,33,53,0.15) 62%, rgba(0,0,0,0.16)); }
+.live-category-badge { top: auto; bottom: 150px; left: 16px; }
+.live-photo-name { left: 22px; right: 22px; bottom: 86px; max-width: none; }
+.live-photo-name #popupName { font-size: clamp(2.2rem, 3.8vw, 3.5rem) !important; text-shadow: 2px 2px 0 rgba(0,0,0,0.55) !important; }
+.live-photo-controls { left: 18px; right: 18px; bottom: 18px; justify-content: space-between; border-radius: 4px; background: rgba(8,18,31,0.88); }
+.live-info-panel {
+  min-height: 100%;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(154,177,204,0.18);
+  background: rgba(12,27,45,0.72);
+  border-radius: 6px;
+  padding: 24px;
+  position: relative;
+}
+.live-info-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 68%;
+  height: 5px;
+  background: #66ff63;
+  box-shadow: 0 0 18px rgba(102,255,99,0.45);
+}
+#viewerPriceDisplay { background: transparent !important; border: 0 !important; text-align: center !important; align-self: center !important; }
+#viewerPriceDisplay > div:first-child { font-size: 13px !important; letter-spacing: 0.45em !important; color: #d7deeb !important; }
+#viewerPrice { color: #00e84d !important; font-family: var(--font-display) !important; font-size: clamp(4.5rem, 8vw, 7.8rem) !important; line-height: 0.9; text-shadow: 0 0 28px rgba(0,232,77,0.3); }
+.high-bidder-name { color: #dfe7f8 !important; font-family: var(--font-display); font-size: 1.85rem !important; }
+.live-bid-stepper {
+  width: min(100%, 360px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.bid-step-btn {
+  min-height: 58px;
+  border: 1px solid rgba(154,177,204,0.25);
+  background: rgba(31,50,75,0.94) !important;
+  color: #dfe7f8 !important;
+  font-family: var(--font-display);
+  font-size: 2.15rem;
+  line-height: 1;
+  box-shadow: none !important;
+}
+.bid-step-btn:hover:not(:disabled) { border-color: rgba(102,255,99,0.52); color: #66ff63 !important; }
+.bid-step-up { background: rgba(102,255,99,0.16) !important; border-color: rgba(102,255,99,0.38); }
+#adminActionButtons { width: 100%; align-self: end; }
+#adminActionButtons button, #teamActionButtons button { min-height: 64px; font-size: 1.15rem !important; }
+#btnTeamBid { min-height: 136px; background: #66ff63 !important; color: #06111d !important; font-family: var(--font-display) !important; font-size: 2.2rem !important; line-height: 1; }
+.timer-pill { top: auto; left: auto; right: 26px; bottom: 22px; transform: none; border-radius: 4px; border-color: rgba(255,194,10,0.45); color: #ffc20a; }
+#auctionSidebar .glass { border-radius: 6px; }
+.score-tile { border-radius: 4px; background: rgba(18,36,57,0.94); }
+.score-tile:hover { border-color: rgba(102,255,99,0.4); }
+
+@media (max-width: 1100px) {
+  .admin-command-row, .admin-franchise-grid, .admin-lower-grid { grid-template-columns: 1fr 1fr; }
+  .admin-command-row .admin-command-meta { grid-column: 1 / -1; }
+  .next-player-panel { grid-template-columns: 1fr; }
+  .next-player-art { min-height: 140px; }
+}
+@media (max-width: 899px) {
+  #appContainer::before, #appContainer::after { display: none; }
+  .live-card-content { grid-template-columns: 1fr; min-height: auto; }
+  .live-info-panel { min-height: 330px; }
+  .admin-command-row, .admin-franchise-grid, .admin-lower-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  body { background: #050a11; }
+  #appContainer { padding-bottom: 94px; }
+  header {
+    min-height: 86px !important;
+    height: auto !important;
+    padding: 18px 28px !important;
+    background: #00111f !important;
+    border-bottom-color: rgba(154,177,204,0.18) !important;
+  }
+  header > div:first-child .brand-logo { display: none; }
+  header > div:first-child span:last-child {
+    font-size: clamp(2.25rem, 10vw, 3.8rem) !important;
+    color: #66ff63 !important;
+    font-style: italic;
+    line-height: 0.9;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.45);
+  }
+  header .header-right { gap: 12px; }
+  header .header-right .chip, header .desktop-exit-btn { display: none !important; }
+  #appContainer::after {
+    content: attr(data-live-ticker);
+    position: fixed;
+    top: 86px;
+    left: 0;
+    right: 0;
+    z-index: 3400;
+    display: flex !important;
+    align-items: center;
+    height: 48px;
+    margin: 0;
+    padding: 0 28px;
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 1px solid rgba(154,177,204,0.12);
+    border-bottom: 1px solid rgba(255,194,10,0.32);
+    background: #00111f;
+    color: #ffc20a;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  #mobileBottomNav {
+    display: block !important;
+    background: #00111f;
+    border-top: 1px solid rgba(154,177,204,0.18);
+    box-shadow: 0 -7px 26px rgba(102,255,99,0.12);
+    padding-top: 12px;
+  }
+  #mobileBottomNav::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 25%;
+    height: 5px;
+    background: #66ff63;
+    box-shadow: 0 0 18px rgba(102,255,99,0.7);
+  }
+  #mobileBottomNav .mnav-item {
+    min-height: 66px;
+    color: #b8bdc8;
+    border-radius: 0;
+    background: transparent !important;
+    font-family: var(--font-body);
+  }
+  #mobileBottomNav .mnav-item.active { color: #66ff63; }
+  #mobileBottomNav .mnav-item .mnav-icon { font-size: 26px; }
+  #mobileBottomNav .mnav-item .mnav-label {
+    max-width: none;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  #mainContentContainer { padding: 66px 16px 26px !important; }
+  #sectionDashboard h2 { font-size: 2.1rem !important; }
+  .admin-franchise-card {
+    min-height: 0;
+    padding: 28px;
+    border-radius: 10px;
+    background: #071321;
+    box-shadow: 0 18px 46px rgba(0,0,0,0.34);
+  }
+  .admin-franchise-card .team-head { margin-bottom: 28px; }
+  .admin-franchise-card .team-mark { width: 86px; height: 86px; border-radius: 18px; }
+  .admin-franchise-card .team-budget-ring { width: 98px; height: 98px; font-size: 18px; }
+  .admin-franchise-card .team-budget-ring::after { inset: 10px; }
+  .admin-franchise-card h3 { font-size: clamp(1.9rem, 7vw, 2.7rem); line-height: 1; }
+  .team-money-row { display: block; font-size: 17px; line-height: 1.4; }
+  .team-money-row strong { display: block; font-size: 18px; }
+  .team-purchase-list { gap: 14px; }
+  .team-purchase-list .line {
+    background: #132337;
+    border-radius: 4px;
+    padding: 13px 16px;
+    font-size: 18px;
+  }
+  #sectionLiveAuction { gap: 16px !important; }
+  #auctionPlayerPopup { border: 0; box-shadow: none; background: transparent; min-height: 0; }
+  #btnCloseLivePopup {
+    top: 12px !important;
+    right: 12px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    border-width: 2px !important;
+  }
+  .live-card-content { padding: 0; gap: 18px; }
+  .live-photo-panel { min-height: 0 !important; height: auto; box-shadow: none; background: transparent; }
+  .live-photo-frame {
+    aspect-ratio: 16 / 9;
+    max-height: none;
+    border-radius: 10px;
+    border-color: rgba(154,177,204,0.3);
+  }
+  .live-category-badge { top: 28px; bottom: auto; left: 28px; }
+  .live-photo-name { left: 28px; right: 28px; bottom: 84px; }
+  .live-photo-name { bottom: 78px; }
+  .live-photo-name #popupName { font-size: clamp(2.8rem, 12vw, 4.2rem) !important; }
+  .live-info-panel {
+    min-height: 300px;
+    padding: 28px;
+    background: #102135;
+    border-radius: 10px;
+    justify-content: center;
+  }
+  #viewerPriceDisplay { width: 100%; padding: 0 !important; }
+  #viewerPriceDisplay > div:first-child { font-size: 14px !important; letter-spacing: 0.22em !important; color: #66ff63 !important; }
+  #viewerPrice { font-size: clamp(5.2rem, 23vw, 8.6rem) !important; }
+  .high-bidder-name { font-size: 1.6rem !important; }
+  .live-bid-stepper {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    order: 2;
+  }
+  .bid-step-btn { min-height: 70px; font-size: 2rem; }
+  #adminActionButtons {
+    grid-template-columns: 1fr !important;
+    order: 3;
+    margin-top: 8px !important;
+  }
+  #adminActionButtons button { min-height: 64px; font-size: 1rem !important; }
+  .timer-pill {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin-left: auto;
+    margin-top: 10px;
+    width: fit-content;
+  }
+  #auctionSidebar { display: none !important; }
+  #teamActionButtons {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3600;
+    margin: 0 !important;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0;
+    background: #132337;
+    border-top: 1px solid rgba(154,177,204,0.28);
+  }
+  #teamActionButtons > div { grid-template-columns: 1fr 1fr !important; }
+  #btnTeamBid { min-height: 74px; font-size: 2.3rem !important; }
+}
 </style>
 </head>
 <body>
@@ -510,7 +979,7 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
   </div>
 </div>
 
-<div id="appContainer" class="hidden" style="min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1">
+<div id="appContainer" class="hidden" data-live-ticker="LIVE UPDATE: WAITING FOR NEXT PLAYER" style="min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1">
   <div id="toastContainer"></div>
   <input type="file" id="globalFileInput" accept="image/*" style="display:none">
 
@@ -519,7 +988,7 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
       <span class="brand-logo" style="background:none;box-shadow:none;">
   <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020917'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f7df6'/%3E%3Cstop offset='1' stop-color='%2325d4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='48' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='46' text-anchor='middle' fill='url(%23g)'%3EA%3C/text%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
 </span>
-      <span style="font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:0.06em;color:white">AUCTION<span style="color:var(--accent-2)">CMD</span></span>
+      <span style="font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:0.06em;color:white">AUCTION<span style="color:var(--accent-2)"> COMMAND</span></span>
     </div>
     <nav id="topNav" style="display:flex;gap:2px;overflow-x:auto;flex:1;justify-content:center" class="hide-scrollbar hidden"></nav>
     <div class="header-right">
@@ -540,7 +1009,7 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
     <div id="sectionDashboard">
       <div style="margin-bottom:24px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px">Auction Control Room</div>
-        <h2 style="font-family:var(--font-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:800; word-break: break-word;">Welcome, <span style="color:var(--accent-2)" id="dashWelcomeName"></span></h2>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.3rem,3vw,2rem);font-weight:800; word-break: break-word;">Franchise Overview <span style="color:var(--accent-2)" id="dashWelcomeName"></span></h2>
       </div>
 
       <div id="dashAdminView" class="hidden"></div>
@@ -642,15 +1111,6 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
                 </div>
               </div>
 
-              <div id="adminBidControls" class="hidden live-photo-controls">
-                <button onclick="adjustBid('dec')" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(239,68,68,0.26),rgba(255,255,255,0.06));border:1px solid rgba(239,68,68,0.28);font-size:20px;padding:0;color:white">−</button>
-                <div class="live-price-readout">
-                  <div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Value</div>
-                  <div id="popupPrice" class="mono" style="font-size:1.8rem;font-weight:700;color:white;text-shadow: 0 2px 6px rgba(0,0,0,0.8);">0</div>
-                  <div class="high-bidder-name word-break" style="font-size:11px; font-weight:700; color:var(--emerald); margin-top:2px;text-shadow: 0 2px 4px rgba(0,0,0,0.8);">No Bids Yet</div>
-                </div>
-                <button onclick="adjustBid('inc')" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(37,212,255,0.12));border:1px solid rgba(37,212,255,0.28);font-size:20px;padding:0;color:white">+</button>
-              </div>
             </div>
 
             <div class="live-info-panel">
@@ -659,7 +1119,12 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
                 <div id="viewerPrice" class="mono" style="font-size:clamp(2rem,5vw,2.8rem);font-weight:700;color:var(--cyan)">0</div>
                 <div class="high-bidder-name word-break" style="font-size:12px; font-weight:700; color:var(--emerald); margin-top:2px;">No Bids Yet</div>
               </div>
-            
+              <div id="adminBidControls" class="hidden live-bid-stepper">
+                <button class="bid-step-btn bid-step-down" onclick="adjustBid('dec')" aria-label="Decrease bid">−</button>
+                <span id="popupPrice" class="hidden">0</span>
+                <button class="bid-step-btn bid-step-up" onclick="adjustBid('inc')" aria-label="Increase bid">+</button>
+              </div>
+
               <div id="adminActionButtons" class="hidden" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px">
                 <button class="green" onclick="socket.emit('admin:start_bidding')" id="btnStartBidding" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">▶ START BIDDING</button>
                 <button class="yellow" onclick="triggerSoldFromPopup()" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">🔨 GAVEL DROP</button>
@@ -1253,6 +1718,17 @@ window.selectLoginTeam = (teamId) => {
 function updateLiveIndicator() {
   const auctionLive = !!activePlayer || !!STATE.codeShuffleActive || (STATE.lotteryQueue || []).length > 0;
   ['viewerLiveStatus', 'teamLiveStatus'].forEach(id => document.getElementById(id)?.classList.toggle('hidden', !auctionLive));
+  updateHeaderLiveTicker();
+}
+
+function updateHeaderLiveTicker() {
+  if (!appContainer) return;
+  if (activePlayer?.name) {
+    appContainer.dataset.liveTicker = `LIVE UPDATE: ${activePlayer.name} IS IN BIDDING`;
+    return;
+  }
+  const next = getNextQueuedPlayer?.();
+  appContainer.dataset.liveTicker = next?.name ? `LIVE UPDATE: ${next.name} IS NEXT IN LINE` : 'LIVE UPDATE: WAITING FOR NEXT PLAYER';
 }
 
 function getLiveBidContext() {
@@ -1713,7 +2189,7 @@ window.respondRTM = (accept) => {
 function buildNavItems(sections) {
   const nav = document.getElementById('topNav');
   nav.innerHTML = '';
-  sections.forEach(s => { nav.innerHTML += `<a data-section="${s.id}" onclick="showSection('${s.id}')">${s.label}</a>`; });
+  sections.forEach(s => { nav.innerHTML += `<a data-section="${s.id}" onclick="showSection('${s.id}')"><span class="nav-icon" style="font-size:18px;line-height:1;margin-right:10px">${s.icon}</span><span>${s.label}</span></a>`; });
   nav.classList.remove('hidden');
   const mn = document.getElementById('mobileNavItems');
   mn.innerHTML = '';
@@ -1727,43 +2203,44 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
   const label = isTeam ? (myTeam ? myTeam.name : CURRENT_USER.teamId) : CURRENT_USER.hostId;
 
-  let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '🏠' }];
-  if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live', icon: '⚡' });
-  sections.push({ id: 'sectionPlayerDatabase', label: 'Database', icon: '🏆' });
-  if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Teams', icon: '🛡️' });
+  let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '▦' }];
+  if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '⚒' });
+  sections.push({ id: 'sectionPlayerDatabase', label: 'Player DB', icon: '♚' });
+  if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Team Config', icon: '⚙' });
 
   buildNavItems(sections);
   document.getElementById('roleDisplay').innerHTML = isTeam ? `${CURRENT_USER.role.toUpperCase()} · ${teamNameWithLogoHTML(myTeam, 20)}` : `${CURRENT_USER.role.toUpperCase()} · ${label}`;
-  document.getElementById('dashWelcomeName').innerHTML = isTeam ? teamNameWithLogoHTML(myTeam, 30) : label;
+  document.getElementById('dashWelcomeName').innerHTML = isAdmin ? '' : (isTeam ? teamNameWithLogoHTML(myTeam, 30) : label);
 
   if (isAdmin) {
     document.getElementById('dashAdminView').classList.remove('hidden');
     document.getElementById('dashAdminView').innerHTML = `
-      <div class="admin-cards-grid">
-          <div class="dash-card" onclick="showSection('sectionLiveAuction')">
-            <div style="font-size:28px;margin-bottom:14px">⚡</div>
-            <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:8px">Live Bidding</h3>
-            <p style="color:var(--muted);font-size:12px;line-height:1.6">Start bidding, accept offers, execute sales.</p>
-            <div style="margin-top:18px;font-size:11px;color:var(--accent-2);font-weight:700;font-family:var(--font-display);letter-spacing:0.06em">LAUNCH CENTER ›</div>
+      <div class="admin-command-row">
+          <div class="admin-command-meta">
+            <span>${STATE.teams.length || 0} Teams Active</span>
+            <span>${STATE.categories.length || 0} Auction Sets</span>
           </div>
-          <div class="dash-card" onclick="showSection('sectionPlayerDatabase')">
-            <div style="font-size:28px;margin-bottom:14px">🏆</div>
-            <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:8px">Players</h3>
-            <p style="color:var(--muted);font-size:12px;line-height:1.6">Configure categories, base prices, player lists.</p>
-            <div style="margin-top:18px;font-size:11px;color:var(--accent-2);font-weight:700;font-family:var(--font-display);letter-spacing:0.06em">OPEN DATABASE ›</div>
-          </div>
-          <div class="dash-card" onclick="showSection('sectionTeamConfig')">
-            <div style="font-size:28px;margin-bottom:14px">🛡️</div>
-            <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:8px">Teams</h3>
-            <p style="color:var(--muted);font-size:12px;line-height:1.6">Manage franchise IDs, passwords, logos, purse.</p>
-            <div style="margin-top:18px;font-size:11px;color:var(--accent-2);font-weight:700;font-family:var(--font-display);letter-spacing:0.06em">CONFIGURE TEAMS ›</div>
-          </div>
+          <button class="ghost admin-command-card" onclick="showSection('sectionTeamConfig')">⚙ Configure Teams</button>
+          <button class="ghost admin-command-card" onclick="showSection('sectionPlayerDatabase')">♚ Player Database</button>
+          <button class="green admin-command-card" onclick="showSection('sectionLiveAuction')">⚒ Go To Live Auction</button>
       </div>
-      
-      <div class="glass" style="padding: 20px; width: 100%;">
-          <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:6px">Franchise Status Overview</h3>
-          <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">Live budgets and acquired players for all active teams.</p>
-          <div id="adminTeamsSummary" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;"></div>
+      <div>
+          <div id="adminTeamsSummary" class="admin-franchise-grid"></div>
+      </div>
+      <div class="admin-lower-grid">
+        <div class="glass next-player-panel">
+          <div class="next-player-copy">
+            <div style="color:var(--accent);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.16em;margin-bottom:10px">Upcoming marquee player</div>
+            <h3 id="adminNextPlayerName">Awaiting Shuffle</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+              <span class="chip chip-cyan" id="adminNextBase">Base Price --</span>
+              <span class="chip chip-cyan" id="adminNextSet">Set --</span>
+            </div>
+            <button class="ghost" onclick="showSection('sectionPlayerDatabase')" style="margin-top:26px">View Full Stats</button>
+          </div>
+          <div class="next-player-art">IPL</div>
+        </div>
+        <div class="glass stat-panel" id="adminAuctionStats"></div>
       </div>
     `;
   }
@@ -1772,7 +2249,7 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   document.getElementById('dashViewerView').classList.toggle('hidden', CURRENT_USER.role !== 'listener');
   document.getElementById('adminBidControls').classList.toggle('hidden', !isAdmin);
   document.getElementById('adminActionButtons').classList.toggle('hidden', !isAdmin);
-  document.getElementById('viewerPriceDisplay').classList.toggle('hidden', isAdmin);
+  document.getElementById('viewerPriceDisplay').classList.remove('hidden');
   document.getElementById('teamActionButtons').classList.toggle('hidden', !isTeam);
   document.getElementById('adminPlayerDatabaseConfig').classList.toggle('hidden', !isAdmin);
   document.getElementById('btnResetSystem').classList.toggle('hidden', !isAdmin);
@@ -1789,41 +2266,90 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   showSection(availableSection);
 }
 
+function formatAuctionCr(value) {
+    const n = Number(value) || 0;
+    return `${n.toFixed(n % 1 ? 2 : 0)} Cr`;
+}
+
+function getTeamSpendDetails(team) {
+    const purchases = Object.entries(team.purchases || {}).map(([cat, name]) => {
+        const key = `${cat}:${name}`;
+        const price = Number(STATE.soldPrices?.[key]) || 0;
+        return { cat, name, price };
+    });
+    const spent = purchases.reduce((sum, p) => sum + p.price, 0);
+    const purse = Number(team.purse) || 0;
+    const starting = Math.max(purse + spent, purse, 1);
+    return { purchases, spent, purse, starting, remainingPct: Math.round((purse / starting) * 100) };
+}
+
 function renderAdminTeamsSummary() {
     if (CURRENT_USER.role !== 'admin') return;
     const container = document.getElementById('adminTeamsSummary');
     if (!container) return;
     container.innerHTML = '';
-    
+
     if (!STATE.teams || STATE.teams.length === 0) {
-        container.innerHTML = '<div style="color:var(--muted);font-size:12px;">No franchises configured yet.</div>';
+        container.innerHTML = '<div class="glass" style="padding:22px;color:var(--muted);font-size:12px;">No franchises configured yet.</div>';
         return;
     }
 
+    let totalSpent = 0;
+    let highest = { price: 0, name: '--', team: '--' };
+
     STATE.teams.forEach(t => {
-        let boughtHtml = '';
-        if (t.purchases && Object.keys(t.purchases).length > 0) {
-            boughtHtml = '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">';
-            Object.entries(t.purchases).forEach(([cat, name]) => {
-                boughtHtml += `<span class="chip chip-cyan" style="font-size:8px;">${name} (${cat})</span>`;
-            });
-            boughtHtml += '</div>';
-        } else {
-            boughtHtml = '<div style="color:var(--muted); font-size:10px; margin-top:8px;">No players bought</div>';
-        }
+        const details = getTeamSpendDetails(t);
+        totalSpent += details.spent;
+        details.purchases.forEach(p => {
+            if (p.price > highest.price) highest = { price: p.price, name: p.name, team: t.name };
+        });
+        const isCritical = details.remainingPct <= 18;
+        const topRows = details.purchases
+            .sort((a, b) => b.price - a.price)
+            .slice(0, 3)
+            .map(p => `<div class="line"><span class="word-break">${p.name}</span><span class="price">${p.price ? formatAuctionCr(p.price) : '--'}</span></div>`);
+        while (topRows.length < 3) topRows.push('<div class="line"><span>Pending...</span><span class="price">--</span></div>');
 
         container.innerHTML += `
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                <strong class="word-break" style="color:white; font-family:var(--font-display); font-size:13px; min-width:0;">${teamNameWithLogoHTML(t, 32)}</strong>
-                <span class="mono" style="color:var(--emerald); font-weight:700; font-size:14px;">৳${t.purse}</span>
+        <div class="admin-franchise-card ${isCritical ? 'is-critical' : ''}" style="--budget-angle:${Math.max(0, Math.min(100, details.remainingPct))}%">
+            <div class="team-head">
+              <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+              <div class="team-budget-ring"><span>${details.remainingPct}%</span></div>
             </div>
-            <div style="font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:4px;">
-                ${t.purchases ? Object.keys(t.purchases).length : 0} Players Acquired
+            <h3 class="word-break">${t.name}</h3>
+            <div class="team-money-row">
+              <span>Spent: ${formatAuctionCr(details.spent)}</span>
+              <strong class="${isCritical ? 'critical' : ''}">Left: ${formatAuctionCr(details.purse)}</strong>
             </div>
-            ${boughtHtml}
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">Top Acquisitions</div>
+            <div class="team-purchase-list">${topRows.join('')}</div>
         </div>`;
     });
+
+    const next = getNextQueuedPlayer();
+    const nextName = document.getElementById('adminNextPlayerName');
+    const nextBase = document.getElementById('adminNextBase');
+    const nextSet = document.getElementById('adminNextSet');
+    if (nextName) nextName.textContent = next ? next.name : 'Awaiting Shuffle';
+    if (nextBase) nextBase.textContent = next ? `Base Price ${formatAuctionCr(next.base)}` : 'Base Price --';
+    if (nextSet) nextSet.textContent = next ? `Set ${next.category}` : 'Set --';
+
+    const soldCount = STATE.teams.reduce((sum, t) => sum + Object.keys(t.purchases || {}).length, 0);
+    const totalPlayers = STATE.categories.reduce((sum, c) => sum + (STATE.playersSnapshot[c.id] || []).length, 0);
+    const stats = document.getElementById('adminAuctionStats');
+    if (stats) {
+        const soldPct = totalPlayers ? Math.round((soldCount / totalPlayers) * 100) : 0;
+        stats.innerHTML = `
+          <div style="color:var(--amber);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:18px">Auction Statistics</div>
+          <div style="display:flex;justify-content:space-between;color:#d7deeb;font-size:13px"><span>Players Sold</span><span>${soldCount} / ${totalPlayers || 0}</span></div>
+          <div class="stat-bar"><span style="width:${soldPct}%"></span></div>
+          <div style="display:flex;justify-content:space-between;color:#d7deeb;font-size:13px"><span>Total Purse Spent</span><span>${formatAuctionCr(totalSpent)}</span></div>
+          <div class="stat-bar"><span style="width:${Math.min(100, Math.round(totalSpent))}%"></span></div>
+          <div style="margin-top:28px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.12em">Highest Bid Today</div>
+          <div class="stat-highlight">${highest.price ? formatAuctionCr(highest.price) : '--'}</div>
+          <div class="word-break" style="font-size:12px;color:#d7deeb">${highest.name}${highest.team !== '--' ? ` (${highest.team})` : ''}</div>
+        `;
+    }
 }
 
 function renderAll() {

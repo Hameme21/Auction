@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Auction Command</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020917'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f7df6'/%3E%3Cstop offset='1' stop-color='%2325d4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='48' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='46' text-anchor='middle' fill='url(%23g)'%3EA%3C/text%3E%3C/svg%3E">
-<link rel="icon" type="image/png" href="Auction_logo.png" sizes="any">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2300111f'/%3E%3Cpath d='M12 12h40v14c0 13-8 22-20 26C20 48 12 39 12 26V12Z' fill='%23102135' stroke='%2366ff63' stroke-width='3'/%3E%3Cpath d='M22 38h20' stroke='%23ffc20a' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M26 22l12 12M38 22L26 34' stroke='%2366ff63' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{if(localStorage.getItem('auctioncmd.session.v1'))document.documentElement.classList.add('restore-session')}catch(e){}</script>
 <script>
 window.__hideAuctionLoader = function(delay) {
@@ -323,8 +322,10 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes playerPhotoRing { 0%, 100% { opacity: 0.68; box-shadow: inset 0 0 28px rgba(37,212,255,0.14), inset 0 0 60px rgba(47,125,246,0.1); } 50% { opacity: 1; box-shadow: inset 0 0 38px rgba(37,212,255,0.24), inset 0 0 86px rgba(47,125,246,0.16); } }
 @media (max-width: 767px) {
   .live-card-content { display: flex; flex-direction: column; padding: 12px; gap: 10px; min-height: 100%; }
-  .live-admin-toolbar { align-items: flex-start; padding: 12px; }
-  .live-admin-toolbar .toolbar-actions { flex-shrink: 0; }
+  .live-admin-toolbar { align-items: flex-start; padding: 12px; flex-wrap: wrap; }
+  .live-admin-toolbar .toolbar-copy { width: 100%; }
+  .live-admin-toolbar .toolbar-actions { flex-shrink: 1; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .live-admin-toolbar .toolbar-actions button { min-width: 0; padding-left: 8px; padding-right: 8px; }
   .header-right #btnExportAdmin, .header-right #btnResetSystem { width: 34px; min-width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: 10px; font-size: 0; gap: 0; }
   .header-right #btnExportAdmin::before { content: '⇩'; font-size: 16px; line-height: 1; }
   .header-right #btnResetSystem::before { content: '⌫'; font-size: 15px; line-height: 1; }
@@ -343,8 +344,8 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   #idleWaitingMessage { padding: 0 !important; }
   .live-code-stage, .live-code-stage.full-bleed { min-height: clamp(300px, 58vh, 460px); padding: 14px; }
   .live-code-stage .code-card { width: min(100%, 430px); aspect-ratio: 4 / 3; min-height: 0; }
-  .code-value.slot-reels, .live-code-stage .code-value.slot-reels, .live-code-reveal .code-value.slot-reels { font-size: 3rem; }
-  .code-reel { width: 52px; border-radius: 12px; }
+  .code-value.slot-reels, .live-code-stage .code-value.slot-reels, .live-code-reveal .code-value.slot-reels { font-size: clamp(2.2rem, 13vw, 3rem); gap: 6px; }
+  .code-reel { width: clamp(39px, 14vw, 52px); border-radius: 12px; }
   .live-info-panel { justify-content: flex-start; gap: 10px; }
   #adminActionButtons { grid-template-columns: 1fr !important; }
   #adminActionButtons button { min-width: 0; white-space: normal; }
@@ -647,6 +648,21 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .team-purchase-list { border-top: 1px solid rgba(154,177,204,0.14); padding-top: 12px; display: grid; gap: 9px; }
 .team-purchase-list .line { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
 .team-purchase-list .price { color: #ffc20a; font-family: var(--font-mono); font-weight: 800; }
+.team-dashboard-grid { display: grid; grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.25fr); gap: 14px; margin-bottom: 14px; }
+.team-chart-card { background: rgba(7,19,33,0.86); border: 1px solid rgba(154,177,204,0.16); border-radius: 6px; padding: 16px; min-width: 0; }
+.team-chart-title { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px; }
+.purse-pie-wrap { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.purse-pie { width: 116px; height: 116px; border-radius: 50%; background: conic-gradient(#66ff63 var(--spent-angle), rgba(154,177,204,0.16) 0); display: grid; place-items: center; flex-shrink: 0; position: relative; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 24px rgba(102,255,99,0.12); }
+.purse-pie::after { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: #102135; }
+.purse-pie span { position: relative; z-index: 1; font-family: var(--font-mono); color: #66ff63; font-weight: 900; font-size: 18px; }
+.purse-legend { display: grid; gap: 8px; min-width: 0; color: #d7deeb; font-size: 12px; }
+.purse-legend b { color: #66ff63; }
+.price-bars { display: grid; gap: 9px; }
+.price-bar-row { display: grid; grid-template-columns: minmax(78px, 0.8fr) minmax(90px, 1.2fr) auto; gap: 8px; align-items: center; font-size: 11px; color: #d7deeb; min-width: 0; }
+.price-bar-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.price-bar-track { height: 9px; border-radius: 999px; background: rgba(154,177,204,0.14); overflow: hidden; }
+.price-bar-fill { display: block; height: 100%; width: var(--bar-width); border-radius: inherit; background: linear-gradient(90deg, #66ff63, #ffc20a); }
+.price-bar-value { color: #ffc20a; font-family: var(--font-mono); font-weight: 800; }
 .admin-lower-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(250px, 0.85fr); gap: 16px; }
 .next-player-panel { display: grid; grid-template-columns: minmax(0, 1fr) 280px; min-height: 210px; overflow: hidden; }
 .next-player-copy { padding: 26px 30px; }
@@ -657,14 +673,14 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .stat-bar span { display: block; height: 100%; background: #66ff63; }
 .stat-highlight { color: #ffc20a; font-family: var(--font-display); font-size: 2.15rem; line-height: 1; }
 
-#sectionLiveAuction { grid-template-columns: minmax(0, 1fr) 320px !important; gap: 18px !important; }
+#sectionLiveAuction { grid-template-columns: minmax(0, 1fr) 300px !important; gap: 14px !important; min-height: 540px !important; }
 #auctionPlayerPopup, #auctionIdleState {
   background: #102135;
   border-radius: 6px;
   border-color: rgba(154,177,204,0.24);
   box-shadow: 0 18px 50px rgba(0,0,0,0.32);
 }
-.live-card-content { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); min-height: 585px; padding: 18px; gap: 18px; }
+.live-card-content { display: grid; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr); min-height: 500px; padding: 16px; gap: 16px; }
 .live-photo-panel { aspect-ratio: auto; max-height: none; height: 100%; min-height: 0 !important; border-radius: 6px; box-shadow: 0 0 34px rgba(102,255,99,0.16); }
 .live-photo-frame { border-radius: 6px; background: #071321; border-color: rgba(102,255,99,0.28); }
 .live-photo-frame::after { background: linear-gradient(to top, rgba(16,33,53,0.98) 0%, rgba(16,33,53,0.15) 62%, rgba(0,0,0,0.16)); }
@@ -679,7 +695,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   border: 1px solid rgba(154,177,204,0.18);
   background: rgba(12,27,45,0.72);
   border-radius: 6px;
-  padding: 24px;
+  padding: 20px;
   position: relative;
 }
 .live-info-panel::before {
@@ -716,26 +732,26 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .bid-step-btn:hover:not(:disabled) { border-color: rgba(102,255,99,0.52); color: #66ff63 !important; }
 .bid-step-up { background: rgba(102,255,99,0.16) !important; border-color: rgba(102,255,99,0.38); }
 #adminActionButtons { width: 100%; align-self: end; }
-#adminActionButtons button, #teamActionButtons button { min-height: 64px; font-size: 1.15rem !important; }
-#btnTeamBid { min-height: 136px; background: #66ff63 !important; color: #06111d !important; font-family: var(--font-display) !important; font-size: 2.2rem !important; line-height: 1; }
+#adminActionButtons button, #teamActionButtons button { min-height: 56px; font-size: 1rem !important; }
+#btnTeamBid { min-height: 112px; background: #66ff63 !important; color: #06111d !important; font-family: var(--font-display) !important; font-size: 2rem !important; line-height: 1; }
 .timer-pill { top: auto; left: auto; right: 26px; bottom: 22px; transform: none; border-radius: 4px; border-color: rgba(255,194,10,0.45); color: #ffc20a; }
 #auctionPlayerPopup:not(.is-player-live) .timer-pill { display: none; }
-#auctionIdleState { min-height: 621px !important; }
-#auctionIdleState .live-code-stage.full-bleed { min-height: 585px; }
-#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active { min-height: 621px !important; }
-#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active .live-code-stage.full-bleed { min-height: 585px; }
+#auctionIdleState { min-height: 520px !important; }
+#auctionIdleState .live-code-stage.full-bleed { min-height: 484px; }
+#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active { min-height: 500px !important; }
+#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active .live-code-stage.full-bleed { min-height: 464px; }
 #auctionPlayerPopup.is-code-mode .live-card-content {
   display: flex;
-  min-height: 585px;
-  padding: 18px;
+  min-height: 500px;
+  padding: 16px;
 }
 #auctionPlayerPopup.is-code-mode .live-photo-panel {
   width: 100%;
-  min-height: 585px !important;
+  min-height: 500px !important;
 }
 #auctionPlayerPopup.is-code-mode .live-code-stage {
-  min-height: 585px;
-  padding-top: 26px;
+  min-height: 500px;
+  padding-top: 22px;
 }
 #auctionSidebar .glass { border-radius: 6px; }
 .score-tile { border-radius: 4px; background: rgba(18,36,57,0.94); }
@@ -752,6 +768,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   .live-card-content { grid-template-columns: 1fr; min-height: auto; }
   .live-info-panel { min-height: 330px; }
   .admin-command-row, .admin-franchise-grid, .admin-lower-grid { grid-template-columns: 1fr; }
+  .team-dashboard-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
   body { background: #050a11; }
@@ -813,6 +830,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     background: #66ff63;
     box-shadow: 0 0 18px rgba(102,255,99,0.7);
   }
+  #mobileBottomNav::before { display: none; }
   #mobileBottomNav .mnav-item {
     min-height: 66px;
     color: #b8bdc8;
@@ -853,7 +871,10 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     padding: 13px 16px;
     font-size: 18px;
   }
-  #sectionLiveAuction { gap: 16px !important; }
+  .team-dashboard-grid { grid-template-columns: 1fr; }
+  .purse-pie-wrap { align-items: flex-start; }
+  .price-bar-row { grid-template-columns: minmax(78px, 0.9fr) minmax(80px, 1fr) auto; }
+  #sectionLiveAuction { gap: 16px !important; min-height: auto !important; }
   #auctionPlayerPopup { border: 0; box-shadow: none; background: transparent; min-height: 0; }
   #btnCloseLivePopup {
     top: 12px !important;
@@ -945,7 +966,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     <div style="position:relative;width:116px;height:116px;display:grid;place-items:center">
       <div class="loading-ring"></div>
       <div class="loading-mark" style="background:none;box-shadow:none;">
-  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020917'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f7df6'/%3E%3Cstop offset='1' stop-color='%2325d4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='48' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='46' text-anchor='middle' fill='url(%23g)'%3EA%3C/text%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2300111f'/%3E%3Cpath d='M12 12h40v14c0 13-8 22-20 26C20 48 12 39 12 26V12Z' fill='%23102135' stroke='%2366ff63' stroke-width='3'/%3E%3Cpath d='M22 38h20' stroke='%23ffc20a' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M26 22l12 12M38 22L26 34' stroke='%2366ff63' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
 </div>
     </div>
     <div>
@@ -1018,7 +1039,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   <header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:var(--header-h);border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(7,11,18,0.86);backdrop-filter:blur(22px);position:sticky;top:0;z-index:4000;gap:12px">
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
       <span class="brand-logo" style="background:none;box-shadow:none;">
-  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020917'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232f7df6'/%3E%3Cstop offset='1' stop-color='%2325d4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='48' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='46' text-anchor='middle' fill='url(%23g)'%3EA%3C/text%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2300111f'/%3E%3Cpath d='M12 12h40v14c0 13-8 22-20 26C20 48 12 39 12 26V12Z' fill='%23102135' stroke='%2366ff63' stroke-width='3'/%3E%3Cpath d='M22 38h20' stroke='%23ffc20a' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M26 22l12 12M38 22L26 34' stroke='%2366ff63' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
 </span>
       <span style="font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:0.06em;color:white">AUCTION<span style="color:var(--accent-2)"> COMMAND</span></span>
     </div>
@@ -1072,7 +1093,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
           </div>
         </div>
         <div class="glass" style="padding:16px;display:flex;flex-direction:column">
-          <div style="font-size:10px;color:var(--emerald);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06)">Network Franchises & Rosters</div>
+          <div style="font-size:10px;color:var(--emerald);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06)">Network Purchases</div>
           <div id="viewerRostersContent" style="overflow-y:auto;flex:1"></div>
         </div>
       </div>
@@ -1600,6 +1621,7 @@ async function playQueuedPlayerReveal(player, context) {
     playerLoader?.classList.add('hidden');
     body.classList.remove('is-preparing-player');
     document.getElementById('liveAuctionMain')?.classList.remove('is-revealing-player');
+    updateLiveIndicator();
     if (CURRENT_USER.role === 'admin') {
       idleState?.classList.remove('hidden');
       idleState?.classList.add('admin-code-active');
@@ -1634,6 +1656,7 @@ async function playQueuedPlayerReveal(player, context) {
   playerLoader?.classList.add('hidden');
   body.classList.remove('is-preparing-player');
   document.getElementById('liveAuctionMain')?.classList.remove('is-revealing-player');
+  updateLiveIndicator();
   if (CURRENT_USER.role === 'admin') {
     idleState?.classList.remove('hidden');
     idleState?.classList.add('admin-code-active');
@@ -1756,12 +1779,22 @@ function updateLiveIndicator() {
 
 function updateHeaderLiveTicker() {
   if (!appContainer) return;
+  const revealInProgress = activePlayer?.revealCode && (
+    document.getElementById('liveAuctionMain')?.classList.contains('is-revealing-player') ||
+    document.getElementById('livePlayerBody')?.classList.contains('is-preparing-player') ||
+    !document.getElementById('liveCodeReveal')?.classList.contains('hidden')
+  );
+  if (revealInProgress) {
+    appContainer.dataset.liveTicker = 'LIVE UPDATE: THIS CODE GOT PICKED';
+    return;
+  }
   if (activePlayer?.name) {
     appContainer.dataset.liveTicker = `LIVE UPDATE: ${activePlayer.name} IS IN BIDDING`;
     return;
   }
   const next = getNextQueuedPlayer?.();
-  appContainer.dataset.liveTicker = next?.name ? `LIVE UPDATE: ${next.name} IS NEXT IN LINE` : 'LIVE UPDATE: WAITING FOR NEXT PLAYER';
+  const nextCode = next ? (next.code || getPlayerCode(next.category, next.name)) : '';
+  appContainer.dataset.liveTicker = nextCode ? `LIVE UPDATE: ${nextCode} IS NEXT IN LINE` : 'LIVE UPDATE: WAITING FOR NEXT PLAYER';
 }
 
 function closeLocalLivePlayerView() {
@@ -2344,6 +2377,44 @@ function getTeamSpendDetails(team) {
     return { purchases, spent, purse, starting, remainingPct: Math.round((purse / starting) * 100) };
 }
 
+function renderTeamSpendCharts(team) {
+    const details = getTeamSpendDetails(team);
+    const spentPct = Math.round((details.spent / details.starting) * 100);
+    const maxPrice = Math.max(1, ...details.purchases.map(p => Number(p.price) || 0));
+    const barRows = details.purchases.length
+      ? details.purchases
+          .slice()
+          .sort((a, b) => b.price - a.price)
+          .map(p => {
+              const width = Math.max(4, Math.round(((Number(p.price) || 0) / maxPrice) * 100));
+              return `<div class="price-bar-row">
+                <div class="price-bar-name" title="${escapeHTML(p.name)}">${escapeHTML(p.name)}</div>
+                <div class="price-bar-track"><span class="price-bar-fill" style="--bar-width:${width}%"></span></div>
+                <div class="price-bar-value">${p.price ? formatAuctionCr(p.price) : '--'}</div>
+              </div>`;
+          })
+          .join('')
+      : '<div style="color:var(--muted);font-size:11px;text-align:center;padding:18px;border:1px dashed rgba(154,177,204,0.16);border-radius:6px">No player prices yet.</div>';
+
+    return `<div class="team-dashboard-grid">
+      <div class="team-chart-card">
+        <div class="team-chart-title">Purse Usage</div>
+        <div class="purse-pie-wrap">
+          <div class="purse-pie" style="--spent-angle:${spentPct}%"><span>${spentPct}%</span></div>
+          <div class="purse-legend">
+            <div>Used <b>${formatAuctionCr(details.spent)}</b></div>
+            <div>Left <b>${formatAuctionCr(details.purse)}</b></div>
+            <div>Starting <b>${formatAuctionCr(details.starting)}</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="team-chart-card">
+        <div class="team-chart-title">Bought Player Prices</div>
+        <div class="price-bars">${barRows}</div>
+      </div>
+    </div>`;
+}
+
 function renderAdminTeamsSummary() {
     if (CURRENT_USER.role !== 'admin') return;
     const container = document.getElementById('adminTeamsSummary');
@@ -2624,26 +2695,31 @@ function renderViewerRosters() {
   const div = document.getElementById('viewerRostersContent'); if (!div) return;
   div.innerHTML = '';
   if (!STATE.teams.length) { div.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No franchises available.</div>'; return; }
+  div.className = 'admin-franchise-grid';
   STATE.teams.forEach(t => {
-    div.insertAdjacentHTML('beforeend', `<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:16px;display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px">
-      <div style="width:160px;flex-shrink:0;text-align:center;background:rgba(0,0,0,0.3);padding:16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.05)">
-        <div style="display:flex;justify-content:center;margin-bottom:10px">${teamAvatarHTML(t, 56)}</div>
-        <h3 style="font-family:var(--font-display);font-size:13px;font-weight:800;color:white;margin-bottom:6px;word-wrap:break-word;">${t.name}</h3>
-        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px">${t.purchases ? Object.keys(t.purchases).length : 0} Players</div>
-        <div class="mono" style="font-size:18px;font-weight:700;color:var(--cyan)">৳${t.purse}</div>
-      </div>
-      <div style="flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;align-content:start" id="viewerTeamPlayers-${t.id}"></div>
-    </div>`);
-    const grid = document.getElementById(`viewerTeamPlayers-${t.id}`);
-    if (!t.purchases || !Object.keys(t.purchases).length) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:20px 0;text-align:center">No players yet.</div>'; return; }
-    Object.entries(t.purchases).forEach(([catId, pName]) => {
-      const player = (STATE.playersSnapshot[catId] || []).find(p => p.name === pName);
-      const cat = STATE.categories.find(c => c.id === catId);
-      if (!player || !cat) return;
-      const key = `${catId}:${pName}`;
-      const price = STATE.soldPrices?.[key] || STATE.activeBids?.[key] || player.price || cat.base;
-      grid.innerHTML += makeTileHTML(player, catId, price, !!STATE.directSigns?.[key], !!STATE.rtmEvents?.[key], t.name);
-    });
+    const details = getTeamSpendDetails(t);
+    const isCritical = details.remainingPct <= 18;
+    const rows = details.purchases.length
+      ? details.purchases
+          .sort((a, b) => b.price - a.price)
+          .map(p => `<div class="line"><span class="word-break">${escapeHTML(p.cat)} · ${escapeHTML(p.name)}</span><span class="price">${p.price ? formatAuctionCr(p.price) : '--'}</span></div>`)
+          .join('')
+      : '<div class="line"><span>No purchases yet</span><span class="price">--</span></div>';
+
+    div.insertAdjacentHTML('beforeend', `
+      <div class="admin-franchise-card ${isCritical ? 'is-critical' : ''}" style="--budget-angle:${Math.max(0, Math.min(100, details.remainingPct))}%">
+        <div class="team-head">
+          <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+          <div class="team-budget-ring"><span>${details.remainingPct}%</span></div>
+        </div>
+        <h3 class="word-break">${escapeHTML(t.name)}</h3>
+        <div class="team-money-row">
+          <span>Spent: ${formatAuctionCr(details.spent)}</span>
+          <strong class="${isCritical ? 'critical' : ''}">Left: ${formatAuctionCr(details.purse)}</strong>
+        </div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">All Purchases</div>
+        <div class="team-purchase-list" style="max-height:230px;overflow-y:auto">${rows}</div>
+      </div>`);
   });
 }
 
@@ -2655,6 +2731,7 @@ function renderMyTeam() {
     <div class="mono" style="font-size:1.4rem;font-weight:700;color:var(--emerald)">৳${t.purse}</div>
   </div>
   ${t.impactUsed ? `<div style="background:rgba(47,125,246,0.1);border:1px solid rgba(120,183,255,0.24);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--accent-2);font-weight:600;display:flex;align-items:center;gap:8px"><span>⚡</span> Impact Power Deployed</div>` : ''}`;
+  div.innerHTML += renderTeamSpendCharts(t);
   const hasPurchases = t.purchases && Object.keys(t.purchases).length > 0;
   if (!hasPurchases) { div.innerHTML += '<div style="text-align:center;padding:30px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;border:1px dashed rgba(255,255,255,0.07);border-radius:var(--radius)">No players acquired yet.</div>'; return; }
   const grid = document.createElement('div');

@@ -668,8 +668,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .live-photo-panel { aspect-ratio: auto; max-height: none; height: 100%; min-height: 0 !important; border-radius: 6px; box-shadow: 0 0 34px rgba(102,255,99,0.16); }
 .live-photo-frame { border-radius: 6px; background: #071321; border-color: rgba(102,255,99,0.28); }
 .live-photo-frame::after { background: linear-gradient(to top, rgba(16,33,53,0.98) 0%, rgba(16,33,53,0.15) 62%, rgba(0,0,0,0.16)); }
-.live-category-badge { top: auto; bottom: 150px; left: 16px; }
-.live-photo-name { left: 22px; right: 22px; bottom: 86px; max-width: none; }
+.live-category-badge { top: 18px; bottom: auto; left: 18px; }
+.live-photo-name { left: 22px; right: 22px; bottom: 22px; max-width: none; }
 .live-photo-name #popupName { font-size: clamp(2.2rem, 3.8vw, 3.5rem) !important; text-shadow: 2px 2px 0 rgba(0,0,0,0.55) !important; }
 .live-photo-controls { left: 18px; right: 18px; bottom: 18px; justify-content: space-between; border-radius: 4px; background: rgba(8,18,31,0.88); }
 .live-info-panel {
@@ -719,6 +719,24 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 #adminActionButtons button, #teamActionButtons button { min-height: 64px; font-size: 1.15rem !important; }
 #btnTeamBid { min-height: 136px; background: #66ff63 !important; color: #06111d !important; font-family: var(--font-display) !important; font-size: 2.2rem !important; line-height: 1; }
 .timer-pill { top: auto; left: auto; right: 26px; bottom: 22px; transform: none; border-radius: 4px; border-color: rgba(255,194,10,0.45); color: #ffc20a; }
+#auctionPlayerPopup:not(.is-player-live) .timer-pill { display: none; }
+#auctionIdleState { min-height: 621px !important; }
+#auctionIdleState .live-code-stage.full-bleed { min-height: 585px; }
+#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active { min-height: 621px !important; }
+#liveAuctionMain.is-player-active #auctionIdleState.admin-code-active .live-code-stage.full-bleed { min-height: 585px; }
+#auctionPlayerPopup.is-code-mode .live-card-content {
+  display: flex;
+  min-height: 585px;
+  padding: 18px;
+}
+#auctionPlayerPopup.is-code-mode .live-photo-panel {
+  width: 100%;
+  min-height: 585px !important;
+}
+#auctionPlayerPopup.is-code-mode .live-code-stage {
+  min-height: 585px;
+  padding-top: 26px;
+}
 #auctionSidebar .glass { border-radius: 6px; }
 .score-tile { border-radius: 4px; background: rgba(18,36,57,0.94); }
 .score-tile:hover { border-color: rgba(102,255,99,0.4); }
@@ -854,8 +872,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     border-color: rgba(154,177,204,0.3);
   }
   .live-category-badge { top: 28px; bottom: auto; left: 28px; }
-  .live-photo-name { left: 28px; right: 28px; bottom: 84px; }
-  .live-photo-name { bottom: 78px; }
+  .live-photo-name { left: 28px; right: 28px; bottom: 28px; }
   .live-photo-name #popupName { font-size: clamp(2.8rem, 12vw, 4.2rem) !important; }
   .live-info-panel {
     min-height: 300px;
@@ -887,6 +904,21 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     margin-left: auto;
     margin-top: 10px;
     width: fit-content;
+  }
+  #auctionPlayerPopup:not(.is-player-live) .timer-pill { display: none; }
+  #auctionIdleState { min-height: 430px !important; }
+  #auctionIdleState .live-code-stage.full-bleed { min-height: 430px; }
+  #liveAuctionMain.is-player-active #auctionIdleState.admin-code-active { min-height: 430px !important; }
+  #liveAuctionMain.is-player-active #auctionIdleState.admin-code-active .live-code-stage.full-bleed { min-height: 430px; }
+  #auctionPlayerPopup.is-code-mode .live-card-content {
+    min-height: 430px;
+    padding: 0;
+  }
+  #auctionPlayerPopup.is-code-mode .live-photo-panel {
+    min-height: 430px !important;
+  }
+  #auctionPlayerPopup.is-code-mode .live-code-stage {
+    min-height: 430px;
   }
   #auctionSidebar { display: none !important; }
   #teamActionButtons {
@@ -1528,6 +1560,7 @@ function preloadImage(url, timeoutMs = 1800) {
 function resetLiveRevealUI(reveal, revealCodeEl) {
   if (!reveal) return;
   document.getElementById('auctionPlayerPopup')?.classList.remove('is-code-mode');
+  document.getElementById('auctionPlayerPopup')?.classList.add('is-player-live');
   const card = document.getElementById('liveRevealCodeCard');
   if (card) {
     card.removeAttribute('class');
@@ -1738,6 +1771,7 @@ function closeLocalLivePlayerView() {
   blockedBidToastKey = '';
   const popup = document.getElementById('auctionPlayerPopup');
   popup?.classList.remove('is-code-mode');
+  popup?.classList.remove('is-player-live');
   popup?.classList.add('hidden');
   if (popup) {
     popup.style.opacity = '';
@@ -2434,6 +2468,7 @@ function renderPopupCodeStage(next) {
   if (!popup || !reveal || !card || !body) return;
   popup.classList.remove('hidden');
   popup.classList.add('is-code-mode');
+  popup.classList.remove('is-player-live');
   body.classList.remove('is-preparing-player');
   document.getElementById('livePlayerLoader')?.classList.add('hidden');
   document.querySelector('#popupImgContainer .live-photo-frame')?.classList.remove('photo-glow');

@@ -1441,6 +1441,7 @@ let importTargetTeamId = null;
 let importActiveCatFilter = '';
 let importSelectedPlayers = new Set();
 let importOriginalPlayers = new Set();
+let rtmTagOverrides = {};
 let blockedBidToastKey = '';
 let liveRevealToken = 0;
 let allowActivePlayerCodeQueue = false;
@@ -2017,6 +2018,7 @@ socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.rol
 socket.on('state:updated', s => {
   const shouldClearActivePlayer = activePlayer && s && !s.currentActivePlayer && !s.biddingActive;
   STATE = s;
+  applyRTMTagOverridesToState();
   if (shouldClearActivePlayer) closeLocalLivePlayerView();
   renderAll();
 });
@@ -2945,6 +2947,24 @@ function removeRTMTagsForTeam(teamId) {
   return removed;
 }
 
+function setRTMTagOverride(teamId, selectedKeys) {
+  rtmTagOverrides[teamId] = Array.from(selectedKeys);
+}
+
+function applyRTMTagOverridesToState() {
+  if (!STATE.previousOwners) STATE.previousOwners = {};
+  Object.entries(rtmTagOverrides).forEach(([teamId, selectedKeys]) => {
+    Object.keys(STATE.previousOwners).forEach(key => {
+      if (STATE.previousOwners[key] === teamId) delete STATE.previousOwners[key];
+    });
+    selectedKeys.forEach(key => {
+      const [catId, ...nameParts] = key.split('::');
+      const name = nameParts.join('::');
+      if (catId && name) STATE.previousOwners[`${catId}:${name}`] = teamId;
+    });
+  });
+}
+
 function applyRTMTagSelectionForTeam(teamId, selectedKeys) {
   if (!STATE.previousOwners) STATE.previousOwners = {};
   removeRTMTagsForTeam(teamId);
@@ -2962,6 +2982,7 @@ function syncRTMTagSelectionForTeam(teamId, selectedKeys, originalKeys = new Set
   const addedPlayers = getImportPlayersFromKeys(addedKeys);
   const removedPlayers = getImportPlayersFromKeys(removedKeys);
 
+  setRTMTagOverride(teamId, selected);
   applyRTMTagSelectionForTeam(teamId, selected);
   socket.emit('admin:import_previous', { teamId, players: selectedPlayers, mode: 'replace' });
   socket.emit('admin:sync_previous', { teamId, players: selectedPlayers, removed: removedPlayers, previousOwners: STATE.previousOwners });
@@ -3070,6 +3091,7 @@ window.confirmImportPlayers = () => {
 
   const removedText = result.removedPlayers.length ? `, removed ${result.removedPlayers.length}` : '';
   showToast(`✅ Saved ${result.selectedPlayers.length} RTM tag(s) for ${targetTeam.name}${removedText}`);
+  renderAll();
   closeImportModal();
 };
 
@@ -3274,6 +3296,7 @@ document.getElementById('btnAddCat').onclick = () => {
 window.saveGlobalConfig = () => { socket.emit('admin:updateConfig', { impactAmount: document.getElementById('configImpact').value }); showToast('Impact Rule Saved'); };
 window.resetTeam = (tid) => {
   if (!confirm('Reset team history?')) return;
+  setRTMTagOverride(tid, new Set());
   const removedPlayers = removeRTMTagsForTeam(tid);
   if (importTargetTeamId === tid) {
     importSelectedPlayers = new Set();

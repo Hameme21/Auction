@@ -215,6 +215,14 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .logo-drop-zone { width: 48px; height: 48px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3); margin: 0 auto; transition: border-color 0.2s; }
 .logo-drop-zone:hover { border-color: var(--accent); }
 .logo-drop-zone img { width: 100%; height: 100%; object-fit: cover; }
+.captain-box { margin-top: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.2); border-radius: var(--radius); }
+.captain-photo-drop { width: 48px; height: 48px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3); flex-shrink: 0; transition: border-color 0.2s; }
+.captain-photo-drop:hover { border-color: var(--accent); }
+.captain-photo-drop img { width: 100%; height: 100%; object-fit: cover; }
+.captain-pill { display: inline-flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 9px; border: 1px solid rgba(255,194,10,0.24); background: rgba(255,194,10,0.08); border-radius: var(--radius); }
+.captain-pill img, .captain-pill .captain-initial { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.16); }
+.captain-pill .captain-initial { display: flex; align-items: center; justify-content: center; color: var(--amber); background: rgba(255,255,255,0.05); font-family: var(--font-display); font-weight: 800; }
+.captain-pill .captain-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: white; font-weight: 800; font-size: 12px; }
 
 .team-config-card { background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s, transform 0.2s; }
 .team-config-card:hover { border-color: rgba(120,183,255,0.26); transform: translateY(-1px); }
@@ -1688,6 +1696,23 @@ function teamNameWithLogoHTML(team, size = 28, extra = '') {
   return `<span style="display:inline-flex;align-items:center;gap:8px;min-width:0;${extra}">${teamAvatarHTML(team, size)}<span class="word-break" style="min-width:0;overflow:hidden;text-overflow:ellipsis;">${name}</span></span>`;
 }
 
+function getTeamCaptain(team) {
+  return {
+    name: team?.captainName || team?.captain?.name || '',
+    photo: team?.captainPhoto || team?.captain?.photo || ''
+  };
+}
+
+function captainPillHTML(team) {
+  const captain = getTeamCaptain(team);
+  if (!captain.name && !captain.photo) return '';
+  const initial = (captain.name || 'C').trim().charAt(0).toUpperCase() || 'C';
+  const avatar = captain.photo
+    ? `<img src="${escapeHTML(captain.photo)}" alt="">`
+    : `<span class="captain-initial">${escapeHTML(initial)}</span>`;
+  return `<span class="captain-pill" title="Captain">${avatar}<span style="min-width:0"><span style="display:block;font-size:8px;color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;line-height:1">Captain</span><span class="captain-name word-break">${escapeHTML(captain.name || 'Captain')}</span></span></span>`;
+}
+
 function makePlayerCode(category, name, usedCodes = new Set()) {
   const catPart = String(category || 'XX').replace(/[^A-Z0-9]/gi, '').toUpperCase().padEnd(2, 'X').slice(0, 2);
   const seed = `${category || ''}:${name || ''}`.toUpperCase();
@@ -2735,7 +2760,7 @@ function renderMyTeam() {
   const t = STATE.teams.find(x => x.id === CURRENT_USER.teamId);
   const div = document.getElementById('dashboardMyTeamContent'); if (!t || !div) return;
   div.innerHTML = `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px">
-    <div style="min-width:0">${teamNameWithLogoHTML(t, 36, 'color:white;font-family:var(--font-display);font-weight:800;')}<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-top:6px">Remaining Purse</div></div>
+    <div style="min-width:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">${teamNameWithLogoHTML(t, 36, 'color:white;font-family:var(--font-display);font-weight:800;')}${captainPillHTML(t)}<div style="flex-basis:100%;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-top:2px">Remaining Purse</div></div>
     <div class="mono" style="font-size:1.4rem;font-weight:700;color:var(--emerald)">৳${t.purse}</div>
   </div>
   ${t.impactUsed ? `<div style="background:rgba(47,125,246,0.1);border:1px solid rgba(120,183,255,0.24);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--accent-2);font-weight:600;display:flex;align-items:center;gap:8px"><span>⚡</span> Impact Power Deployed</div>` : ''}`;
@@ -2827,6 +2852,8 @@ function renderTeamConfigTable() {
     const tile = document.createElement('div');
     tile.className = 'team-config-card';
     const logoHtml = t.logo ? `<img src="${t.logo}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:9px;color:var(--muted);text-align:center">Logo</span>`;
+    const captain = getTeamCaptain(t);
+    const captainPhotoHtml = captain.photo ? `<img src="${escapeHTML(captain.photo)}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:9px;color:var(--muted);text-align:center">Photo</span>`;
     tile.innerHTML = `<div style="position:absolute;top:10px;right:10px;display:flex;gap:5px">
       <button class="ghost small" onclick="resetTeam('${t.id}')" title="Reset" style="color:var(--amber);border-color:rgba(245,158,11,0.2);padding:3px 7px;font-size:11px">↺</button>
       <button class="ghost small" onclick="this.closest('.team-config-card').remove()" title="Delete" style="color:var(--danger);border-color:rgba(239,68,68,0.2);padding:3px 7px;font-size:11px">×</button>
@@ -2840,6 +2867,13 @@ function renderTeamConfigTable() {
       <div><label>Security Key</label><input class="t-pass" value="${t.password || ''}" placeholder="Password" style="margin:0;padding:8px 11px;font-size:13px"></div>
       <div><label>Starting Purse (৳)</label><input class="t-purse" type="number" value="${t.purse}" placeholder="500" style="margin:0;padding:8px 11px;font-size:14px;font-weight:700;color:var(--emerald)"></div>
     </div>
+    <div class="captain-box">
+      <label>Captain</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="captain-photo-drop">${captainPhotoHtml}</div>
+        <input class="t-captain-name" value="${escapeHTML(captain.name)}" placeholder="Captain name" style="margin:0;padding:8px 11px;font-size:13px">
+      </div>
+    </div>
     <button class="ghost small word-break rtm-tag-btn" style="width:100%;margin-top:12px;color:var(--rtm);border-color:rgba(236,72,153,0.3);font-size:11px;padding:8px" onclick="openImportPlayersModal('${t.id}')">📥 Tag Previous Players (RTM)</button>`;
     container.appendChild(tile);
     const logoDrop = tile.querySelector('.logo-drop-zone');
@@ -2847,6 +2881,11 @@ function renderTeamConfigTable() {
       logoDrop.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
       socket.emit('admin:setTeamLogo', { teamId: t.id, logoUrl: url });
       showToast('Team logo uploaded');
+    }));
+    const captainDrop = tile.querySelector('.captain-photo-drop');
+    setupFileUpload(captainDrop, (file) => uploadFile(file).then(url => {
+      captainDrop.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+      showToast('Captain photo uploaded. Sync Team DB to save.');
     }));
   });
 
@@ -3109,10 +3148,19 @@ window.addTeamInputRow = () => {
   const current = [];
   document.querySelectorAll('#teamsConfigContainer .team-config-card').forEach(r => {
     const imgEl = r.querySelector('.logo-drop-zone img');
-    current.push({ id: r.querySelector('.t-id').value.trim(), name: r.querySelector('.t-name').value.trim(), password: r.querySelector('.t-pass').value.trim(), purse: Number(r.querySelector('.t-purse').value), logo: imgEl ? imgEl.src : null });
+    const captainImgEl = r.querySelector('.captain-photo-drop img');
+    current.push({
+      id: r.querySelector('.t-id').value.trim(),
+      name: r.querySelector('.t-name').value.trim(),
+      password: r.querySelector('.t-pass').value.trim(),
+      purse: Number(r.querySelector('.t-purse').value),
+      logo: imgEl ? imgEl.src : null,
+      captainName: r.querySelector('.t-captain-name')?.value.trim() || '',
+      captainPhoto: captainImgEl ? captainImgEl.src : null
+    });
   });
   STATE.teams = current;
-  STATE.teams.push({ id: '', name: '', password: '', purse: 500, logo: null });
+  STATE.teams.push({ id: '', name: '', password: '', purse: 500, logo: null, captainName: '', captainPhoto: null });
   renderTeamConfigTable();
 };
 
@@ -3319,7 +3367,15 @@ document.getElementById('btnSaveTeams').onclick = () => {
   document.querySelectorAll('#teamsConfigContainer .team-config-card').forEach(r => {
     const id = r.querySelector('.t-id').value.trim();
     const name = r.querySelector('.t-name').value.trim();
-    if (id && name) teams.push({ id, name, password: r.querySelector('.t-pass').value.trim(), purse: Number(r.querySelector('.t-purse').value), logo: r.querySelector('.logo-drop-zone img')?.src || null });
+    if (id && name) teams.push({
+      id,
+      name,
+      password: r.querySelector('.t-pass').value.trim(),
+      purse: Number(r.querySelector('.t-purse').value),
+      logo: r.querySelector('.logo-drop-zone img')?.src || null,
+      captainName: r.querySelector('.t-captain-name')?.value.trim() || '',
+      captainPhoto: r.querySelector('.captain-photo-drop img')?.src || null
+    });
   });
   if (!teams.length) return showToast('⚠️ No teams configured');
   socket.emit('admin:updateConfig', { teams }); showToast('Network Synchronization Complete!');

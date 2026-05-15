@@ -218,6 +218,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .team-config-card { background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s, transform 0.2s; }
 .team-config-card:hover { border-color: rgba(120,183,255,0.26); transform: translateY(-1px); }
+.team-config-card .rtm-tag-btn { white-space: normal; line-height: 1.25; overflow-wrap: anywhere; text-align: center; min-height: 38px; }
 @media (max-width: 480px) { .team-config-card { padding: 12px; } }
 
 .code-stage { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; border: 1px solid rgba(120,183,255,0.14); border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(47,125,246,0.1), rgba(3,12,26,0.28)); position: relative; overflow: hidden; padding: 26px; }
@@ -269,10 +270,14 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .import-player-item .pi-img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
 .import-player-item .pi-info { flex: 1; min-width: 0; }
 .import-player-item .pi-name { font-weight: 600; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.import-player-item .pi-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.import-player-item .pi-meta { font-size: 10px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-width: 0; }
+.import-player-item .pi-tag-label { overflow-wrap: anywhere; min-width: 0; }
 .import-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .import-filter-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--muted); cursor: pointer; transition: all 0.15s; }
 .import-filter-btn.active { background: rgba(47,125,246,0.16); border-color: rgba(120,183,255,0.36); color: var(--accent-2); }
+.rtm-owner-badge { position: absolute; bottom: 8px; right: 8px; z-index: 5; max-width: calc(100% - 16px); font-size: 9px; font-weight: 600; color: var(--rtm); background: rgba(236,72,153,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(236,72,153,0.3); white-space: normal; overflow-wrap: anywhere; text-align: right; }
+.dashboard-section-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; margin: 18px 0 10px; display: flex; align-items: center; gap: 8px; }
+.dashboard-section-label::after { content: ''; height: 1px; flex: 1; background: rgba(255,255,255,0.08); }
 
 #auctionPlayerPopup { flex: 1; min-height: 380px; border-radius: var(--radius-lg); overflow: hidden; position: relative; border: 1px solid rgba(120,183,255,0.28); box-shadow: 0 24px 80px rgba(0,8,28,0.48); display: flex; flex-direction: column; animation: livePop 0.35s cubic-bezier(0.16,1,0.3,1); }
 @media (max-width: 767px) { #auctionPlayerPopup { min-height: 300px; } }
@@ -2658,7 +2663,7 @@ function makeTileHTML(player, catId, price, isDirect, isRTM, soldToName) {
   let prevOwnerBadge = '';
   if (prevOwnerId && !isSold) {
       const pT = STATE.teams.find(t => t.id === prevOwnerId);
-      if (pT) prevOwnerBadge = `<span style="position:absolute;bottom:8px;right:8px;z-index:5;font-size:9px;font-weight:600;color:var(--rtm);background:rgba(236,72,153,0.1);padding:2px 6px;border-radius:4px;border:1px solid rgba(236,72,153,0.3)">RTM: ${pT.name}</span>`;
+      if (pT) prevOwnerBadge = `<span class="rtm-owner-badge">RTM: ${escapeHTML(pT.name)}</span>`;
   }
 
   let statusBar = '';
@@ -2732,8 +2737,19 @@ function renderMyTeam() {
   </div>
   ${t.impactUsed ? `<div style="background:rgba(47,125,246,0.1);border:1px solid rgba(120,183,255,0.24);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--accent-2);font-weight:600;display:flex;align-items:center;gap:8px"><span>⚡</span> Impact Power Deployed</div>` : ''}`;
   div.innerHTML += renderTeamSpendCharts(t);
+  const rtmTaggedPlayers = getRTMTaggedPlayersForTeam(t.id);
+  if (rtmTaggedPlayers.length) {
+    div.insertAdjacentHTML('beforeend', '<div class="dashboard-section-label">RTM tagged players</div>');
+    const rtmGrid = document.createElement('div');
+    rtmGrid.className = 'player-grid-lg';
+    rtmTaggedPlayers.forEach(({ catId, player, price }) => {
+      rtmGrid.innerHTML += makeTileHTML(player, catId, price, false, false, null);
+    });
+    div.appendChild(rtmGrid);
+  }
   const hasPurchases = t.purchases && Object.keys(t.purchases).length > 0;
   if (!hasPurchases) { div.innerHTML += '<div style="text-align:center;padding:30px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;border:1px dashed rgba(255,255,255,0.07);border-radius:var(--radius)">No players acquired yet.</div>'; return; }
+  div.insertAdjacentHTML('beforeend', '<div class="dashboard-section-label">Acquired players</div>');
   const grid = document.createElement('div');
   grid.className = 'player-grid-lg';
   Object.entries(t.purchases).forEach(([catId, pName]) => {
@@ -2821,7 +2837,7 @@ function renderTeamConfigTable() {
       <div><label>Security Key</label><input class="t-pass" value="${t.password || ''}" placeholder="Password" style="margin:0;padding:8px 11px;font-size:13px"></div>
       <div><label>Starting Purse (৳)</label><input class="t-purse" type="number" value="${t.purse}" placeholder="500" style="margin:0;padding:8px 11px;font-size:14px;font-weight:700;color:var(--emerald)"></div>
     </div>
-    <button class="ghost small word-break" style="width:100%;margin-top:12px;color:var(--rtm);border-color:rgba(236,72,153,0.3);font-size:11px;padding:8px" onclick="openImportPlayersModal('${t.id}')">📥 Tag Previous Players (RTM)</button>`;
+    <button class="ghost small word-break rtm-tag-btn" style="width:100%;margin-top:12px;color:var(--rtm);border-color:rgba(236,72,153,0.3);font-size:11px;padding:8px" onclick="openImportPlayersModal('${t.id}')">📥 Tag Previous Players (RTM)</button>`;
     container.appendChild(tile);
     const logoDrop = tile.querySelector('.logo-drop-zone');
     setupFileUpload(logoDrop, (file) => uploadFile(file).then(url => {
@@ -2843,7 +2859,7 @@ function renderTeamConfigTable() {
 window.openImportPlayersModal = (teamId) => {
   importTargetTeamId = teamId;
   importActiveCatFilter = '';
-  importSelectedPlayers = new Set();
+  importSelectedPlayers = getRTMTaggedPlayerKeysForTeam(teamId);
   const overlay = document.getElementById('importPlayersOverlay');
   overlay.classList.remove('hidden');
   buildImportCatFilters();
@@ -2878,6 +2894,43 @@ function getImportPlayerKey(catId, name) {
   return `${catId}::${name}`;
 }
 
+function parsePreviousOwnerKey(key) {
+  const splitAt = String(key).indexOf(':');
+  if (splitAt === -1) return { catId: '', name: String(key) };
+  return { catId: key.slice(0, splitAt), name: key.slice(splitAt + 1) };
+}
+
+function getRTMTaggedPlayerKeysForTeam(teamId) {
+  const keys = new Set();
+  Object.entries(STATE.previousOwners || {}).forEach(([ownerKey, ownerTeamId]) => {
+    if (ownerTeamId !== teamId) return;
+    const { catId, name } = parsePreviousOwnerKey(ownerKey);
+    if (catId && name) keys.add(getImportPlayerKey(catId, name));
+  });
+  return keys;
+}
+
+function getRTMTaggedPlayersForTeam(teamId) {
+  const tagged = [];
+  Object.entries(STATE.previousOwners || {}).forEach(([ownerKey, ownerTeamId]) => {
+    if (ownerTeamId !== teamId) return;
+    const { catId, name } = parsePreviousOwnerKey(ownerKey);
+    const alreadyPurchased = STATE.teams.some(t => t.purchases?.[catId] === name);
+    if (alreadyPurchased) return;
+    const player = (STATE.playersSnapshot[catId] || []).find(p => p.name === name);
+    const cat = STATE.categories.find(c => c.id === catId);
+    if (player && cat) tagged.push({ catId, name, player, cat, price: player.price || cat.base });
+  });
+  return tagged;
+}
+
+function removeRTMTagsForTeam(teamId) {
+  if (!STATE.previousOwners) return;
+  Object.keys(STATE.previousOwners).forEach(key => {
+    if (STATE.previousOwners[key] === teamId) delete STATE.previousOwners[key];
+  });
+}
+
 function renderImportPlayerList() {
   const list = document.getElementById('importPlayerList');
   const search = (document.getElementById('importSearchInput').value || '').toLowerCase();
@@ -2904,17 +2957,17 @@ function renderImportPlayerList() {
     const prevTeamId = STATE.previousOwners ? STATE.previousOwners[`${p.catId}:${p.name}`] : null;
     const prevTeam = prevTeamId ? STATE.teams.find(t => t.id === prevTeamId) : null;
     const lockedToOtherTeam = !!prevTeamId && prevTeamId !== importTargetTeamId;
-    const badgeHtml = prevTeam ? `<span style="font-size:9px;color:var(--rtm)">Tagged to ${prevTeam.name}</span>` : `<span style="font-size:9px;color:var(--muted)">৳${p.catBase}</span>`;
+    const badgeHtml = prevTeam ? `<span class="pi-tag-label" style="font-size:9px;color:var(--rtm)">Tagged to ${escapeHTML(prevTeam.name)}</span>` : `<span style="font-size:9px;color:var(--muted)">৳${p.catBase}</span>`;
     
     const item = document.createElement('label');
     item.className = 'import-player-item';
     item.style.cursor = lockedToOtherTeam ? 'not-allowed' : 'pointer';
     item.style.opacity = lockedToOtherTeam ? '0.45' : '1';
-    item.innerHTML = `<input type="checkbox" class="import-checkbox" data-name="${p.name}" data-cat="${p.catId}" ${importSelectedPlayers.has(playerKey) ? 'checked' : ''} ${lockedToOtherTeam ? 'disabled' : ''} onchange="toggleImportPlayerSelection(this)">
-      <img class="pi-img" src="${img}" alt="">
+    item.innerHTML = `<input type="checkbox" class="import-checkbox" data-name="${escapeHTML(p.name)}" data-cat="${escapeHTML(p.catId)}" ${importSelectedPlayers.has(playerKey) ? 'checked' : ''} ${lockedToOtherTeam ? 'disabled' : ''} onchange="toggleImportPlayerSelection(this)">
+      <img class="pi-img" src="${escapeHTML(img)}" alt="">
       <div class="pi-info">
-        <div class="pi-name word-break">${p.name}</div>
-        <div class="pi-meta"><span class="chip chip-cyan" style="font-size:8px;padding:1px 6px">${p.catId}</span> ${badgeHtml}</div>
+        <div class="pi-name word-break">${escapeHTML(p.name)}</div>
+        <div class="pi-meta"><span class="chip chip-cyan" style="font-size:8px;padding:1px 6px">${escapeHTML(p.catId)}</span> ${badgeHtml}</div>
       </div>`;
     list.appendChild(item);
   });
@@ -3164,7 +3217,16 @@ document.getElementById('btnAddCat').onclick = () => {
 };
 
 window.saveGlobalConfig = () => { socket.emit('admin:updateConfig', { impactAmount: document.getElementById('configImpact').value }); showToast('Impact Rule Saved'); };
-window.resetTeam = (tid) => { if (confirm('Reset team history?')) socket.emit('admin:resetTeam', { teamId: tid }); };
+window.resetTeam = (tid) => {
+  if (!confirm('Reset team history?')) return;
+  removeRTMTagsForTeam(tid);
+  if (importTargetTeamId === tid) {
+    importSelectedPlayers = new Set();
+    renderImportPlayerList();
+  }
+  renderAll();
+  socket.emit('admin:resetTeam', { teamId: tid });
+};
 document.getElementById('clearLog').onclick = () => document.getElementById('log').innerHTML = '';
 
 document.getElementById('btnSaveTeams').onclick = () => {

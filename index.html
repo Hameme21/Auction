@@ -1440,6 +1440,7 @@ window.timerHandled = false;
 let importTargetTeamId = null;
 let importActiveCatFilter = '';
 let importSelectedPlayers = new Set();
+let importOriginalPlayers = new Set();
 let blockedBidToastKey = '';
 let liveRevealToken = 0;
 let allowActivePlayerCodeQueue = false;
@@ -2860,6 +2861,7 @@ window.openImportPlayersModal = (teamId) => {
   importTargetTeamId = teamId;
   importActiveCatFilter = '';
   importSelectedPlayers = getRTMTaggedPlayerKeysForTeam(teamId);
+  importOriginalPlayers = new Set(importSelectedPlayers);
   const overlay = document.getElementById('importPlayersOverlay');
   overlay.classList.remove('hidden');
   buildImportCatFilters();
@@ -2924,11 +2926,50 @@ function getRTMTaggedPlayersForTeam(teamId) {
   return tagged;
 }
 
-function removeRTMTagsForTeam(teamId) {
-  if (!STATE.previousOwners) return;
-  Object.keys(STATE.previousOwners).forEach(key => {
-    if (STATE.previousOwners[key] === teamId) delete STATE.previousOwners[key];
+function getImportPlayersFromKeys(keys) {
+  return Array.from(keys).map(key => {
+    const [catId, ...nameParts] = key.split('::');
+    return { catId, name: nameParts.join('::') };
   });
+}
+
+function removeRTMTagsForTeam(teamId) {
+  const removed = [];
+  if (!STATE.previousOwners) return removed;
+  Object.keys(STATE.previousOwners).forEach(key => {
+    if (STATE.previousOwners[key] !== teamId) return;
+    const { catId, name } = parsePreviousOwnerKey(key);
+    removed.push({ catId, name });
+    delete STATE.previousOwners[key];
+  });
+  return removed;
+}
+
+function applyRTMTagSelectionForTeam(teamId, selectedKeys) {
+  if (!STATE.previousOwners) STATE.previousOwners = {};
+  removeRTMTagsForTeam(teamId);
+  getImportPlayersFromKeys(selectedKeys).forEach(({ catId, name }) => {
+    if (catId && name) STATE.previousOwners[`${catId}:${name}`] = teamId;
+  });
+}
+
+function syncRTMTagSelectionForTeam(teamId, selectedKeys, originalKeys = new Set()) {
+  const selected = new Set(selectedKeys);
+  const original = new Set(originalKeys);
+  const addedKeys = new Set([...selected].filter(key => !original.has(key)));
+  const removedKeys = new Set([...original].filter(key => !selected.has(key)));
+  const selectedPlayers = getImportPlayersFromKeys(selected);
+  const addedPlayers = getImportPlayersFromKeys(addedKeys);
+  const removedPlayers = getImportPlayersFromKeys(removedKeys);
+
+  applyRTMTagSelectionForTeam(teamId, selected);
+  socket.emit('admin:import_previous', { teamId, players: selectedPlayers, mode: 'replace' });
+  socket.emit('admin:sync_previous', { teamId, players: selectedPlayers, removed: removedPlayers, previousOwners: STATE.previousOwners });
+  if (removedPlayers.length) socket.emit('admin:remove_previous', { teamId, players: removedPlayers, previousOwners: STATE.previousOwners });
+  if (addedPlayers.length && addedPlayers.length !== selectedPlayers.length) socket.emit('admin:import_previous', { teamId, players: addedPlayers });
+  socket.emit('admin:updateConfig', { previousOwners: STATE.previousOwners });
+
+  return { addedPlayers, removedPlayers, selectedPlayers };
 }
 
 function renderImportPlayerList() {
@@ -2977,15 +3018,23 @@ function renderImportPlayerList() {
 window.toggleImportPlayerSelection = (checkbox) => {
   const key = getImportPlayerKey(checkbox.dataset.cat, checkbox.dataset.name);
   if (checkbox.checked) importSelectedPlayers.add(key);
-  else importSelectedPlayers.delete(key);
+  else {
+    importSelectedPlayers.delete(key);
+    const ownerKey = `${checkbox.dataset.cat}:${checkbox.dataset.name}`;
+    if (STATE.previousOwners?.[ownerKey] === importTargetTeamId) {
+      delete STATE.previousOwners[ownerKey];
+      socket.emit('admin:remove_previous', { teamId: importTargetTeamId, players: [{ catId: checkbox.dataset.cat, name: checkbox.dataset.name }], previousOwners: STATE.previousOwners });
+    }
+  }
   updateImportSelCount();
 };
 
 window.updateImportSelCount = () => {
   const checked = importSelectedPlayers.size;
+  const hasChanges = checked !== importOriginalPlayers.size || [...importSelectedPlayers].some(key => !importOriginalPlayers.has(key));
   document.getElementById('importSelCount').textContent = `${checked} selected`;
-  document.getElementById('btnConfirmImport').textContent = checked ? `Tag ${checked} Player${checked > 1 ? 's' : ''} (RTM)` : 'Tag Selected (RTM)';
-  document.getElementById('btnConfirmImport').disabled = checked === 0;
+  document.getElementById('btnConfirmImport').textContent = checked ? `Save ${checked} RTM Tag${checked > 1 ? 's' : ''}` : 'Save RTM Tags';
+  document.getElementById('btnConfirmImport').disabled = !hasChanges && checked === 0;
   const visibleBoxes = Array.from(document.querySelectorAll('.import-checkbox:not(:disabled)'));
   const allVisibleChecked = visibleBoxes.length > 0 && visibleBoxes.every(b => b.checked);
   document.getElementById('btnSelectAllImport').textContent = allVisibleChecked ? 'Deselect All' : 'Select All';
@@ -2994,28 +3043,33 @@ window.updateImportSelCount = () => {
 window.toggleSelectAllImport = () => {
   const boxes = document.querySelectorAll('.import-checkbox:not(:disabled)');
   const anyUnchecked = Array.from(boxes).some(b => !b.checked);
+  const removedPlayers = [];
   boxes.forEach(b => {
     b.checked = anyUnchecked;
     const key = getImportPlayerKey(b.dataset.cat, b.dataset.name);
-    if (anyUnchecked) importSelectedPlayers.add(key);
-    else importSelectedPlayers.delete(key);
+    if (anyUnchecked) {
+      importSelectedPlayers.add(key);
+    } else {
+      importSelectedPlayers.delete(key);
+      const ownerKey = `${b.dataset.cat}:${b.dataset.name}`;
+      if (STATE.previousOwners?.[ownerKey] === importTargetTeamId) {
+        delete STATE.previousOwners[ownerKey];
+        removedPlayers.push({ catId: b.dataset.cat, name: b.dataset.name });
+      }
+    }
   });
+  if (removedPlayers.length) socket.emit('admin:remove_previous', { teamId: importTargetTeamId, players: removedPlayers, previousOwners: STATE.previousOwners });
   updateImportSelCount();
 };
 
 window.confirmImportPlayers = () => {
-  if (!importSelectedPlayers.size) return;
   const targetTeam = STATE.teams.find(t => t.id === importTargetTeamId);
   if (!targetTeam) return;
 
-  const toImport = Array.from(importSelectedPlayers).map(key => {
-    const [catId, ...nameParts] = key.split('::');
-    return { catId, name: nameParts.join('::') };
-  });
+  const result = syncRTMTagSelectionForTeam(importTargetTeamId, importSelectedPlayers, importOriginalPlayers);
 
-  socket.emit('admin:import_previous', { teamId: importTargetTeamId, players: toImport });
-
-  showToast(`✅ Tagged ${toImport.length} player(s) for RTM to ${targetTeam.name}`);
+  const removedText = result.removedPlayers.length ? `, removed ${result.removedPlayers.length}` : '';
+  showToast(`✅ Saved ${result.selectedPlayers.length} RTM tag(s) for ${targetTeam.name}${removedText}`);
   closeImportModal();
 };
 
@@ -3023,6 +3077,7 @@ window.closeImportModal = () => {
   document.getElementById('importPlayersOverlay').classList.add('hidden');
   importTargetTeamId = null;
   importSelectedPlayers = new Set();
+  importOriginalPlayers = new Set();
   document.getElementById('importSearchInput').value = '';
   document.getElementById('importSelCount').textContent = '0 selected';
   document.getElementById('btnSelectAllImport').textContent = 'Select All';
@@ -3219,12 +3274,19 @@ document.getElementById('btnAddCat').onclick = () => {
 window.saveGlobalConfig = () => { socket.emit('admin:updateConfig', { impactAmount: document.getElementById('configImpact').value }); showToast('Impact Rule Saved'); };
 window.resetTeam = (tid) => {
   if (!confirm('Reset team history?')) return;
-  removeRTMTagsForTeam(tid);
+  const removedPlayers = removeRTMTagsForTeam(tid);
   if (importTargetTeamId === tid) {
     importSelectedPlayers = new Set();
+    importOriginalPlayers = new Set();
     renderImportPlayerList();
   }
   renderAll();
+  if (removedPlayers.length) {
+    socket.emit('admin:remove_previous', { teamId: tid, players: removedPlayers, previousOwners: STATE.previousOwners });
+    socket.emit('admin:sync_previous', { teamId: tid, players: [], removed: removedPlayers, previousOwners: STATE.previousOwners });
+    socket.emit('admin:import_previous', { teamId: tid, players: [], mode: 'replace' });
+    socket.emit('admin:updateConfig', { previousOwners: STATE.previousOwners });
+  }
   socket.emit('admin:resetTeam', { teamId: tid });
 };
 document.getElementById('clearLog').onclick = () => document.getElementById('log').innerHTML = '';

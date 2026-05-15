@@ -223,6 +223,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .captain-pill img, .captain-pill .captain-initial { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.16); }
 .captain-pill .captain-initial { display: flex; align-items: center; justify-content: center; color: var(--amber); background: rgba(255,255,255,0.05); font-family: var(--font-display); font-weight: 800; }
 .captain-pill .captain-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: white; font-weight: 800; font-size: 15px; line-height: 1.1; }
+.captain-pill.compact { padding: 5px 7px; gap: 7px; max-width: 150px; }
+.captain-pill.compact img, .captain-pill.compact .captain-initial { width: 28px; height: 28px; }
+.captain-pill.compact .captain-name { font-size: 11px; }
+.captain-pill.compact .captain-label { font-size: 7px !important; margin-bottom: 1px !important; }
+.team-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
 
 .team-config-card { background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s, transform 0.2s; }
 .team-config-card:hover { border-color: rgba(120,183,255,0.26); transform: translateY(-1px); }
@@ -1703,14 +1708,15 @@ function getTeamCaptain(team) {
   };
 }
 
-function captainPillHTML(team) {
+function captainPillHTML(team, variant = '') {
   const captain = getTeamCaptain(team);
   if (!captain.name && !captain.photo) return '';
   const initial = (captain.name || 'C').trim().charAt(0).toUpperCase() || 'C';
   const avatar = captain.photo
     ? `<img src="${escapeHTML(captain.photo)}" alt="">`
     : `<span class="captain-initial">${escapeHTML(initial)}</span>`;
-  return `<span class="captain-pill" title="Captain">${avatar}<span style="min-width:0"><span style="display:block;font-size:9px;color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;line-height:1;margin-bottom:3px">Captain</span><span class="captain-name word-break">${escapeHTML(captain.name || 'Captain')}</span></span></span>`;
+  const cls = variant ? `captain-pill ${variant}` : 'captain-pill';
+  return `<span class="${cls}" title="Captain">${avatar}<span style="min-width:0"><span class="captain-label" style="display:block;font-size:9px;color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;line-height:1;margin-bottom:3px">Captain</span><span class="captain-name word-break">${escapeHTML(captain.name || 'Captain')}</span></span></span>`;
 }
 
 function makePlayerCode(category, name, usedCodes = new Set()) {
@@ -2478,7 +2484,10 @@ function renderAdminTeamsSummary() {
         container.innerHTML += `
         <div class="admin-franchise-card ${isCritical ? 'is-critical' : ''}" style="--budget-angle:${Math.max(0, Math.min(100, details.remainingPct))}%">
             <div class="team-head">
-              <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+              <div class="team-head-left">
+                <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+                ${captainPillHTML(t)}
+              </div>
               <div class="team-budget-ring"><span>${details.remainingPct}%</span></div>
             </div>
             <h3 class="word-break">${t.name}</h3>
@@ -2667,6 +2676,7 @@ function renderScoreboards() {
     STATE.teams.forEach(t => {
       c.innerHTML += `<div data-team-id="${t.id}" class="score-tile" style="display:flex;align-items:center;text-align:left;gap:12px;padding:10px 12px;">
         ${teamAvatarHTML(t, 34)}
+        ${captainPillHTML(t, 'compact')}
         <div style="flex:1;min-width:0;">
           <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.name}</div>
           <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">${t.purchases ? Object.keys(t.purchases).length : 0} players</div>
@@ -2742,7 +2752,10 @@ function renderViewerRosters() {
     div.insertAdjacentHTML('beforeend', `
       <div class="admin-franchise-card ${isCritical ? 'is-critical' : ''}" style="--budget-angle:${Math.max(0, Math.min(100, details.remainingPct))}%">
         <div class="team-head">
-          <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+          <div class="team-head-left">
+            <div class="team-mark">${teamAvatarHTML(t, 46)}</div>
+            ${captainPillHTML(t)}
+          </div>
           <div class="team-budget-ring"><span>${details.remainingPct}%</span></div>
         </div>
         <h3 class="word-break">${escapeHTML(t.name)}</h3>

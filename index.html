@@ -216,23 +216,29 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .logo-drop-zone:hover { border-color: var(--accent); }
 .logo-drop-zone img { width: 100%; height: 100%; object-fit: cover; }
 .captain-box { margin-top: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.2); border-radius: var(--radius); }
+.captain-box > div { min-width: 0; }
 .captain-photo-drop { width: 48px; height: 48px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3); flex-shrink: 0; transition: border-color 0.2s; }
 .captain-photo-drop:hover { border-color: var(--accent); }
 .captain-photo-drop img { width: 100%; height: 100%; object-fit: cover; }
-.captain-pill { display: inline-flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 12px; border: 1px solid rgba(255,194,10,0.28); background: rgba(255,194,10,0.1); border-radius: var(--radius); }
+.captain-pill { display: inline-flex; align-items: center; gap: 10px; min-width: 0; max-width: 100%; padding: 8px 12px; border: 1px solid rgba(255,194,10,0.28); background: rgba(255,194,10,0.1); border-radius: var(--radius); }
 .captain-pill img, .captain-pill .captain-initial { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.16); }
 .captain-pill .captain-initial { display: flex; align-items: center; justify-content: center; color: var(--amber); background: rgba(255,255,255,0.05); font-family: var(--font-display); font-weight: 800; }
-.captain-pill .captain-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: white; font-weight: 800; font-size: 15px; line-height: 1.1; }
+.captain-pill .captain-name { display: block; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; word-break: normal; color: white; font-weight: 800; font-size: 15px; line-height: 1.1; }
 .captain-pill.compact { padding: 5px 7px; gap: 7px; max-width: 150px; }
 .captain-pill.compact img, .captain-pill.compact .captain-initial { width: 28px; height: 28px; }
 .captain-pill.compact .captain-name { font-size: 11px; }
 .captain-pill.compact .captain-label { font-size: 7px !important; margin-bottom: 1px !important; }
-.team-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.team-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; }
 
 .team-config-card { background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s, transform 0.2s; }
 .team-config-card:hover { border-color: rgba(120,183,255,0.26); transform: translateY(-1px); }
 .team-config-card .rtm-tag-btn { white-space: normal; line-height: 1.25; overflow-wrap: anywhere; text-align: center; min-height: 38px; }
-@media (max-width: 480px) { .team-config-card { padding: 12px; } }
+@media (max-width: 480px) {
+  .team-config-card { padding: 12px; }
+  .captain-box { padding: 9px; }
+  .captain-box > div { display: grid !important; grid-template-columns: 48px minmax(0, 1fr); gap: 9px !important; }
+  .captain-box .t-captain-name { min-width: 0; }
+}
 
 .code-stage { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; border: 1px solid rgba(120,183,255,0.14); border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(47,125,246,0.1), rgba(3,12,26,0.28)); position: relative; overflow: hidden; padding: 26px; }
 .code-stage::before { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, transparent, rgba(37,212,255,0.11), transparent); transform: translateX(-120%); animation: shimmer 3.5s ease-in-out infinite; }
@@ -631,7 +637,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .admin-command-meta span::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 7px; height: 7px; border-radius: 50%; background: #66ff63; box-shadow: 0 0 12px rgba(102,255,99,0.5); }
 .admin-command-meta span:nth-child(2)::before { background: #ffc20a; box-shadow: 0 0 12px rgba(255,194,10,0.45); }
 .admin-command-card { min-height: 58px; justify-content: center; }
-.admin-franchise-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 16px; }
+.admin-franchise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .admin-franchise-card {
   min-height: 255px;
   padding: 22px;
@@ -642,8 +648,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   overflow: hidden;
 }
 .admin-franchise-card.is-critical { border-color: rgba(255,194,10,0.7); }
-.admin-franchise-card .team-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 22px; }
-.admin-franchise-card .team-mark { width: 62px; height: 62px; border-radius: 4px; background: #23354d; display: grid; place-items: center; border: 1px solid rgba(154,177,204,0.18); overflow: hidden; }
+.admin-franchise-card .team-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 22px; min-width: 0; }
+.admin-franchise-card .team-mark { width: 62px; height: 62px; border-radius: 4px; background: #23354d; display: grid; place-items: center; border: 1px solid rgba(154,177,204,0.18); overflow: hidden; flex-shrink: 0; }
 .admin-franchise-card .team-budget-ring {
   width: 58px;
   height: 58px;
@@ -656,6 +662,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   font-weight: 800;
   background: conic-gradient(#66ff63 var(--budget-angle), rgba(154,177,204,0.16) 0);
   position: relative;
+  flex-shrink: 0;
 }
 .admin-franchise-card .team-budget-ring::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #132337; }
 .admin-franchise-card .team-budget-ring span { position: relative; z-index: 1; }
@@ -668,6 +675,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .team-purchase-list .price { color: #ffc20a; font-family: var(--font-mono); font-weight: 800; }
 .team-dashboard-grid { display: grid; grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.25fr); gap: 14px; margin-bottom: 14px; }
 .team-chart-card { background: rgba(7,19,33,0.86); border: 1px solid rgba(154,177,204,0.16); border-radius: 6px; padding: 16px; min-width: 0; }
+#dashboardMyTeamContent > div:first-child { min-width: 0; }
+#dashboardMyTeamContent > div:first-child > div:first-child { flex: 1 1 auto; min-width: 0; }
 .team-chart-title { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px; }
 .purse-pie-wrap { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .purse-pie { width: 116px; height: 116px; border-radius: 50%; background: conic-gradient(#66ff63 var(--spent-angle), rgba(154,177,204,0.16) 0); display: grid; place-items: center; flex-shrink: 0; position: relative; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 24px rgba(102,255,99,0.12); }
@@ -794,20 +803,33 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   header {
     min-height: 86px !important;
     height: auto !important;
-    padding: 18px 28px !important;
+    padding: 16px !important;
     background: #00111f !important;
     border-bottom-color: rgba(154,177,204,0.18) !important;
+    gap: 10px !important;
   }
+  header > div:first-child { min-width: 0; flex: 1 1 auto !important; }
   header > div:first-child .brand-logo { display: none; }
   header > div:first-child span:last-child {
-    font-size: clamp(2.25rem, 10vw, 3.8rem) !important;
+    font-size: clamp(2rem, 9.4vw, 3.05rem) !important;
     color: #66ff63 !important;
     font-style: italic;
-    line-height: 0.9;
+    line-height: 0.92;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-shadow: 2px 2px 0 rgba(0,0,0,0.45);
   }
-  header .header-right { gap: 12px; }
+  header .header-right { gap: 8px; flex: 0 0 auto; }
   header .header-right .chip, header .desktop-exit-btn { display: none !important; }
+  .header-right #btnExportAdmin, .header-right #btnResetSystem {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 10px;
+  }
   #appContainer::after {
     content: attr(data-live-ticker);
     position: fixed;
@@ -866,32 +888,54 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     letter-spacing: 0.04em;
     text-transform: none;
   }
-  #mainContentContainer { padding: 66px 16px 26px !important; }
-  #sectionDashboard h2 { font-size: 2.1rem !important; }
+  #mainContentContainer { padding: 64px 12px 26px !important; }
+  #sectionDashboard > div:first-child { margin-bottom: 12px !important; }
+  #sectionDashboard h2 { font-size: clamp(1.5rem, 7.8vw, 2.05rem) !important; line-height: 1; }
+  .admin-franchise-grid { grid-template-columns: 1fr; gap: 12px; }
   .admin-franchise-card {
     min-height: 0;
-    padding: 28px;
+    padding: clamp(16px, 4.8vw, 22px);
     border-radius: 10px;
     background: #071321;
     box-shadow: 0 18px 46px rgba(0,0,0,0.34);
   }
-  .admin-franchise-card .team-head { margin-bottom: 28px; }
-  .admin-franchise-card .team-mark { width: 86px; height: 86px; border-radius: 18px; }
-  .admin-franchise-card .team-budget-ring { width: 98px; height: 98px; font-size: 18px; }
-  .admin-franchise-card .team-budget-ring::after { inset: 10px; }
-  .admin-franchise-card h3 { font-size: clamp(1.9rem, 7vw, 2.7rem); line-height: 1; }
-  .team-money-row { display: block; font-size: 17px; line-height: 1.4; }
-  .team-money-row strong { display: block; font-size: 18px; }
-  .team-purchase-list { gap: 14px; }
+  .admin-franchise-card .team-head { align-items: center; gap: 10px; margin-bottom: 18px; }
+  .admin-franchise-card .team-head-left { flex: 1 1 0; gap: 8px; min-width: 0; }
+  .admin-franchise-card .team-mark { width: clamp(58px, 18vw, 76px); height: clamp(58px, 18vw, 76px); border-radius: 14px; }
+  .admin-franchise-card .team-budget-ring { width: clamp(68px, 20vw, 82px); height: clamp(68px, 20vw, 82px); font-size: clamp(12px, 4vw, 15px); }
+  .admin-franchise-card .team-budget-ring::after { inset: 8px; }
+  .admin-franchise-card h3 { font-size: clamp(1.65rem, 8vw, 2.35rem); line-height: 1; }
+  .captain-pill { flex: 1 1 0; padding: 7px 8px; gap: 8px; border-radius: 9px; }
+  .captain-pill img, .captain-pill .captain-initial { width: 34px; height: 34px; }
+  .captain-pill .captain-label { font-size: 8px !important; letter-spacing: 0.1em !important; }
+  .captain-pill .captain-name { font-size: 13px; }
+  .team-money-row { display: block; font-size: 14px; line-height: 1.4; margin: 8px 0 14px; }
+  .team-money-row strong { display: block; font-size: 16px; }
+  .team-purchase-list { gap: 10px; }
   .team-purchase-list .line {
     background: #132337;
     border-radius: 4px;
-    padding: 13px 16px;
-    font-size: 18px;
+    padding: 10px 12px;
+    font-size: 14px;
+    align-items: center;
   }
   .team-dashboard-grid { grid-template-columns: 1fr; }
-  .purse-pie-wrap { align-items: flex-start; }
-  .price-bar-row { grid-template-columns: minmax(78px, 0.9fr) minmax(80px, 1fr) auto; }
+  .team-chart-card { padding: 14px; }
+  .purse-pie-wrap { align-items: center; gap: 12px; }
+  .purse-pie { width: 92px; height: 92px; }
+  .purse-pie::after { inset: 11px; }
+  .purse-pie span { font-size: 15px; }
+  .price-bar-row { grid-template-columns: minmax(70px, 0.9fr) minmax(78px, 1fr) auto; gap: 7px; }
+  #dashboardMyTeamContent > div:first-child {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  #dashboardMyTeamContent > div:first-child > div:first-child {
+    flex-wrap: nowrap !important;
+  }
+  #dashboardMyTeamContent > div:first-child > div:last-child {
+    text-align: left !important;
+  }
   #sectionLiveAuction { gap: 16px !important; min-height: auto !important; }
   #auctionPlayerPopup { border: 0; box-shadow: none; background: transparent; min-height: 0; }
   #btnCloseLivePopup {

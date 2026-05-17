@@ -171,7 +171,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   #dashTeamView, #dashViewerView { grid-template-columns: 1fr; display: flex; flex-direction: column-reverse; gap: 12px; min-height: auto; }
 }
 
-#teamsConfigContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+#teamsConfigContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
 @media (max-width: 480px) { #teamsConfigContainer { grid-template-columns: 1fr; gap: 10px; } }
 
 .player-grid-lg { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
@@ -216,14 +216,16 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .logo-drop-zone:hover { border-color: var(--accent); }
 .logo-drop-zone img { width: 100%; height: 100%; object-fit: cover; }
 .captain-box { margin-top: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.2); border-radius: var(--radius); }
-.captain-box > div { min-width: 0; }
+.captain-box > div { min-width: 0; display: grid !important; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 10px !important; }
+.captain-box .t-captain-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .captain-photo-drop { width: 48px; height: 48px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3); flex-shrink: 0; transition: border-color 0.2s; }
 .captain-photo-drop:hover { border-color: var(--accent); }
 .captain-photo-drop img { width: 100%; height: 100%; object-fit: cover; }
 .captain-pill { display: inline-flex; align-items: center; gap: 10px; min-width: 0; max-width: 100%; padding: 8px 12px; border: 1px solid rgba(255,194,10,0.28); background: rgba(255,194,10,0.1); border-radius: var(--radius); }
+.captain-pill > span:last-child { min-width: 0; flex: 1 1 auto; max-width: 100%; }
 .captain-pill img, .captain-pill .captain-initial { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.16); }
 .captain-pill .captain-initial { display: flex; align-items: center; justify-content: center; color: var(--amber); background: rgba(255,255,255,0.05); font-family: var(--font-display); font-weight: 800; }
-.captain-pill .captain-name { display: block; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; word-break: normal; color: white; font-weight: 800; font-size: 15px; line-height: 1.1; }
+.captain-pill .captain-name { display: block; min-width: 0; max-width: 100%; overflow: hidden !important; text-overflow: ellipsis; white-space: nowrap !important; overflow-wrap: normal !important; word-break: keep-all !important; color: white; font-weight: 800; font-size: 15px; line-height: 1.1; }
 .captain-pill.compact { padding: 5px 7px; gap: 7px; max-width: 150px; }
 .captain-pill.compact img, .captain-pill.compact .captain-initial { width: 28px; height: 28px; }
 .captain-pill.compact .captain-name { font-size: 11px; }
@@ -236,8 +238,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @media (max-width: 480px) {
   .team-config-card { padding: 12px; }
   .captain-box { padding: 9px; }
-  .captain-box > div { display: grid !important; grid-template-columns: 48px minmax(0, 1fr); gap: 9px !important; }
-  .captain-box .t-captain-name { min-width: 0; }
+  .captain-box > div { gap: 9px !important; }
 }
 
 .code-stage { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; border: 1px solid rgba(120,183,255,0.14); border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(47,125,246,0.1), rgba(3,12,26,0.28)); position: relative; overflow: hidden; padding: 26px; }
@@ -648,9 +649,14 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   overflow: hidden;
 }
 .admin-franchise-card.is-critical { border-color: rgba(255,194,10,0.7); }
-.admin-franchise-card .team-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 22px; min-width: 0; }
-.admin-franchise-card .team-mark { width: 62px; height: 62px; border-radius: 4px; background: #23354d; display: grid; place-items: center; border: 1px solid rgba(154,177,204,0.18); overflow: hidden; flex-shrink: 0; }
+.admin-franchise-card .team-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 14px; align-items: center; margin-bottom: 22px; min-width: 0; }
+.admin-franchise-card .team-head-left { display: contents; }
+.admin-franchise-card .team-mark { grid-column: 1; grid-row: 1; width: 62px; height: 62px; border-radius: 4px; background: #23354d; display: grid; place-items: center; border: 1px solid rgba(154,177,204,0.18); overflow: hidden; flex-shrink: 0; }
+.admin-franchise-card .captain-pill { grid-column: 1 / -1; grid-row: 2; width: 100%; }
 .admin-franchise-card .team-budget-ring {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -1018,6 +1024,31 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   }
   #teamActionButtons > div { grid-template-columns: 1fr 1fr !important; }
   #btnTeamBid { min-height: 74px; font-size: 2.3rem !important; }
+}
+@media (max-width: 480px) {
+  .admin-franchise-card .team-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+  .admin-franchise-card .team-head-left {
+    display: contents;
+  }
+  .admin-franchise-card .team-mark {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .admin-franchise-card .team-budget-ring {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .admin-franchise-card .captain-pill {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin-top: 10px;
+  }
 }
 </style>
 </head>
@@ -1760,7 +1791,7 @@ function captainPillHTML(team, variant = '') {
     ? `<img src="${escapeHTML(captain.photo)}" alt="">`
     : `<span class="captain-initial">${escapeHTML(initial)}</span>`;
   const cls = variant ? `captain-pill ${variant}` : 'captain-pill';
-  return `<span class="${cls}" title="Captain">${avatar}<span style="min-width:0"><span class="captain-label" style="display:block;font-size:9px;color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;line-height:1;margin-bottom:3px">Captain</span><span class="captain-name word-break">${escapeHTML(captain.name || 'Captain')}</span></span></span>`;
+  return `<span class="${cls}" title="Captain">${avatar}<span class="captain-copy"><span class="captain-label" style="display:block;font-size:9px;color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;line-height:1;margin-bottom:3px">Captain</span><span class="captain-name">${escapeHTML(captain.name || 'Captain')}</span></span></span>`;
 }
 
 function makePlayerCode(category, name, usedCodes = new Set()) {

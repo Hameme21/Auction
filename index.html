@@ -170,6 +170,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @media (max-width: 767px) {
   #dashTeamView, #dashViewerView { grid-template-columns: 1fr; display: flex; flex-direction: column-reverse; gap: 12px; min-height: auto; }
 }
+#dashViewerView { grid-template-columns: minmax(0, 1fr); }
 
 #teamsConfigContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
 @media (max-width: 480px) { #teamsConfigContainer { grid-template-columns: 1fr; gap: 10px; } }
@@ -418,6 +419,7 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
   #auctionSidebar { display: flex !important; flex-direction: column; width: 100% !important; }
   #auctionSidebar .glass { min-height: 220px; }
   #dashTeamView, #dashViewerView { grid-template-columns: 240px minmax(0, 1fr); }
+  #dashViewerView { grid-template-columns: minmax(0, 1fr); }
   .player-grid-lg { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 @media (max-width: 767px) {
@@ -707,6 +709,10 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .stat-highlight { color: #ffc20a; font-family: var(--font-display); font-size: 2.15rem; line-height: 1; }
 
 #sectionLiveAuction { grid-template-columns: minmax(0, 1fr) 300px !important; gap: 14px !important; min-height: 540px !important; }
+#appContainer.role-team #sectionLiveAuction { grid-template-columns: 360px minmax(0, 1fr) !important; }
+#appContainer.role-team #auctionSidebar { grid-column: 1; grid-row: 1; }
+#appContainer.role-team #liveAuctionMain { grid-column: 2; grid-row: 1; }
+#appContainer.role-team #auctionScoreboard .captain-pill.compact { max-width: none; flex: 1 1 auto; }
 #auctionPlayerPopup, #auctionIdleState {
   background: #102135;
   border-radius: 6px;
@@ -804,6 +810,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   .team-dashboard-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
+  #appContainer.role-team #auctionSidebar,
+  #appContainer.role-team #liveAuctionMain { grid-column: auto; grid-row: auto; }
   body { background: #050a11; }
   #appContainer { padding-bottom: 94px; }
   header {
@@ -1179,14 +1187,12 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 
       <div id="dashViewerView" class="hidden">
         <div class="glass" style="padding:16px;display:flex;flex-direction:column">
-          <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px">Live Standings</div>
-          <div id="viewerScoreboard" style="flex:1;overflow-y:auto"></div>
-          <div id="viewerLiveStatus" class="hidden" style="margin-top:14px;padding:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:12px;text-align:center;cursor:pointer" onclick="showSection('sectionLiveAuction')">
-            <span style="color:var(--emerald);font-size:11px;font-weight:700;font-family:var(--font-display);text-transform:uppercase;letter-spacing:0.1em">● Auction Live · Go ›</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06);gap:10px;flex-wrap:wrap">
+            <div style="font-size:10px;color:var(--emerald);font-weight:600;text-transform:uppercase;letter-spacing:0.15em">Network Purchases</div>
+            <div id="viewerLiveStatus" class="hidden" style="padding:8px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:12px;text-align:center;cursor:pointer" onclick="showSection('sectionLiveAuction')">
+              <span style="color:var(--emerald);font-size:11px;font-weight:700;font-family:var(--font-display);text-transform:uppercase;letter-spacing:0.1em">● Auction Live · Go ›</span>
+            </div>
           </div>
-        </div>
-        <div class="glass" style="padding:16px;display:flex;flex-direction:column">
-          <div style="font-size:10px;color:var(--emerald);font-weight:600;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06)">Network Purchases</div>
           <div id="viewerRostersContent" style="overflow-y:auto;flex:1"></div>
         </div>
       </div>
@@ -2089,11 +2095,12 @@ socket.on('manager:logged_in', data => {
   CURRENT_USER.hostId = data.username;
   CURRENT_USER.role = 'admin';
   STATE = data.state;
+  const resumeToDashboard = restoringSession;
   const saved = getSavedSession();
   saveSession({ ...(pendingAuthSession || saved || {}), kind: 'manager', username: data.username, password: (pendingAuthSession || saved || {}).password || '' });
   restoringSession = false;
   pendingAuthSession = null;
-  finishEnterApp(getSavedSession()?.sectionId);
+  finishEnterApp(resumeToDashboard ? 'sectionDashboard' : getSavedSession()?.sectionId);
 });
 socket.on('init:teams_available', data => {
   CURRENT_USER.hostId = data.hostId;
@@ -2113,12 +2120,13 @@ socket.on('auction:enter', data => {
   CURRENT_USER.role = data.role;
   CURRENT_USER.teamId = data.teamId;
   STATE = data.state;
+  const resumeToDashboard = restoringSession;
   const saved = getSavedSession();
   const auth = pendingAuthSession || saved || {};
   saveSession({ kind: 'participant', hostId: CURRENT_USER.hostId || auth.hostId, role: data.role, teamId: data.teamId || auth.teamId || '', password: auth.password || '' });
   restoringSession = false;
   pendingAuthSession = null;
-  finishEnterApp(getSavedSession()?.sectionId);
+  finishEnterApp(resumeToDashboard ? 'sectionDashboard' : getSavedSession()?.sectionId);
 });
 socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.role || selectedLoginRole || 'team'; document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); applyParticipantAuthRole(failedRole); teamAuthOverlay.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('teamAuthMsg').textContent = msg; });
 socket.on('state:updated', s => {
@@ -2410,6 +2418,9 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   const isTeam = CURRENT_USER.role === 'team';
   const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
   const label = isTeam ? (myTeam ? myTeam.name : CURRENT_USER.teamId) : CURRENT_USER.hostId;
+  appContainer.classList.toggle('role-admin', isAdmin);
+  appContainer.classList.toggle('role-team', isTeam);
+  appContainer.classList.toggle('role-listener', CURRENT_USER.role === 'listener');
 
   let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '▦' }];
   if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '⚒' });
@@ -2749,13 +2760,21 @@ function renderScoreboards() {
     c.style.alignContent = 'start'; // Prevents vertical stretching
 
     STATE.teams.forEach(t => {
+      const isTeamLiveArena = CURRENT_USER.role === 'team' && id === 'auctionScoreboard';
+      const captainHTML = captainPillHTML(t, 'compact');
+      const middleHTML = isTeamLiveArena
+        ? `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;">
+            <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</div>
+            ${captainHTML}
+          </div>`
+        : `${captainHTML}
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">${t.purchases ? Object.keys(t.purchases).length : 0} players</div>
+          </div>`;
       c.innerHTML += `<div data-team-id="${t.id}" class="score-tile" style="display:flex;align-items:center;text-align:left;gap:12px;padding:10px 12px;">
         ${teamAvatarHTML(t, 34)}
-        ${captainPillHTML(t, 'compact')}
-        <div style="flex:1;min-width:0;">
-          <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.name}</div>
-          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">${t.purchases ? Object.keys(t.purchases).length : 0} players</div>
-        </div>
+        ${middleHTML}
         <div class="mono" style="font-size:13px;font-weight:700;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.12);border-radius:6px;padding:4px 8px;flex-shrink:0;">৳${t.purse}</div>
       </div>`;
     });

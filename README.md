@@ -1,4 +1,4 @@
-[# Auction Socket ](https://github.com/Hameme21/Auction_socket)
+# Auction Socket 
 
 🌐 [Open in Browser](https://auction-three-lake.vercel.app/)
 

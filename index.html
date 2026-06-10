@@ -170,6 +170,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @media (max-width: 767px) {
   #dashTeamView, #dashViewerView { grid-template-columns: 1fr; display: flex; flex-direction: column-reverse; gap: 12px; min-height: auto; }
 }
+#dashTeamView { grid-template-columns: minmax(0, 1fr) 320px; }
+@media (max-width: 1024px) { #dashTeamView { grid-template-columns: minmax(0, 1fr) 280px; } }
+#dashTeamView > .glass:first-child { grid-column: 2; grid-row: 1; }
+#dashTeamView > .glass:last-child { grid-column: 1; grid-row: 1; }
+#dashboardScoreboard .captain-pill.compact { max-width: 100%; width: 100%; }
 #dashViewerView { grid-template-columns: minmax(0, 1fr); }
 
 #teamsConfigContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
@@ -709,10 +714,6 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .stat-highlight { color: #ffc20a; font-family: var(--font-display); font-size: 2.15rem; line-height: 1; }
 
 #sectionLiveAuction { grid-template-columns: minmax(0, 1fr) 300px !important; gap: 14px !important; min-height: 540px !important; }
-#appContainer.role-team #sectionLiveAuction { grid-template-columns: 360px minmax(0, 1fr) !important; }
-#appContainer.role-team #auctionSidebar { grid-column: 1; grid-row: 1; }
-#appContainer.role-team #liveAuctionMain { grid-column: 2; grid-row: 1; }
-#appContainer.role-team #auctionScoreboard .captain-pill.compact { max-width: none; flex: 1 1 auto; }
 #auctionPlayerPopup, #auctionIdleState {
   background: #102135;
   border-radius: 6px;
@@ -810,8 +811,6 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   .team-dashboard-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
-  #appContainer.role-team #auctionSidebar,
-  #appContainer.role-team #liveAuctionMain { grid-column: auto; grid-row: auto; }
   body { background: #050a11; }
   #appContainer { padding-bottom: 94px; }
   header {
@@ -2760,9 +2759,9 @@ function renderScoreboards() {
     c.style.alignContent = 'start'; // Prevents vertical stretching
 
     STATE.teams.forEach(t => {
-      const isTeamLiveArena = CURRENT_USER.role === 'team' && id === 'auctionScoreboard';
+      const isTeamDashboardStandings = CURRENT_USER.role === 'team' && id === 'dashboardScoreboard';
       const captainHTML = captainPillHTML(t, 'compact');
-      const middleHTML = isTeamLiveArena
+      const middleHTML = isTeamDashboardStandings
         ? `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;">
             <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</div>
             ${captainHTML}

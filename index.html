@@ -868,39 +868,117 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   }
   #mobileBottomNav {
     display: block !important;
-    background: #00111f;
-    border-top: 1px solid rgba(154,177,204,0.18);
-    box-shadow: 0 -7px 26px rgba(102,255,99,0.12);
-    padding-top: 12px;
-  }
-  #mobileBottomNav::before {
-    content: "";
-    position: absolute;
+    position: fixed;
+    bottom: 0;
     left: 0;
-    top: 0;
-    width: 25%;
-    height: 5px;
-    background: #66ff63;
-    box-shadow: 0 0 18px rgba(102,255,99,0.7);
+    right: 0;
+    z-index: 3500;
+    background: rgba(3, 13, 26, 0.98) !important;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(102, 255, 99, 0.25) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    padding-top: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
   }
-  #mobileBottomNav::before { display: none; }
+  #mobileBottomNav .mnav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
   #mobileBottomNav .mnav-item {
-    min-height: 66px;
-    color: #b8bdc8;
-    border-radius: 0;
+    min-height: 54px;
+    padding: 6px 2px;
+    color: #9da8b9;
+    border-radius: 8px;
     background: transparent !important;
     font-family: var(--font-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+    transition: all 0.2s ease;
   }
-  #mobileBottomNav .mnav-item.active { color: #66ff63; }
-  #mobileBottomNav .mnav-item .mnav-icon { font-size: 26px; }
+  #mobileBottomNav .mnav-item.active {
+    color: #66ff63 !important;
+    background: rgba(102, 255, 99, 0.12) !important;
+  }
+  #mobileBottomNav .mnav-item .mnav-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
   #mobileBottomNav .mnav-item .mnav-label {
-    max-width: none;
-    font-family: var(--font-body);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: none;
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
   }
+
+  /* Mobile Scheduler Section Optimization */
+  #sectionScheduler .glass { padding: 14px !important; }
+  #adminSchedulerControls {
+    width: 100%;
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  #adminSchedulerControls button {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* Scheduler Fixture Creation Form on Mobile */
+  #sectionScheduler .cat-config-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  #sectionScheduler .cat-config-row > div:nth-child(4),
+  #sectionScheduler .cat-config-row > div:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+  #sectionScheduler .cat-config-row button {
+    grid-column: 1 / -1;
+    height: 44px !important;
+    width: 100%;
+  }
+
+  /* Mobile Team Position Assignment Table / Card conversion */
+  #teamPositionTable, #teamPositionTable thead, #teamPositionTable tbody, #teamPositionTable th, #teamPositionTable td, #teamPositionTable tr {
+    display: block;
+  }
+  #teamPositionTable thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  #teamPositionTable tbody tr {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.25);
+  }
+  #teamPositionTable td {
+    border: none !important;
+    padding: 4px 0 !important;
+  }
+  #teamPositionTable td select {
+    width: 100% !important;
+    margin-top: 4px;
+    font-size: 13px !important;
+    height: 38px;
+  }
+
   #mainContentContainer { padding: 64px 12px 26px !important; }
   #sectionDashboard > div:first-child { margin-bottom: 12px !important; }
   #sectionDashboard h2 { font-size: clamp(1.5rem, 7.8vw, 2.05rem) !important; line-height: 1; }
@@ -2563,11 +2641,11 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   appContainer.classList.toggle('role-team', isTeam);
   appContainer.classList.toggle('role-listener', CURRENT_USER.role === 'listener');
 
-  let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '▦' }];
-  if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '⚒' });
-  sections.push({ id: 'sectionPlayerDatabase', label: 'Player DB', icon: '♚' });
+  let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '📊' }];
+  if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '🔨' });
+  sections.push({ id: 'sectionPlayerDatabase', label: 'Player DB', icon: '👥' });
   sections.push({ id: 'sectionScheduler', label: 'Scheduler', icon: '📅' });
-  if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Team Config', icon: '⚙' });
+  if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Team Config', icon: '⚙️' });
 
   buildNavItems(sections);
   document.getElementById('roleDisplay').innerHTML = isTeam ? `${CURRENT_USER.role.toUpperCase()} · ${teamNameWithLogoHTML(myTeam, 20)}` : `${CURRENT_USER.role.toUpperCase()} · ${label}`;

@@ -1364,21 +1364,40 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
           </div>
         </div>
 
-        <div id="schedulerAdminContainer" class="hidden" style="display:grid;grid-template-columns:minmax(280px, 340px) minmax(0, 1fr);gap:20px">
-          <div class="glass-sm" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-            <div style="font-size:11px;color:var(--emerald);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06)">
-              1. Connect Teams to Positions (1 to N)
+        <div id="schedulerAdminContainer" class="hidden" style="display:flex;flex-direction:column;gap:20px">
+          <!-- 1. Team Position Assignment Table -->
+          <div class="glass-sm" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+              <div style="font-size:12px;color:var(--emerald);font-weight:800;text-transform:uppercase;letter-spacing:0.12em">
+                📋 Team Position Assignment Table (1 to N)
+              </div>
+              <span class="chip chip-cyan" id="assignedPositionsBadge">0 / 0 Teams Assigned</span>
             </div>
-            <p style="font-size:11px;color:var(--muted)">Connect each team to a position number. Match slots created with numbers will automatically display the assigned team logo & name!</p>
-            <div id="teamNumberAssignmentList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto"></div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:16px">
+              Assign position numbers (1, 2, 3... N) to each franchise. Matches created with position numbers (e.g. 1 vs 2, 3 vs 4) will automatically resolve to the assigned team logos & names!
+            </p>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;text-align:left;font-size:13px" id="teamPositionTable">
+                <thead>
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.1);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.08em">
+                    <th style="padding:10px">Franchise</th>
+                    <th style="padding:10px">Captain</th>
+                    <th style="padding:10px">Assigned Position Number</th>
+                    <th style="padding:10px;text-align:center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="teamPositionTableBody"></tbody>
+              </table>
+            </div>
           </div>
 
+          <!-- 2. Match Fixture Creator & Schedule Grid -->
           <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-            <div class="glass-sm" style="padding:16px">
-              <div style="font-size:11px;color:var(--accent-2);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px">
-                2. Add / Edit Match Fixtures
+            <div class="glass-sm" style="padding:18px">
+              <div style="font-size:11px;color:var(--accent-2);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px">
+                ⚔️ Add / Edit Match Fixtures (e.g. 1 vs 2, 3 vs 4)
               </div>
-              <div style="display:grid;grid-template-columns:70px 1fr 1fr 1.2fr 1fr auto;gap:10px;align-items:end" class="cat-config-row">
+              <div style="display:grid;grid-template-columns:70px 1fr 1fr 1.2fr 1fr auto;gap:12px;align-items:end" class="cat-config-row">
                 <div>
                   <label>Match #</label>
                   <input type="number" id="schedMatchNo" placeholder="1" style="margin-bottom:0">
@@ -1399,18 +1418,18 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
                   <label>Stage / Note</label>
                   <input type="text" id="schedStage" placeholder="Group Match, Semi-Final..." style="margin-bottom:0">
                 </div>
-                <button onclick="addScheduleMatch()" class="btn-primary small" style="height:40px;padding:0 14px">+ Add Match</button>
+                <button onclick="addScheduleMatch()" class="btn-primary small" style="height:40px;padding:0 18px">+ Add Fixture</button>
               </div>
             </div>
 
-            <div class="glass-sm" style="padding:16px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div class="glass-sm" style="padding:18px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
                 <div style="font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.12em">
                   Published Match Schedule
                 </div>
                 <span id="schedMatchCount" class="chip chip-purple">0 Matches Scheduled</span>
               </div>
-              <div id="scheduleMatchesList" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:12px"></div>
+              <div id="scheduleMatchesList" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:14px"></div>
             </div>
           </div>
         </div>
@@ -3843,29 +3862,48 @@ function renderScheduler() {
   const matches = sched.matches || [];
 
   if (isAdmin) {
-    // 1. Left Column: Team Position Assignment
-    const assignList = document.getElementById('teamNumberAssignmentList');
-    if (assignList) {
+    // 1. Render Team Position Assignment Table
+    const tableBody = document.getElementById('teamPositionTableBody');
+    const badgeEl = document.getElementById('assignedPositionsBadge');
+    
+    if (tableBody) {
       if (!STATE.teams || STATE.teams.length === 0) {
-        assignList.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px">No teams available</div>';
+        tableBody.innerHTML = '<tr><td colspan="4" style="padding:16px;color:var(--muted);text-align:center">No franchises configured yet. Add teams in Team Config tab first.</td></tr>';
       } else {
         const totalTeams = STATE.teams.length;
-        assignList.innerHTML = STATE.teams.map(t => {
+        let assignedCount = 0;
+
+        tableBody.innerHTML = STATE.teams.map(t => {
           const currentPos = teamNumbers[t.id] || '';
-          let optionsHTML = '<option value="">Unassigned</option>';
+          if (currentPos) assignedCount++;
+
+          let optionsHTML = '<option value="">-- Unassigned --</option>';
           for (let i = 1; i <= totalTeams; i++) {
             optionsHTML += `<option value="${i}" ${Number(currentPos) === i ? 'selected' : ''}>Position ${i}</option>`;
           }
-          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;gap:8px">
-            <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
-              ${teamAvatarHTML(t, 28)}
-              <span style="font-weight:700;font-size:12px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</span>
-            </div>
-            <select onchange="assignTeamNumber('${t.id}', this.value)" style="width:110px;margin-bottom:0;padding:5px 8px;font-size:12px;background:rgba(0,0,0,0.4)">
-              ${optionsHTML}
-            </select>
-          </div>`;
+
+          const statusBadge = currentPos 
+            ? `<span class="chip chip-emerald">Linked: Pos ${currentPos}</span>` 
+            : `<span class="chip" style="background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid rgba(255,255,255,0.1)">Unassigned</span>`;
+
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+            <td style="padding:12px 10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                ${teamAvatarHTML(t, 32)}
+                <span style="font-weight:700;font-size:13px;color:white">${escapeHTML(t.name)}</span>
+              </div>
+            </td>
+            <td style="padding:12px 10px">${captainPillHTML(t, 'compact')}</td>
+            <td style="padding:12px 10px">
+              <select onchange="assignTeamNumber('${t.id}', this.value)" style="width:160px;margin-bottom:0;padding:6px 10px;font-size:12px;background:rgba(0,0,0,0.5)">
+                ${optionsHTML}
+              </select>
+            </td>
+            <td style="padding:12px 10px;text-align:center">${statusBadge}</td>
+          </tr>`;
         }).join('');
+
+        if (badgeEl) badgeEl.textContent = `${assignedCount} / ${totalTeams} Positions Assigned`;
       }
     }
 

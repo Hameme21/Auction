@@ -1470,6 +1470,47 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     </div>
   </div>
 
+  <div class="overlay hidden" id="matchEditOverlay">
+    <div class="modal" style="max-width:480px;text-align:left">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:6px 14px;margin-bottom:16px">
+        <span style="font-size:16px">✏️</span>
+        <span style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--cyan);letter-spacing:0.06em">EDIT MATCH FIXTURE</span>
+      </div>
+      <input type="hidden" id="editMatchId">
+      
+      <div style="margin-bottom:14px">
+        <label>Match #</label>
+        <input type="number" id="editMatchNo" placeholder="1" style="margin-bottom:0">
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label>Team Pos A</label>
+          <select id="editTeamPosA" style="margin-bottom:0"></select>
+        </div>
+        <div>
+          <label>Team Pos B</label>
+          <select id="editTeamPosB" style="margin-bottom:0"></select>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:14px">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="editDateTime" style="margin-bottom:0">
+      </div>
+      
+      <div style="margin-bottom:20px">
+        <label>Stage / Note</label>
+        <input type="text" id="editStage" placeholder="e.g. Group Match, Final..." style="margin-bottom:0">
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <button onclick="closeMatchEditModal()" class="ghost">Cancel</button>
+        <button onclick="saveMatchEdit()" class="btn-primary">Update Match</button>
+      </div>
+    </div>
+  </div>
+
   <div id="soldAnimationOverlay" class="hidden">
     <div style="text-align:center;padding:40px; width: 100%;">
       <h1 id="animTitle" style="font-family:var(--font-display);font-size:clamp(2.8rem,8vw,6rem);font-weight:800;color:var(--amber);letter-spacing:0.1em;margin-bottom:8px">SOLD!</h1>
@@ -3780,11 +3821,19 @@ window.addScheduleMatch = () => {
   STATE.schedule.matches.push(matchObj);
   STATE.schedule.matches.sort((a, b) => a.matchNo - b.matchNo);
 
+  // Auto-advance form for next addition: increment match # and step time by 30 minutes!
   if (matchNoInput) matchNoInput.value = matchNo + 1;
   if (stageInput) stageInput.value = '';
+  if (dateTimeInput && dateTime) {
+    const nextTime = new Date(new Date(dateTime).getTime() + 30 * 60 * 1000);
+    // Format YYYY-MM-DDTHH:MM local
+    const tzOffset = nextTime.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(nextTime - tzOffset)).toISOString().slice(0, 16);
+    dateTimeInput.value = localISOTime;
+  }
 
   renderScheduler();
-  showToast(`Match #${matchNo} added to schedule draft`);
+  showToast(`Match #${matchNo} added (+30m time step applied)`);
 };
 
 window.deleteScheduleMatch = (matchId) => {
@@ -3792,6 +3841,62 @@ window.deleteScheduleMatch = (matchId) => {
   STATE.schedule.matches = STATE.schedule.matches.filter(m => m.id !== matchId);
   renderScheduler();
   showToast('Match removed from schedule draft');
+};
+
+window.openMatchEditModal = (matchId) => {
+  const m = STATE.schedule?.matches?.find(x => x.id === matchId);
+  if (!m) return;
+
+  document.getElementById('editMatchId').value = m.id;
+  document.getElementById('editMatchNo').value = m.matchNo;
+  document.getElementById('editDateTime').value = m.dateTime || '';
+  document.getElementById('editStage').value = m.stage || '';
+
+  ['editTeamPosA', 'editTeamPosB'].forEach((selectId, idx) => {
+    const el = document.getElementById(selectId);
+    if (el) {
+      const totalTeams = Math.max(STATE.teams.length, 2);
+      let opts = `<option value="">Select Pos</option>`;
+      for (let i = 1; i <= totalTeams; i++) {
+        const linkedTeam = getTeamByPos(i);
+        const nameLabel = linkedTeam ? linkedTeam.name : `Unassigned`;
+        opts += `<option value="${i}" ${Number(idx === 0 ? m.teamPosA : m.teamPosB) === i ? 'selected' : ''}>Pos ${i} (${nameLabel})</option>`;
+      }
+      el.innerHTML = opts;
+    }
+  });
+
+  document.getElementById('matchEditOverlay').classList.remove('hidden');
+};
+
+window.closeMatchEditModal = () => {
+  document.getElementById('matchEditOverlay').classList.add('hidden');
+};
+
+window.saveMatchEdit = () => {
+  const matchId = document.getElementById('editMatchId').value;
+  const matchNo = Number(document.getElementById('editMatchNo').value);
+  const teamPosA = Number(document.getElementById('editTeamPosA').value);
+  const teamPosB = Number(document.getElementById('editTeamPosB').value);
+  const dateTime = document.getElementById('editDateTime').value;
+  const stage = document.getElementById('editStage').value?.trim();
+
+  if (!teamPosA || !teamPosB) return showToast('Please select valid positions for both teams', 'error');
+  if (teamPosA === teamPosB) return showToast('Pos A and Pos B cannot be the same position', 'error');
+
+  const matchObj = STATE.schedule?.matches?.find(m => m.id === matchId);
+  if (matchObj) {
+    matchObj.matchNo = matchNo;
+    matchObj.teamPosA = teamPosA;
+    matchObj.teamPosB = teamPosB;
+    matchObj.dateTime = dateTime;
+    matchObj.stage = stage;
+    
+    STATE.schedule.matches.sort((a, b) => a.matchNo - b.matchNo);
+    closeMatchEditModal();
+    renderScheduler();
+    showToast(`Match #${matchNo} updated successfully!`);
+  }
 };
 
 window.autoGenerateFixtures = () => {
@@ -3802,37 +3907,67 @@ window.autoGenerateFixtures = () => {
     return;
   }
 
+  // Auto-assign numbers 1..N to teams if not already assigned
   STATE.teams.forEach((t, i) => {
     if (!STATE.schedule.teamNumbers[t.id]) {
       STATE.schedule.teamNumbers[t.id] = i + 1;
     }
   });
 
-  const positions = Array.from({ length: numTeams }, (_, i) => i + 1);
-  const generatedMatches = [];
-  let matchCounter = 1;
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() + 1);
-  startDate.setHours(15, 0, 0, 0);
-
-  for (let i = 0; i < positions.length; i++) {
-    for (let j = i + 1; j < positions.length; j++) {
-      const matchTime = new Date(startDate.getTime() + (matchCounter - 1) * 86400000);
-      generatedMatches.push({
-        id: 'auto_' + matchCounter + '_' + Date.now(),
-        matchNo: matchCounter,
-        teamPosA: positions[i],
-        teamPosB: positions[j],
-        dateTime: matchTime.toISOString().slice(0, 16),
-        stage: `Group Match ${matchCounter}`
-      });
-      matchCounter++;
+  // Collect all unique pairings
+  const unplayed = [];
+  for (let i = 1; i <= numTeams; i++) {
+    for (let j = i + 1; j <= numTeams; j++) {
+      unplayed.push([i, j]);
     }
   }
 
+  // Rest-optimized algorithm ensuring at least 1 match rest/gap per team
+  const generatedMatches = [];
+  let lastTeams = new Set();
+  let matchCounter = 1;
+
+  const startInput = document.getElementById('schedDateTime')?.value;
+  let currentTime = startInput ? new Date(startInput) : new Date();
+  if (!startInput) {
+    currentTime.setDate(currentTime.getDate() + 1);
+    currentTime.setHours(15, 0, 0, 0);
+  }
+
+  while (unplayed.length > 0) {
+    let bestIdx = unplayed.findIndex(([a, b]) => !lastTeams.has(a) && !lastTeams.has(b));
+    if (bestIdx === -1) bestIdx = 0;
+
+    const [posA, posB] = unplayed.splice(bestIdx, 1)[0];
+    const tzOffset = currentTime.getTimezoneOffset() * 60000;
+    const timeStr = (new Date(currentTime - tzOffset)).toISOString().slice(0, 16);
+
+    generatedMatches.push({
+      id: 'auto_' + matchCounter + '_' + Date.now(),
+      matchNo: matchCounter,
+      teamPosA: posA,
+      teamPosB: posB,
+      dateTime: timeStr,
+      stage: `Group Match ${matchCounter}`
+    });
+
+    lastTeams = new Set([posA, posB]);
+    matchCounter++;
+    // Step forward by 30 minutes per match!
+    currentTime = new Date(currentTime.getTime() + 30 * 60 * 1000);
+  }
+
   STATE.schedule.matches = generatedMatches;
+  
+  // Advance manual form input to 30 min after last match
+  const schedDateTime = document.getElementById('schedDateTime');
+  if (schedDateTime) {
+    const tzOffset = currentTime.getTimezoneOffset() * 60000;
+    schedDateTime.value = (new Date(currentTime - tzOffset)).toISOString().slice(0, 16);
+  }
+
   renderScheduler();
-  showToast(`Auto-generated ${generatedMatches.length} fixtures! Click 'Publish Schedule' to release.`);
+  showToast(`Auto-generated ${generatedMatches.length} rest-optimized fixtures (+30m steps)! Click 'Publish Schedule' to release.`);
 };
 
 window.publishSchedule = () => {
@@ -3953,7 +4088,10 @@ function renderScheduler() {
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:8px">
               <span>🕒 ${formattedDate}</span>
-              <button onclick="deleteScheduleMatch('${m.id}')" class="ghost red small" style="padding:2px 8px;font-size:10px">Delete</button>
+              <div style="display:flex;gap:6px">
+                <button onclick="openMatchEditModal('${m.id}')" class="ghost small" style="padding:2px 8px;font-size:10px;color:var(--cyan)">Edit</button>
+                <button onclick="deleteScheduleMatch('${m.id}')" class="ghost red small" style="padding:2px 8px;font-size:10px">Delete</button>
+              </div>
             </div>
           </div>`;
         }).join('');

@@ -1350,6 +1350,83 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       </div>
     </div>
 
+    <div id="sectionScheduler" class="hidden">
+      <div class="glass" style="padding:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:14px">
+          <div>
+            <h2 style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:white">Tournament Match Scheduler</h2>
+            <p style="color:var(--muted);font-size:12px;margin-top:4px">Connect teams to position numbers (1 to N), create fixture dates & times, and publish live schedules</p>
+          </div>
+          <div id="adminSchedulerControls" class="hidden" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button onclick="autoGenerateFixtures()" class="ghost small" style="color:var(--cyan);border-color:rgba(71,233,255,0.3)">⚡ Auto-Generate Fixtures</button>
+            <button onclick="resetSchedule()" class="ghost red small" style="font-size:11px">Reset Schedule</button>
+            <button onclick="publishSchedule()" class="green" style="padding:8px 18px;font-family:var(--font-display);letter-spacing:0.04em">Publish Schedule ›</button>
+          </div>
+        </div>
+
+        <div id="schedulerAdminContainer" class="hidden" style="display:grid;grid-template-columns:minmax(280px, 340px) minmax(0, 1fr);gap:20px">
+          <div class="glass-sm" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:11px;color:var(--emerald);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06)">
+              1. Connect Teams to Positions (1 to N)
+            </div>
+            <p style="font-size:11px;color:var(--muted)">Connect each team to a position number. Match slots created with numbers will automatically display the assigned team logo & name!</p>
+            <div id="teamNumberAssignmentList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto"></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+            <div class="glass-sm" style="padding:16px">
+              <div style="font-size:11px;color:var(--accent-2);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px">
+                2. Add / Edit Match Fixtures
+              </div>
+              <div style="display:grid;grid-template-columns:70px 1fr 1fr 1.2fr 1fr auto;gap:10px;align-items:end" class="cat-config-row">
+                <div>
+                  <label>Match #</label>
+                  <input type="number" id="schedMatchNo" placeholder="1" style="margin-bottom:0">
+                </div>
+                <div>
+                  <label>Team Pos A</label>
+                  <select id="schedTeamPosA" style="margin-bottom:0"></select>
+                </div>
+                <div>
+                  <label>Team Pos B</label>
+                  <select id="schedTeamPosB" style="margin-bottom:0"></select>
+                </div>
+                <div>
+                  <label>Date & Time</label>
+                  <input type="datetime-local" id="schedDateTime" style="margin-bottom:0">
+                </div>
+                <div>
+                  <label>Stage / Note</label>
+                  <input type="text" id="schedStage" placeholder="Group Match, Semi-Final..." style="margin-bottom:0">
+                </div>
+                <button onclick="addScheduleMatch()" class="btn-primary small" style="height:40px;padding:0 14px">+ Add Match</button>
+              </div>
+            </div>
+
+            <div class="glass-sm" style="padding:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+                <div style="font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.12em">
+                  Published Match Schedule
+                </div>
+                <span id="schedMatchCount" class="chip chip-purple">0 Matches Scheduled</span>
+              </div>
+              <div id="scheduleMatchesList" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:12px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="schedulerPublicContainer" class="hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="font-size:11px;color:var(--accent-2);font-weight:800;text-transform:uppercase;letter-spacing:0.14em" id="schedulerPublicTitle">
+              Tournament Match Schedule
+            </div>
+            <div id="schedulerTeamFilterBadge" class="chip chip-emerald hidden"></div>
+          </div>
+          <div id="publicScheduleMatchesGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:14px"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <div class="overlay hidden" id="playerEditOverlay">
@@ -2400,6 +2477,11 @@ window.respondRTM = (accept) => {
     document.getElementById('rtmPromptOverlay').classList.add('hidden');
 };
 
+socket.on('schedule:updated', (scheduleData) => {
+    STATE.schedule = scheduleData || { teamNumbers: {}, matches: [] };
+    renderAll();
+});
+
 
 function buildNavItems(sections) {
   const nav = document.getElementById('topNav');
@@ -2424,6 +2506,7 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '▦' }];
   if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '⚒' });
   sections.push({ id: 'sectionPlayerDatabase', label: 'Player DB', icon: '♚' });
+  sections.push({ id: 'sectionScheduler', label: 'Scheduler', icon: '📅' });
   if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Team Config', icon: '⚙' });
 
   buildNavItems(sections);
@@ -2618,6 +2701,7 @@ function renderAll() {
   if (CURRENT_USER.role === 'listener') renderViewerRosters();
   if (CURRENT_USER.role !== 'admin') renderLiveIdleCode();
   renderDatabase();
+  renderScheduler();
   
   if (CURRENT_USER.role === 'admin') { 
       renderTeamConfigTable(); 
@@ -3617,6 +3701,281 @@ const dlCSV = () => {
   a.href = 'data:text/csv;charset=utf-8,' + encodeURI(r.map(e => e.join(',')).join('\n'));
   a.download = 'arenacmd_db.csv'; a.click();
 };
+// --- TOURNAMENT MATCH SCHEDULER FUNCTIONS ---
+
+function getTeamByPos(posNum) {
+  const num = Number(posNum);
+  if (!num) return null;
+  const teamNumbers = STATE.schedule?.teamNumbers || {};
+  const teamId = Object.keys(teamNumbers).find(id => Number(teamNumbers[id]) === num);
+  return STATE.teams.find(t => t.id === teamId) || null;
+}
+
+window.assignTeamNumber = (teamId, numberVal) => {
+  if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
+  if (!STATE.schedule.teamNumbers) STATE.schedule.teamNumbers = {};
+  
+  const val = Number(numberVal);
+  if (val > 0) {
+    STATE.schedule.teamNumbers[teamId] = val;
+  } else {
+    delete STATE.schedule.teamNumbers[teamId];
+  }
+  renderScheduler();
+};
+
+window.addScheduleMatch = () => {
+  if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
+  if (!Array.isArray(STATE.schedule.matches)) STATE.schedule.matches = [];
+
+  const matchNoInput = document.getElementById('schedMatchNo');
+  const posAInput = document.getElementById('schedTeamPosA');
+  const posBInput = document.getElementById('schedTeamPosB');
+  const dateTimeInput = document.getElementById('schedDateTime');
+  const stageInput = document.getElementById('schedStage');
+
+  const matchNo = Number(matchNoInput?.value) || (STATE.schedule.matches.length + 1);
+  const teamPosA = Number(posAInput?.value);
+  const teamPosB = Number(posBInput?.value);
+  const dateTime = dateTimeInput?.value || new Date().toISOString().slice(0, 16);
+  const stage = stageInput?.value?.trim() || `Match ${matchNo}`;
+
+  if (!teamPosA || !teamPosB) {
+    showToast('Please select two valid team positions', 'error');
+    return;
+  }
+  if (teamPosA === teamPosB) {
+    showToast('Team Pos A and Team Pos B cannot be the same position', 'error');
+    return;
+  }
+
+  const matchObj = {
+    id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    matchNo,
+    teamPosA,
+    teamPosB,
+    dateTime,
+    stage
+  };
+
+  STATE.schedule.matches.push(matchObj);
+  STATE.schedule.matches.sort((a, b) => a.matchNo - b.matchNo);
+
+  if (matchNoInput) matchNoInput.value = matchNo + 1;
+  if (stageInput) stageInput.value = '';
+
+  renderScheduler();
+  showToast(`Match #${matchNo} added to schedule draft`);
+};
+
+window.deleteScheduleMatch = (matchId) => {
+  if (!STATE.schedule || !Array.isArray(STATE.schedule.matches)) return;
+  STATE.schedule.matches = STATE.schedule.matches.filter(m => m.id !== matchId);
+  renderScheduler();
+  showToast('Match removed from schedule draft');
+};
+
+window.autoGenerateFixtures = () => {
+  if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
+  const numTeams = STATE.teams.length;
+  if (numTeams < 2) {
+    showToast('Need at least 2 configured teams to auto-generate fixtures');
+    return;
+  }
+
+  STATE.teams.forEach((t, i) => {
+    if (!STATE.schedule.teamNumbers[t.id]) {
+      STATE.schedule.teamNumbers[t.id] = i + 1;
+    }
+  });
+
+  const positions = Array.from({ length: numTeams }, (_, i) => i + 1);
+  const generatedMatches = [];
+  let matchCounter = 1;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 1);
+  startDate.setHours(15, 0, 0, 0);
+
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      const matchTime = new Date(startDate.getTime() + (matchCounter - 1) * 86400000);
+      generatedMatches.push({
+        id: 'auto_' + matchCounter + '_' + Date.now(),
+        matchNo: matchCounter,
+        teamPosA: positions[i],
+        teamPosB: positions[j],
+        dateTime: matchTime.toISOString().slice(0, 16),
+        stage: `Group Match ${matchCounter}`
+      });
+      matchCounter++;
+    }
+  }
+
+  STATE.schedule.matches = generatedMatches;
+  renderScheduler();
+  showToast(`Auto-generated ${generatedMatches.length} fixtures! Click 'Publish Schedule' to release.`);
+};
+
+window.publishSchedule = () => {
+  if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
+  socket.emit('schedule:save', STATE.schedule);
+  showToast('Publishing schedule to all connected clients...');
+};
+
+window.resetSchedule = () => {
+  if (confirm('Are you sure you want to reset and clear the tournament match schedule?')) {
+    STATE.schedule = { teamNumbers: {}, matches: [] };
+    socket.emit('schedule:reset');
+  }
+};
+
+function renderScheduler() {
+  const isAdmin = CURRENT_USER.role === 'admin';
+  const isTeam = CURRENT_USER.role === 'team';
+  const isViewer = CURRENT_USER.role === 'listener';
+
+  document.getElementById('adminSchedulerControls')?.classList.toggle('hidden', !isAdmin);
+  document.getElementById('schedulerAdminContainer')?.classList.toggle('hidden', !isAdmin);
+  document.getElementById('schedulerPublicContainer')?.classList.toggle('hidden', isAdmin);
+
+  const sched = STATE.schedule || { teamNumbers: {}, matches: [] };
+  const teamNumbers = sched.teamNumbers || {};
+  const matches = sched.matches || [];
+
+  if (isAdmin) {
+    // 1. Left Column: Team Position Assignment
+    const assignList = document.getElementById('teamNumberAssignmentList');
+    if (assignList) {
+      if (!STATE.teams || STATE.teams.length === 0) {
+        assignList.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px">No teams available</div>';
+      } else {
+        const totalTeams = STATE.teams.length;
+        assignList.innerHTML = STATE.teams.map(t => {
+          const currentPos = teamNumbers[t.id] || '';
+          let optionsHTML = '<option value="">Unassigned</option>';
+          for (let i = 1; i <= totalTeams; i++) {
+            optionsHTML += `<option value="${i}" ${Number(currentPos) === i ? 'selected' : ''}>Position ${i}</option>`;
+          }
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+              ${teamAvatarHTML(t, 28)}
+              <span style="font-weight:700;font-size:12px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</span>
+            </div>
+            <select onchange="assignTeamNumber('${t.id}', this.value)" style="width:110px;margin-bottom:0;padding:5px 8px;font-size:12px;background:rgba(0,0,0,0.4)">
+              ${optionsHTML}
+            </select>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // 2. Options for Pos A & Pos B
+    ['schedTeamPosA', 'schedTeamPosB'].forEach((selectId) => {
+      const el = document.getElementById(selectId);
+      if (el) {
+        const totalTeams = Math.max(STATE.teams.length, 2);
+        let opts = `<option value="">Select Pos</option>`;
+        for (let i = 1; i <= totalTeams; i++) {
+          const linkedTeam = getTeamByPos(i);
+          const nameLabel = linkedTeam ? linkedTeam.name : `Unassigned`;
+          opts += `<option value="${i}">Pos ${i} (${nameLabel})</option>`;
+        }
+        el.innerHTML = opts;
+      }
+    });
+
+    // 3. Admin Matches List
+    const countBadge = document.getElementById('schedMatchCount');
+    if (countBadge) countBadge.textContent = `${matches.length} Matches Scheduled`;
+
+    const adminMatchesList = document.getElementById('scheduleMatchesList');
+    if (adminMatchesList) {
+      if (matches.length === 0) {
+        adminMatchesList.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:12px;padding:24px;text-align:center;border:1px dashed rgba(255,255,255,0.1);border-radius:8px">No match fixtures created yet. Use the form above or click "Auto-Generate Fixtures".</div>';
+      } else {
+        adminMatchesList.innerHTML = matches.map(m => {
+          const teamA = getTeamByPos(m.teamPosA);
+          const teamB = getTeamByPos(m.teamPosB);
+          const formattedDate = m.dateTime ? new Date(m.dateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'TBD';
+          return `<div class="dash-card" style="padding:14px;min-height:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <span class="chip chip-cyan">Match #${m.matchNo}</span>
+              <span class="chip chip-purple" style="font-size:9px">${escapeHTML(m.stage || 'Group')}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0;background:rgba(0,0,0,0.3);padding:10px;border-radius:8px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0;text-align:center">
+                ${teamAvatarHTML(teamA, 36)}
+                <span style="font-weight:700;font-size:11px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${teamA ? escapeHTML(teamA.name) : `Pos ${m.teamPosA}`}</span>
+              </div>
+              <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:var(--amber)">VS</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0;text-align:center">
+                ${teamAvatarHTML(teamB, 36)}
+                <span style="font-weight:700;font-size:11px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${teamB ? escapeHTML(teamB.name) : `Pos ${m.teamPosB}`}</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:8px">
+              <span>🕒 ${formattedDate}</span>
+              <button onclick="deleteScheduleMatch('${m.id}')" class="ghost red small" style="padding:2px 8px;font-size:10px">Delete</button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+  } else {
+    // 4. Public / Team / Viewer Match Schedule List
+    const titleEl = document.getElementById('schedulerPublicTitle');
+    const badgeEl = document.getElementById('schedulerTeamFilterBadge');
+    const myTeam = isTeam ? STATE.teams.find(t => t.id === CURRENT_USER.teamId) : null;
+
+    if (titleEl) titleEl.textContent = isTeam ? `Team Match Schedule` : `Tournament Match Schedule`;
+    if (badgeEl) {
+      if (isTeam && myTeam) {
+        badgeEl.classList.remove('hidden');
+        badgeEl.textContent = `Franchise: ${myTeam.name}`;
+      } else {
+        badgeEl.classList.add('hidden');
+      }
+    }
+
+    const publicGrid = document.getElementById('publicScheduleMatchesGrid');
+    if (publicGrid) {
+      if (matches.length === 0) {
+        publicGrid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:13px;padding:36px;text-align:center;border:1px dashed rgba(255,255,255,0.1);border-radius:12px">No scheduled matches published yet. Check back soon!</div>';
+      } else {
+        publicGrid.innerHTML = matches.map(m => {
+          const teamA = getTeamByPos(m.teamPosA);
+          const teamB = getTeamByPos(m.teamPosB);
+          const isMyMatch = isTeam && myTeam && ((teamA && teamA.id === myTeam.id) || (teamB && teamB.id === myTeam.id));
+          const formattedDate = m.dateTime ? new Date(m.dateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'TBD';
+
+          return `<div class="dash-card ${isMyMatch ? 'is-critical' : ''}" style="padding:16px;${isMyMatch ? 'border-color:var(--emerald);box-shadow:0 0 20px rgba(16,185,129,0.15)' : ''}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <span class="chip chip-cyan">Match #${m.matchNo}</span>
+              ${isMyMatch ? '<span class="chip chip-emerald">YOUR MATCH</span>' : ''}
+              <span class="chip chip-purple" style="font-size:9px">${escapeHTML(m.stage || 'Group Match')}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;background:rgba(0,0,0,0.35);padding:12px;border-radius:10px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;text-align:center">
+                ${teamAvatarHTML(teamA, 42)}
+                <span style="font-weight:800;font-size:13px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${teamA ? escapeHTML(teamA.name) : `Pos ${m.teamPosA}`}</span>
+              </div>
+              <div style="font-family:var(--font-display);font-size:20px;font-weight:900;color:var(--amber)">VS</div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;text-align:center">
+                ${teamAvatarHTML(teamB, 42)}
+                <span style="font-weight:800;font-size:13px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${teamB ? escapeHTML(teamB.name) : `Pos ${m.teamPosB}`}</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">
+              <span>🕒 ${formattedDate}</span>
+              <span style="color:var(--cyan);font-weight:600;font-size:11px">Upcoming</span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+  }
+}
+
 document.getElementById('btnExportAdmin').onclick = dlCSV;
 document.getElementById('btnExportTeam').onclick = dlCSV;
 </script>

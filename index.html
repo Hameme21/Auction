@@ -1436,7 +1436,9 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
             <p style="color:var(--muted);font-size:12px;margin-top:4px">Connect teams to position numbers (1 to N), create fixture dates & times, and publish live schedules</p>
           </div>
           <div id="adminSchedulerControls" class="hidden" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button onclick="autoLinkTeamPositions()" class="ghost small" style="color:var(--emerald);border-color:rgba(16,185,129,0.3)">🔗 Quick Link (1..N)</button>
             <button onclick="autoGenerateFixtures()" class="ghost small" style="color:var(--cyan);border-color:rgba(71,233,255,0.3)">⚡ Auto-Generate Fixtures</button>
+            <button onclick="shiftMatchTimes(30)" class="ghost small" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">🕒 Shift Times (+30m)</button>
             <button onclick="resetSchedule()" class="ghost red small" style="font-size:11px">Reset Schedule</button>
             <button onclick="publishSchedule()" class="green" style="padding:8px 18px;font-family:var(--font-display);letter-spacing:0.04em">Publish Schedule ›</button>
           </div>
@@ -1449,7 +1451,10 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
               <div style="font-size:12px;color:var(--emerald);font-weight:800;text-transform:uppercase;letter-spacing:0.12em">
                 📋 Team Position Assignment Table (1 to N)
               </div>
-              <span class="chip chip-cyan" id="assignedPositionsBadge">0 / 0 Teams Assigned</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button onclick="autoLinkTeamPositions()" class="ghost small" style="font-size:10px;padding:4px 10px;color:var(--emerald);border-color:rgba(16,185,129,0.3)">⚡ Auto-Link 1..N</button>
+                <span class="chip chip-cyan" id="assignedPositionsBadge">0 / 0 Teams Assigned</span>
+              </div>
             </div>
             <p style="font-size:11px;color:var(--muted);margin-bottom:16px">
               Assign position numbers (1, 2, 3... N) to each franchise. Matches created with position numbers (e.g. 1 vs 2, 3 vs 4) will automatically resolve to the assigned team logos & names!
@@ -1460,6 +1465,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
                   <tr style="border-bottom:1px solid rgba(255,255,255,0.1);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.08em">
                     <th style="padding:10px">Franchise</th>
                     <th style="padding:10px">Captain</th>
+                    <th style="padding:10px;text-align:center">Scheduled Games</th>
                     <th style="padding:10px">Assigned Position Number</th>
                     <th style="padding:10px;text-align:center">Status</th>
                   </tr>
@@ -2943,7 +2949,7 @@ window.shufflePlayerCodes = () => {
   socket.emit('admin:shuffle_codes');
 };
 window.clearPlayerCodes = () => {
-  allowActivePlayerCodeQueue = CURRENT_USER.role === 'admin' && !!activePlayer;
+  closeLocalLivePlayerView();
   STATE.lotteryQueue = [];
   STATE.codeShuffleActive = false;
   const revealCode = document.getElementById('liveRevealCode');
@@ -3160,8 +3166,9 @@ function renderDatabase() {
         const anchor = tile.querySelector('.hover-overlay-anchor');
         if (anchor) {
           anchor.innerHTML = `<div style="position:absolute;top:8px;right:8px;display:flex;gap:5px;z-index:30">
-            <button title="Edit" onclick="event.stopPropagation();openPlayerEdit('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">✏️</button>
-            ${soldToName ? `<button title="Reset" onclick="event.stopPropagation();resetPlayer('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='var(--amber)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">↺</button>` : ''}
+            <button title="Edit" onclick="event.stopPropagation();openPlayerEdit('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">✏️</button>
+            ${soldToName ? `<button title="Reset" onclick="event.stopPropagation();resetPlayer('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='var(--amber)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">↺</button>` : ''}
+            <button title="Delete Player" onclick="event.stopPropagation();deleteSinglePlayer('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(239,68,68,0.85);border:1px solid rgba(255,255,255,0.25);color:white;font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='rgba(239,68,68,0.85)'">❌</button>
           </div>`;
         }
         if (!soldToName) {
@@ -3660,6 +3667,16 @@ window.savePlayerEdit = () => {
 window.clearCat = (id) => { if (confirm('Drop player list?')) socket.emit('players:clear', { category: id }); };
 window.deleteCat = (id) => { if (confirm('Delete category?')) socket.emit('admin:deleteCategory', { id }); };
 window.resetPlayer = (c, n) => { if (confirm('Reset player bidding history?')) socket.emit('admin:resetPlayer', { category: c, name: n }); };
+window.deleteSinglePlayer = (catId, playerName) => {
+  if (confirm(`Are you sure you want to delete player "${playerName}" from category ${catId}?`)) {
+    const players = (STATE.playersSnapshot[catId] || []).filter(p => p.name !== playerName);
+    socket.emit('players:save', { category: catId, players });
+    if (activePlayer && activePlayer.category === catId && activePlayer.name === playerName) {
+      socket.emit('admin:close_popup');
+    }
+    showToast(`Player "${playerName}" deleted from database`);
+  }
+};
 
 document.getElementById('btnAddCat').onclick = () => {
   const id = document.getElementById('newCatId').value.trim().toUpperCase();
@@ -3977,6 +3994,32 @@ window.saveMatchEdit = () => {
   }
 };
 
+window.autoLinkTeamPositions = () => {
+  if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
+  if (!STATE.schedule.teamNumbers) STATE.schedule.teamNumbers = {};
+  if (!STATE.teams || STATE.teams.length === 0) return showToast('No teams configured to link');
+  STATE.teams.forEach((t, i) => {
+    STATE.schedule.teamNumbers[t.id] = i + 1;
+  });
+  renderScheduler();
+  showToast(`Linked all ${STATE.teams.length} franchises to positions 1..${STATE.teams.length}`);
+};
+
+window.shiftMatchTimes = (mins = 30) => {
+  if (!STATE.schedule?.matches?.length) return showToast('No matches created to shift times');
+  const shiftMs = mins * 60 * 1000;
+  STATE.schedule.matches.forEach(m => {
+    if (m.dateTime) {
+      const t = new Date(m.dateTime).getTime();
+      const newT = new Date(t + shiftMs);
+      const tzOffset = newT.getTimezoneOffset() * 60000;
+      m.dateTime = new Date(newT - tzOffset).toISOString().slice(0, 16);
+    }
+  });
+  renderScheduler();
+  showToast(`Shifted all match times forward by +${mins}m`);
+};
+
 window.autoGenerateFixtures = () => {
   if (!STATE.schedule) STATE.schedule = { teamNumbers: {}, matches: [] };
   const numTeams = STATE.teams.length;
@@ -4081,10 +4124,17 @@ function renderScheduler() {
     
     if (tableBody) {
       if (!STATE.teams || STATE.teams.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" style="padding:16px;color:var(--muted);text-align:center">No franchises configured yet. Add teams in Team Config tab first.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" style="padding:16px;color:var(--muted);text-align:center">No franchises configured yet. Add teams in Team Config tab first.</td></tr>';
       } else {
         const totalTeams = STATE.teams.length;
         let assignedCount = 0;
+
+        // Calculate game count per position
+        const posMatchCounts = {};
+        matches.forEach(m => {
+          if (m.teamPosA) posMatchCounts[m.teamPosA] = (posMatchCounts[m.teamPosA] || 0) + 1;
+          if (m.teamPosB) posMatchCounts[m.teamPosB] = (posMatchCounts[m.teamPosB] || 0) + 1;
+        });
 
         tableBody.innerHTML = STATE.teams.map(t => {
           const currentPos = teamNumbers[t.id] || '';
@@ -4099,6 +4149,11 @@ function renderScheduler() {
             ? `<span class="chip chip-emerald">Linked: Pos ${currentPos}</span>` 
             : `<span class="chip" style="background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid rgba(255,255,255,0.1)">Unassigned</span>`;
 
+          const gameCount = currentPos ? (posMatchCounts[currentPos] || 0) : 0;
+          const gameBadge = currentPos
+            ? `<span class="chip chip-purple" style="font-size:10px">${gameCount} Match${gameCount !== 1 ? 'es' : ''}</span>`
+            : `<span style="font-size:11px;color:var(--muted)">-</span>`;
+
           return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
             <td style="padding:12px 10px">
               <div style="display:flex;align-items:center;gap:10px">
@@ -4107,6 +4162,7 @@ function renderScheduler() {
               </div>
             </td>
             <td style="padding:12px 10px">${captainPillHTML(t, 'compact')}</td>
+            <td style="padding:12px 10px;text-align:center">${gameBadge}</td>
             <td style="padding:12px 10px">
               <select onchange="assignTeamNumber('${t.id}', this.value)" style="width:160px;margin-bottom:0;padding:6px 10px;font-size:12px;background:rgba(0,0,0,0.5)">
                 ${optionsHTML}

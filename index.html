@@ -1695,8 +1695,11 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       <input type="text" id="importSearchInput" placeholder="Search player name…" style="margin-bottom:8px" oninput="filterImportList()">
       <div class="import-player-list" id="importPlayerList"></div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <button class="ghost small" onclick="toggleSelectAllImport()" id="btnSelectAllImport">Select All</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:6px">
+          <button class="ghost small" onclick="selectAllImportPlayers(true)" id="btnSelectAllImport">Select All</button>
+          <button class="ghost small" onclick="selectAllImportPlayers(false)" id="btnDeselectAllImport" style="font-size:11px;color:var(--danger);border-color:rgba(239,68,68,0.25)">Deselect All</button>
+        </div>
         <span style="font-size:11px;color:var(--muted)" id="importSelCount">0 selected</span>
       </div>
 
@@ -2793,6 +2796,16 @@ function renderAdminTeamsSummary() {
             .map(p => `<div class="line"><span class="word-break">${p.name}</span><span class="price">${p.price ? formatAuctionCr(p.price) : '--'}</span></div>`);
         while (topRows.length < 3) topRows.push('<div class="line"><span>Pending...</span><span class="price">--</span></div>');
 
+        const rtmTagged = getRTMTaggedPlayersForTeam(t.id);
+        const rtmBlock = rtmTagged.length
+          ? `<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06)">
+               <div style="font-size:9px;color:var(--rtm);font-weight:800;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:6px">🔁 RTM Tagged (${rtmTagged.length})</div>
+               <div style="display:flex;flex-wrap:wrap;gap:3px;max-height:60px;overflow-y:auto">
+                 ${rtmTagged.map(rp => `<span class="chip chip-pink" style="font-size:8px;padding:1px 6px">${escapeHTML(rp.catId)} · ${escapeHTML(rp.name)}</span>`).join('')}
+               </div>
+             </div>`
+          : '';
+
         container.innerHTML += `
         <div class="admin-franchise-card ${isCritical ? 'is-critical' : ''}" style="--budget-angle:${Math.max(0, Math.min(100, details.remainingPct))}%">
             <div class="team-head">
@@ -2809,6 +2822,7 @@ function renderAdminTeamsSummary() {
             </div>
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">Top Acquisitions</div>
             <div class="team-purchase-list">${topRows.join('')}</div>
+            ${rtmBlock}
         </div>`;
     });
 
@@ -3192,6 +3206,11 @@ function renderTeamConfigTable() {
     const logoHtml = t.logo ? `<img src="${t.logo}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:9px;color:var(--muted);text-align:center">Logo</span>`;
     const captain = getTeamCaptain(t);
     const captainPhotoHtml = captain.photo ? `<img src="${escapeHTML(captain.photo)}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:9px;color:var(--muted);text-align:center">Photo</span>`;
+    const rtmTagged = getRTMTaggedPlayersForTeam(t.id);
+    const rtmChipsHtml = rtmTagged.length
+      ? rtmTagged.map(rp => `<span class="chip chip-pink" style="font-size:9px;padding:2px 7px;margin:2px;display:inline-block">${escapeHTML(rp.catId)} · ${escapeHTML(rp.name)}</span>`).join('')
+      : `<span style="font-size:10px;color:var(--muted);font-style:italic">No RTM tags assigned</span>`;
+
     tile.innerHTML = `<div style="position:absolute;top:10px;right:10px;display:flex;gap:5px">
       <button class="ghost small" onclick="resetTeam('${t.id}')" title="Reset" style="color:var(--amber);border-color:rgba(245,158,11,0.2);padding:3px 7px;font-size:11px">↺</button>
       <button class="ghost small" onclick="this.closest('.team-config-card').remove()" title="Delete" style="color:var(--danger);border-color:rgba(239,68,68,0.2);padding:3px 7px;font-size:11px">×</button>
@@ -3212,7 +3231,11 @@ function renderTeamConfigTable() {
         <input class="t-captain-name" value="${escapeHTML(captain.name)}" placeholder="Captain name" style="margin:0;padding:8px 11px;font-size:13px">
       </div>
     </div>
-    <button class="ghost small word-break rtm-tag-btn" style="width:100%;margin-top:12px;color:var(--rtm);border-color:rgba(236,72,153,0.3);font-size:11px;padding:8px" onclick="openImportPlayersModal('${t.id}')">📥 Tag Previous Players (RTM)</button>`;
+    <button class="ghost small word-break rtm-tag-btn" style="width:100%;margin-top:12px;color:var(--rtm);border-color:rgba(236,72,153,0.3);font-size:11px;padding:8px" onclick="openImportPlayersModal('${t.id}')">📥 Tag Previous Players (RTM)</button>
+    <div style="margin-top:10px;background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.18);border-radius:10px;padding:8px 10px;text-align:left">
+      <div style="font-size:9px;color:var(--rtm);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">🔁 Selected RTM Tags (${rtmTagged.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;max-height:80px;overflow-y:auto">${rtmChipsHtml}</div>
+    </div>`;
     container.appendChild(tile);
     const logoDrop = tile.querySelector('.logo-drop-zone');
     setupFileUpload(logoDrop, (file) => uploadFile(file).then(url => {
@@ -3438,14 +3461,13 @@ window.updateImportSelCount = () => {
   document.getElementById('btnSelectAllImport').textContent = allVisibleChecked ? 'Deselect All' : 'Select All';
 };
 
-window.toggleSelectAllImport = () => {
+window.selectAllImportPlayers = (shouldSelect) => {
   const boxes = document.querySelectorAll('.import-checkbox:not(:disabled)');
-  const anyUnchecked = Array.from(boxes).some(b => !b.checked);
   const removedPlayers = [];
   boxes.forEach(b => {
-    b.checked = anyUnchecked;
+    b.checked = shouldSelect;
     const key = getImportPlayerKey(b.dataset.cat, b.dataset.name);
-    if (anyUnchecked) {
+    if (shouldSelect) {
       importSelectedPlayers.add(key);
     } else {
       importSelectedPlayers.delete(key);
@@ -3458,6 +3480,12 @@ window.toggleSelectAllImport = () => {
   });
   if (removedPlayers.length) socket.emit('admin:remove_previous', { teamId: importTargetTeamId, players: removedPlayers, previousOwners: STATE.previousOwners });
   updateImportSelCount();
+};
+
+window.toggleSelectAllImport = () => {
+  const boxes = document.querySelectorAll('.import-checkbox:not(:disabled)');
+  const anyUnchecked = Array.from(boxes).some(b => !b.checked);
+  selectAllImportPlayers(anyUnchecked);
 };
 
 window.confirmImportPlayers = () => {

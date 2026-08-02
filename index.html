@@ -2355,7 +2355,6 @@ socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.rol
 socket.on('state:updated', s => {
   const shouldClearActivePlayer = activePlayer && s && !s.currentActivePlayer && !s.biddingActive;
   STATE = s;
-  applyRTMTagOverridesToState();
   if (shouldClearActivePlayer) closeLocalLivePlayerView();
   renderAll();
 });
@@ -3347,32 +3346,6 @@ function removeRTMTagsForTeam(teamId) {
   return removed;
 }
 
-function setRTMTagOverride(teamId, selectedKeys) {
-  rtmTagOverrides[teamId] = Array.from(selectedKeys);
-}
-
-function applyRTMTagOverridesToState() {
-  if (!STATE.previousOwners) STATE.previousOwners = {};
-  Object.entries(rtmTagOverrides).forEach(([teamId, selectedKeys]) => {
-    Object.keys(STATE.previousOwners).forEach(key => {
-      if (STATE.previousOwners[key] === teamId) delete STATE.previousOwners[key];
-    });
-    selectedKeys.forEach(key => {
-      const [catId, ...nameParts] = key.split('::');
-      const name = nameParts.join('::');
-      if (catId && name) STATE.previousOwners[`${catId}:${name}`] = teamId;
-    });
-  });
-}
-
-function applyRTMTagSelectionForTeam(teamId, selectedKeys) {
-  if (!STATE.previousOwners) STATE.previousOwners = {};
-  removeRTMTagsForTeam(teamId);
-  getImportPlayersFromKeys(selectedKeys).forEach(({ catId, name }) => {
-    if (catId && name) STATE.previousOwners[`${catId}:${name}`] = teamId;
-  });
-}
-
 function syncRTMTagSelectionForTeam(teamId, selectedKeys, originalKeys = new Set()) {
   const selected = new Set(selectedKeys);
   const original = new Set(originalKeys);
@@ -3382,13 +3355,20 @@ function syncRTMTagSelectionForTeam(teamId, selectedKeys, originalKeys = new Set
   const addedPlayers = getImportPlayersFromKeys(addedKeys);
   const removedPlayers = getImportPlayersFromKeys(removedKeys);
 
-  setRTMTagOverride(teamId, selected);
-  applyRTMTagSelectionForTeam(teamId, selected);
-  socket.emit('admin:import_previous', { teamId, players: selectedPlayers, mode: 'replace' });
-  socket.emit('admin:sync_previous', { teamId, players: selectedPlayers, removed: removedPlayers, previousOwners: STATE.previousOwners });
-  if (removedPlayers.length) socket.emit('admin:remove_previous', { teamId, players: removedPlayers, previousOwners: STATE.previousOwners });
-  if (addedPlayers.length && addedPlayers.length !== selectedPlayers.length) socket.emit('admin:import_previous', { teamId, players: addedPlayers });
-  socket.emit('admin:updateConfig', { previousOwners: STATE.previousOwners });
+  if (!STATE.previousOwners) STATE.previousOwners = {};
+  
+  // Cleanly remove all previous RTM tags for this team in local state
+  Object.keys(STATE.previousOwners).forEach(key => {
+    if (STATE.previousOwners[key] === teamId) delete STATE.previousOwners[key];
+  });
+
+  // Assign the new RTM tags
+  selectedPlayers.forEach(({ catId, name }) => {
+    if (catId && name) STATE.previousOwners[`${catId}:${name}`] = teamId;
+  });
+
+  // Emit authoritative save event to server
+  socket.emit('admin:save_team_rtm', { teamId, selectedPlayers });
 
   return { addedPlayers, removedPlayers, selectedPlayers };
 }

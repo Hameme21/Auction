@@ -3240,25 +3240,48 @@ function renderTeamUpcomingMatches(team) {
     </div>`;
   }
 
-  const matches = STATE.schedule.matches.filter(m => Number(m.team1Pos) === teamPos || Number(m.team2Pos) === teamPos);
+  const matches = STATE.schedule.matches.filter(m => {
+    const posA = Number(m.teamPosA ?? m.team1Pos);
+    const posB = Number(m.teamPosB ?? m.team2Pos);
+    return posA === teamPos || posB === teamPos;
+  });
+
   if (!matches.length) {
     return `<div style="background:rgba(13,17,23,0.6);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
       <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">📅 Next Match Queue</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">No upcoming matches scheduled for ${escapeHTML(team.name)}.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">No upcoming matches scheduled for ${escapeHTML(team.name)} (Pos #${teamPos}).</div>
     </div>`;
   }
 
   const matchRows = matches.map((m, idx) => {
-    const isTeam1 = Number(m.team1Pos) === teamPos;
-    const oppPos = isTeam1 ? Number(m.team2Pos) : Number(m.team1Pos);
+    const posA = Number(m.teamPosA ?? m.team1Pos);
+    const posB = Number(m.teamPosB ?? m.team2Pos);
+    const isTeam1 = posA === teamPos;
+    const oppPos = isTeam1 ? posB : posA;
     const oppTeam = getTeamByPos(oppPos);
-    const timeStr = m.timeStr || '--:--';
-    const num = m.num || (idx + 1);
+
+    let formattedTime = '--:--';
+    const rawTime = m.dateTime || m.timeStr;
+    if (rawTime) {
+      try {
+        const d = new Date(rawTime);
+        if (!isNaN(d.getTime())) {
+          formattedTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ')';
+        } else {
+          formattedTime = rawTime;
+        }
+      } catch (e) {
+        formattedTime = rawTime;
+      }
+    }
+
+    const num = m.matchNo || m.num || (idx + 1);
+    const stageStr = m.stage ? ` · ${escapeHTML(m.stage)}` : '';
 
     return `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:10px">
-        <span class="chip chip-cyan" style="font-size:10px;padding:3px 8px">Match #${num}</span>
-        <span class="mono" style="font-size:11px;color:var(--amber);font-weight:700">⏰ ${escapeHTML(timeStr)}</span>
+        <span class="chip chip-cyan" style="font-size:10px;padding:3px 8px">Match #${num}${stageStr}</span>
+        <span class="mono" style="font-size:11px;color:var(--amber);font-weight:700">⏰ ${escapeHTML(formattedTime)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:11px;color:var(--muted);font-weight:600">VS</span>
@@ -3272,7 +3295,7 @@ function renderTeamUpcomingMatches(team) {
       <div style="font-size:11px;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:0.15em;display:flex;align-items:center;gap:6px">
         <span>📅</span> Next Match Queue
       </div>
-      <span class="chip chip-purple" style="font-size:9px">${matches.length} Match(es)</span>
+      <span class="chip chip-purple" style="font-size:9px">${matches.length} Scheduled Match(es)</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
       ${matchRows}

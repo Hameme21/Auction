@@ -276,20 +276,20 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .live-code-stage .code-value { font-size: clamp(4rem, 13vw, 9rem); }
 .code-value { font-family: var(--font-mono); font-size: clamp(2.8rem, 8vw, 5.2rem); font-weight: 800; letter-spacing: 0.12em; color: var(--cyan); text-shadow: 0 0 28px rgba(37,212,255,0.32); line-height: 1; }
 .code-value.slot-reels { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.8vw, 18px); letter-spacing: 0; width: 100%; color: white; text-shadow: none; font-size: 4.8rem; position: relative; overflow: hidden; border-radius: 20px; background: radial-gradient(circle at 50% 50%, rgba(37,212,255,0.08), transparent 70%); padding: 14px 20px; }
-.code-value.slot-reels::after { content: ''; position: absolute; top: 0; bottom: 0; width: 160px; background: linear-gradient(90deg, transparent 0%, rgba(37,212,255,0.45) 45%, rgba(102,255,99,0.55) 75%, transparent 100%); transform: translateX(-200%); animation: casinoLeftRightSweep 2.4s cubic-bezier(0.16,1,0.3,1) forwards; pointer-events: none; z-index: 12; }
+.code-value.slot-reels::after { content: ''; position: absolute; top: 0; bottom: 0; width: 180px; background: linear-gradient(90deg, transparent 0%, rgba(37,212,255,0.45) 45%, rgba(102,255,99,0.55) 75%, transparent 100%); transform: translateX(-220%); animation: casinoLeftRightSweep 3.2s cubic-bezier(0.12,0.88,0.24,1) forwards; pointer-events: none; z-index: 12; }
 .live-code-stage .code-value.slot-reels { font-size: 6rem; }
-.code-reel { width: clamp(58px, 13vw, 115px); height: 1.32em; overflow: hidden; border-radius: 16px; border: 1.5px solid rgba(54,216,208,0.45); background: linear-gradient(180deg, #040e1a 0%, #081d33 50%, #040e1a 100%); box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), inset 0 -14px 24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.25), 0 14px 34px rgba(0,8,28,0.45); position: relative; animation: reelSnapBounce 0.48s cubic-bezier(0.17,0.89,0.32,1.28) forwards; animation-delay: calc(var(--reel-delay, 0ms) + 1.75s); }
+.code-reel { width: clamp(58px, 13vw, 115px); height: 1.32em; overflow: hidden; border-radius: 16px; border: 1.5px solid rgba(54,216,208,0.45); background: linear-gradient(180deg, #040e1a 0%, #081d33 50%, #040e1a 100%); box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), inset 0 -14px 24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.25), 0 14px 34px rgba(0,8,28,0.45); position: relative; animation: reelSnapBounce 0.54s cubic-bezier(0.16,0.92,0.28,1.18) forwards; animation-delay: calc(var(--reel-delay, 0ms) + 2.35s); }
 .code-reel::before, .code-reel::after { content: ''; position: absolute; left: 0; right: 0; height: 36%; z-index: 5; pointer-events: none; }
 .code-reel::before { top: 0; background: linear-gradient(180deg, rgba(2,8,18,0.95) 0%, rgba(2,8,18,0.6) 60%, transparent 100%); border-bottom: 1px solid rgba(255,255,255,0.05); }
 .code-reel::after { bottom: 0; background: linear-gradient(0deg, rgba(2,8,18,0.95) 0%, rgba(2,8,18,0.6) 60%, transparent 100%); border-top: 1px solid rgba(255,255,255,0.05); }
-.code-reel-track { display: flex; flex-direction: column; align-items: center; animation: casinoReelSpin 2.1s cubic-bezier(0.12,0.9,0.22,1.14) both; animation-delay: var(--reel-delay, 0ms); will-change: transform, filter; }
+.code-reel-track { display: flex; flex-direction: column; align-items: center; animation: casinoReelSpin 2.75s cubic-bezier(0.08,0.82,0.17,1.05) both; animation-delay: var(--reel-delay, 0ms); will-change: transform, filter; }
 .code-symbol { height: 1.32em; line-height: 1.32em; color: #66ff63; font-weight: 900; font-family: var(--font-mono); text-shadow: 0 0 24px rgba(102,255,99,0.6), 0 0 10px rgba(37,212,255,0.4); display: flex; align-items: center; justify-content: center; }
 .code-clue { margin-top: 10px; font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; }
 .code-card.flipping { animation: codeFlip 0.72s cubic-bezier(0.22,1,0.36,1); }
 @keyframes codeFlip { 0% { transform: rotateY(0) scale(1); } 45% { transform: rotateY(90deg) scale(1.04); filter: brightness(1.4); } 100% { transform: rotateY(0) scale(1); } }
-@keyframes casinoReelSpin { 0% { transform: translate3d(0, calc(-1 * var(--spin-distance, 10em)), 0); filter: blur(4px) brightness(1.6); } 65% { filter: blur(1.5px) brightness(1.3); } 85% { filter: blur(0.4px) brightness(1.15); } 100% { transform: translate3d(0, 0, 0); filter: blur(0) brightness(1); } }
-@keyframes casinoLeftRightSweep { 0% { transform: translateX(-200%); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(550%); opacity: 0; } }
-@keyframes reelSnapBounce { 0% { border-color: rgba(54,216,208,0.45); box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), 0 14px 34px rgba(0,8,28,0.45); transform: translateY(0); } 40% { border-color: #66ff63; box-shadow: 0 0 32px rgba(102,255,99,0.6), inset 0 0 20px rgba(102,255,99,0.4); transform: translateY(-4px) scale(1.03); } 75% { transform: translateY(1.5px) scale(0.99); } 100% { border-color: rgba(37,212,255,0.65); box-shadow: 0 0 18px rgba(37,212,255,0.35), inset 0 0 12px rgba(37,212,255,0.2); transform: translateY(0) scale(1); } }
+@keyframes casinoReelSpin { 0% { transform: translate3d(0, calc(-1 * var(--spin-distance, 10em)), 0); filter: blur(3.5px) brightness(1.5); } 60% { filter: blur(1.5px) brightness(1.25); } 85% { filter: blur(0.4px) brightness(1.1); } 100% { transform: translate3d(0, 0, 0); filter: blur(0) brightness(1); } }
+@keyframes casinoLeftRightSweep { 0% { transform: translateX(-220%); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(600%); opacity: 0; } }
+@keyframes reelSnapBounce { 0% { border-color: rgba(54,216,208,0.45); box-shadow: inset 0 14px 24px rgba(0,0,0,0.8), 0 14px 34px rgba(0,8,28,0.45); transform: translateY(0); } 42% { border-color: #66ff63; box-shadow: 0 0 34px rgba(102,255,99,0.62), inset 0 0 20px rgba(102,255,99,0.42); transform: translateY(-3.5px) scale(1.025); } 76% { transform: translateY(1px) scale(0.995); } 100% { border-color: rgba(37,212,255,0.68); box-shadow: 0 0 20px rgba(37,212,255,0.38), inset 0 0 14px rgba(37,212,255,0.22); transform: translateY(0) scale(1); } }
 
 #importPlayersModal { max-width: 500px; }
 .import-player-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
@@ -1766,7 +1766,7 @@ let blockedBidToastKey = '';
 let liveRevealToken = 0;
 let allowActivePlayerCodeQueue = false;
 const PLAYER_REVEAL_DELAY_MS = 350;
-const PLAYER_REVEAL_SPIN_MS = 2150;
+const PLAYER_REVEAL_SPIN_MS = 3650;
 const PLAYER_REVEAL_FLIP_MS = 520;
 const PLAYER_REVEAL_LOADER_MS = 700;
 
@@ -1870,15 +1870,15 @@ function escapeHTML(value) {
 function makeCasinoCodeReels(code) {
   const symbols = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
   return String(code || '----').split('').map((finalChar, index) => {
-    // Target character is at index 0 so top-to-bottom scroll lands on finalChar
+    // Target character is at index 0 so top-to-bottom scroll lands smoothly on finalChar
     const reel = [finalChar];
-    const spinLength = 16 + index * 4;
+    const spinLength = 22 + index * 5;
     for (let i = 0; i < spinLength; i++) {
       const symbolIndex = parseInt(hashCode(`${finalChar}:${index}:${i}`), 36) % symbols.length;
       reel.push(symbols[symbolIndex]);
     }
     const distance = (reel.length - 1) * 1.28;
-    const delay = index * 220; // Left-to-right stagger (0ms, 220ms, 440ms, 660ms)
+    const delay = index * 340; // Silky left-to-right stagger (0ms, 340ms, 680ms, 1020ms)
     return `<span class="code-reel" aria-hidden="true" style="--reel-delay:${delay}ms;--spin-distance:${distance}em"><span class="code-reel-track">${reel.map(symbol => `<span class="code-symbol">${escapeHTML(symbol)}</span>`).join('')}</span></span>`;
   }).join('');
 }
@@ -2004,11 +2004,11 @@ async function playQueuedPlayerReveal(player, context) {
   revealCodeEl.setAttribute('aria-label', code);
   revealCodeEl.innerHTML = makeCasinoCodeReels(code);
 
-  // Staggered audio ticks aligned with reel snap landings (0ms, 220ms, 440ms, 660ms delays + 1.75s spin)
-  setTimeout(() => playSlotTick(0.95), 1750);
-  setTimeout(() => playSlotTick(1.15), 1970);
-  setTimeout(() => playSlotTick(1.35), 2190);
-  setTimeout(() => playJackpotChime(), 2410);
+  // Staggered audio ticks aligned with longer, smoother reel snap landings (0ms, 340ms, 680ms, 1020ms delays + 2.35s spin)
+  setTimeout(() => playSlotTick(0.95), 2350);
+  setTimeout(() => playSlotTick(1.15), 2690);
+  setTimeout(() => playSlotTick(1.35), 3030);
+  setTimeout(() => playJackpotChime(), 3370);
 
   await wait(PLAYER_REVEAL_SPIN_MS);
   if (revealToken !== liveRevealToken) return;

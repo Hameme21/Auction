@@ -2762,7 +2762,7 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
   let sections = [{ id: 'sectionDashboard', label: 'Dashboard', icon: '📊' }];
   if (isAdmin || isTeam || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionLiveAuction', label: 'Live Bidding', icon: '🔨' });
   sections.push({ id: 'sectionPlayerDatabase', label: 'Player DB', icon: '👥' });
-  sections.push({ id: 'sectionScheduler', label: 'Scheduler', icon: '📅' });
+  if (isAdmin || CURRENT_USER.role === 'listener') sections.push({ id: 'sectionScheduler', label: 'Scheduler', icon: '📅' });
   if (isAdmin) sections.push({ id: 'sectionTeamConfig', label: 'Team Config', icon: '⚙️' });
 
   buildNavItems(sections);

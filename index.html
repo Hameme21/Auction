@@ -4080,6 +4080,7 @@ window.assignTeamNumber = (teamId, numberVal) => {
   } else {
     delete STATE.schedule.teamNumbers[teamId];
   }
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
 };
 
@@ -4131,6 +4132,7 @@ window.addScheduleMatch = () => {
     dateTimeInput.value = localISOTime;
   }
 
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
   showToast(`Match #${matchNo} added (+30m time step applied)`);
 };
@@ -4138,6 +4140,7 @@ window.addScheduleMatch = () => {
 window.deleteScheduleMatch = (matchId) => {
   if (!STATE.schedule || !Array.isArray(STATE.schedule.matches)) return;
   STATE.schedule.matches = STATE.schedule.matches.filter(m => m.id !== matchId);
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
   showToast('Match removed from schedule draft');
 };
@@ -4193,6 +4196,7 @@ window.saveMatchEdit = () => {
     
     STATE.schedule.matches.sort((a, b) => a.matchNo - b.matchNo);
     closeMatchEditModal();
+    socket.emit('schedule:save', STATE.schedule);
     renderScheduler();
     showToast(`Match #${matchNo} updated successfully!`);
   }
@@ -4205,6 +4209,7 @@ window.autoLinkTeamPositions = () => {
   STATE.teams.forEach((t, i) => {
     STATE.schedule.teamNumbers[t.id] = i + 1;
   });
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
   showToast(`Linked all ${STATE.teams.length} franchises to positions 1..${STATE.teams.length}`);
 };
@@ -4220,6 +4225,7 @@ window.shiftMatchTimes = (mins = 30) => {
       m.dateTime = new Date(newT - tzOffset).toISOString().slice(0, 16);
     }
   });
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
   showToast(`Shifted all match times forward by +${mins}m`);
 };
@@ -4291,8 +4297,9 @@ window.autoGenerateFixtures = () => {
     schedDateTime.value = (new Date(currentTime - tzOffset)).toISOString().slice(0, 16);
   }
 
+  socket.emit('schedule:save', STATE.schedule);
   renderScheduler();
-  showToast(`Auto-generated ${generatedMatches.length} rest-optimized fixtures (+30m steps)! Click 'Publish Schedule' to release.`);
+  showToast(`Auto-generated ${generatedMatches.length} rest-optimized fixtures (+30m steps)!`);
 };
 
 window.publishSchedule = () => {

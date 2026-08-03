@@ -2716,7 +2716,7 @@ function setupUI(preferredSectionId = 'sectionDashboard') {
 
 function formatAuctionCr(value) {
     const n = Number(value) || 0;
-    return `${n.toFixed(n % 1 ? 2 : 0)} Cr`;
+    return `${n.toFixed(n % 1 ? 2 : 0)} CP`;
 }
 
 function getTeamSpendDetails(team) {
@@ -2856,7 +2856,7 @@ function renderAll() {
   if (appContainer.classList.contains('hidden')) return;
   renderScoreboards();
   if (CURRENT_USER.role === 'team') renderMyTeam();
-  if (CURRENT_USER.role === 'listener') renderViewerRosters();
+  renderViewerRosters();
   if (CURRENT_USER.role !== 'admin') renderLiveIdleCode();
   renderDatabase();
   renderScheduler();

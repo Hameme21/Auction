@@ -207,6 +207,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .rtm-badge { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(219,39,119,0.08)); border: 1px solid rgba(236,72,153,0.3); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
 
 #soldAnimationOverlay { position: fixed; inset: 0; z-index: 9999; background: rgba(6,9,16,0.98); display: flex; align-items: center; justify-content: center; }
+#unsoldAnimationOverlay { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(ellipse at center, rgba(180,20,20,0.92) 0%, rgba(60,6,6,0.98) 60%, rgba(10,2,2,0.99) 100%); display: flex; align-items: center; justify-content: center; animation: unsoldFlash 0.6s ease-out; }
+@keyframes unsoldFlash { 0% { opacity:0; transform:scale(1.15); } 30% { opacity:1; } 50% { background: radial-gradient(ellipse at center, rgba(255,40,40,0.95) 0%, rgba(120,8,8,0.98) 60%, rgba(20,2,2,0.99) 100%); } 100% { background: radial-gradient(ellipse at center, rgba(180,20,20,0.92) 0%, rgba(60,6,6,0.98) 60%, rgba(10,2,2,0.99) 100%); } }
+@keyframes unsoldPulse { 0%, 100% { transform: scale(1); text-shadow: 0 0 60px rgba(239,68,68,0.8), 0 8px 40px rgba(0,0,0,0.6); } 50% { transform: scale(1.04); text-shadow: 0 0 90px rgba(255,80,80,0.9), 0 12px 50px rgba(0,0,0,0.7); } }
+@keyframes unsoldSlideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.unsold-round-banner { background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(180,20,20,0.08)); border: 1px solid rgba(239,68,68,0.35); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; animation: unsoldBannerGlow 2s ease-in-out infinite alternate; }
+@keyframes unsoldBannerGlow { 0% { box-shadow: 0 0 8px rgba(239,68,68,0.15); } 100% { box-shadow: 0 0 18px rgba(239,68,68,0.3); } }
 .overlay { position: fixed; inset: 0; z-index: 5000; background: rgba(6,9,16,0.88); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
 .modal { background: linear-gradient(180deg, rgba(10,33,64,0.98), rgba(4,13,29,0.98)); padding: 22px; border-radius: var(--radius-xl); width: 100%; max-width: 520px; border: 1px solid rgba(120,183,255,0.22); box-shadow: 0 30px 90px rgba(0,8,28,0.7); text-align: center; max-height: 95vh; overflow-y: auto; animation: modalRise 0.35s cubic-bezier(0.16,1,0.3,1); }
 @media(min-width:768px) { .modal { padding: 36px; } }
@@ -1286,9 +1292,14 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
             <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700">Code Shuffle</h3>
             <p style="color:var(--muted);font-size:11px;margin-top:3px">Reveal one hidden player code at a time</p>
           </div>
-          <div class="toolbar-actions">
+          <div class="toolbar-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
             <button class="btn-primary small" onclick="shufflePlayerCodes()">Shuffle Codes</button>
+            <button class="ghost small" onclick="startUnsoldRound()" id="btnStartUnsoldRound" style="color:var(--danger);border-color:rgba(239,68,68,0.35)" title="Shuffle only unsold players for the second auction round">🔄 Unsold Round</button>
             <button class="ghost small" onclick="clearPlayerCodes()">Reset Codes</button>
+            <div id="unsoldRoundBanner" class="hidden unsold-round-banner">
+              <span style="font-size:13px">🔴</span>
+              <span style="font-size:11px;font-weight:800;color:var(--danger);text-transform:uppercase;letter-spacing:0.1em">Unsold Round Active</span>
+            </div>
           </div>
         </div>
         <div id="auctionIdleState" class="glass" style="flex:1;min-height:360px;display:flex;flex-direction:column;overflow:hidden">
@@ -1357,9 +1368,10 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
                 <button class="bid-step-btn bid-step-up" onclick="adjustBid('inc')" aria-label="Increase bid">+</button>
               </div>
 
-              <div id="adminActionButtons" class="hidden" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px">
+              <div id="adminActionButtons" class="hidden" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:16px">
                 <button class="green" onclick="socket.emit('admin:start_bidding')" id="btnStartBidding" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">▶ START BIDDING</button>
                 <button class="yellow" onclick="triggerSoldFromPopup()" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">🔨 GAVEL DROP</button>
+                <button class="ghost red" onclick="triggerUnsoldFromPopup()" id="btnUnsoldPlayer" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px;border-color:rgba(239,68,68,0.4);color:var(--danger)">❌ UNSOLD</button>
                 <button class="pink" onclick="triggerRTMPopup()" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">🔁 OVERRIDE RTM</button>
               </div>
             
@@ -1607,6 +1619,26 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       <div style="margin-top:24px">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.2em;margin-bottom:8px">Final Valuation</div>
         <div id="animPrice" class="mono" style="font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--emerald)">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="unsoldAnimationOverlay" class="hidden">
+    <div style="text-align:center;padding:40px;width:100%;">
+      <div style="font-size:clamp(3rem,10vw,5rem);margin-bottom:12px;animation:unsoldPulse 1.2s ease-in-out infinite">❌</div>
+      <h1 style="font-family:var(--font-display);font-size:clamp(3.2rem,10vw,7rem);font-weight:900;color:#ff4444;letter-spacing:0.12em;margin-bottom:10px;text-shadow:0 0 60px rgba(239,68,68,0.8),0 8px 40px rgba(0,0,0,0.6);animation:unsoldPulse 1.2s ease-in-out infinite">UNSOLD</h1>
+      <h2 id="unsoldAnimPlayer" class="word-break" style="font-family:var(--font-display);font-size:clamp(1.2rem,3.5vw,2.2rem);font-weight:600;color:rgba(255,255,255,0.85);margin-bottom:16px;animation:unsoldSlideUp 0.5s ease-out 0.2s both">Player Name</h2>
+      <div style="animation:unsoldSlideUp 0.5s ease-out 0.4s both">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:10px 22px">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;letter-spacing:0.18em">No Winning Bid</span>
+        </div>
+      </div>
+      <div style="margin-top:24px;animation:unsoldSlideUp 0.5s ease-out 0.5s both">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.2em;margin-bottom:6px">Base Price</div>
+        <div id="unsoldAnimBase" class="mono" style="font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;color:rgba(255,100,100,0.85)">৳0</div>
+      </div>
+      <div style="margin-top:18px;animation:unsoldSlideUp 0.5s ease-out 0.6s both">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;text-transform:uppercase;letter-spacing:0.15em">Will return in Unsold Round</div>
       </div>
     </div>
   </div>
@@ -2615,10 +2647,42 @@ socket.on('bidding:started', () => {
 });
 
 socket.on('player:unsold', (data) => {
-    showToast(`❌ ${data.name} went UNSOLD`);
-    log(`<span style="color:var(--danger);font-weight:700">UNSOLD</span>: ${data.name}`);
-    
+    const { category, name } = data;
+    activePlayer = null; updateLiveIndicator();
+    allowActivePlayerCodeQueue = false;
+    liveRevealToken++;
+    blockedBidToastKey = '';
+    const popup = document.getElementById('auctionPlayerPopup');
+    popup.classList.remove('is-code-mode');
+    popup.classList.add('hidden'); popup.style.opacity = ''; popup.style.filter = ''; popup.style.pointerEvents = '';
+    document.getElementById('livePlayerBody')?.classList.remove('is-preparing-player');
+    document.getElementById('livePlayerLoader')?.classList.add('hidden');
+    document.getElementById('liveCodeReveal')?.classList.add('hidden');
+    document.querySelector('#popupImgContainer .live-photo-frame')?.classList.remove('photo-glow');
+    document.getElementById('liveAuctionMain')?.classList.remove('is-player-active', 'is-revealing-player');
+    document.getElementById('auctionIdleState').classList.remove('hidden');
+    document.getElementById('auctionIdleState')?.classList.remove('admin-code-active');
+
+    // Show big red UNSOLD animation overlay
+    const cat = STATE.categories.find(c => c.id === category);
+    const base = Number(cat?.base) || 0;
+    document.getElementById('unsoldAnimPlayer').textContent = name;
+    document.getElementById('unsoldAnimBase').textContent = `৳${base}`;
+    const overlay = document.getElementById('unsoldAnimationOverlay');
+    overlay.classList.remove('hidden');
+    // Re-trigger flash animation
+    overlay.style.animation = 'none'; void overlay.offsetWidth; overlay.style.animation = '';
+
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+      renderAll();
+    }, 3500);
+
+    log(`<span style="color:var(--danger);font-weight:700">UNSOLD</span>: ${name}`);
     if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();
+
+    // Update unsold round banner visibility
+    updateUnsoldRoundBanner();
 });
 
 // --- RTM PROMPT SOCKET EVENTS ---
@@ -2917,6 +2981,7 @@ function renderAll() {
       updatePopupPrice(STATE.activeBids[key] || activePlayer.base, STATE.activeBidders ? STATE.activeBidders[key] : null); 
   }
   updateLiveIndicator();
+  updateUnsoldRoundBanner();
 }
 
 function getNextQueuedPlayer() {
@@ -3880,6 +3945,24 @@ window.triggerSoldFromPopup = () => {
       return;
     }
     markActivePlayerUnsold(sale);
+};
+
+window.triggerUnsoldFromPopup = () => {
+    const sale = getActiveSaleContext();
+    if (!sale) return;
+    markActivePlayerUnsold(sale);
+};
+
+function updateUnsoldRoundBanner() {
+    const banner = document.getElementById('unsoldRoundBanner');
+    if (!banner) return;
+    const isUnsoldActive = !!STATE.unsoldRoundActive || ((STATE.lotteryQueue || []).length > 0 && STATE.lotteryQueue.every(p => p.isUnsold));
+    banner.classList.toggle('hidden', !isUnsoldActive);
+}
+
+window.startUnsoldRound = () => {
+    socket.emit('admin:shuffle_unsold');
+    showToast('🔄 Shuffled Unsold Players for Unsold Round!');
 };
 
 function pauseTimerForModal() {

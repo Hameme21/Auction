@@ -3087,6 +3087,11 @@ function makeTileHTML(player, catId, price, isDirect, isRTM, soldToName) {
       const pT = STATE.teams.find(t => t.id === prevOwnerId);
       if (pT) prevOwnerBadge = `<span class="rtm-owner-badge">RTM: ${escapeHTML(pT.name)}</span>`;
   }
+  const isAdmin = CURRENT_USER.role === 'admin';
+  const playerCode = player.code || getPlayerCode(catId, player.name);
+  const adminCodeBadge = (isAdmin && playerCode)
+    ? `<span class="chip chip-purple" style="position:absolute;bottom:8px;left:8px;z-index:5;background:rgba(120,183,255,0.2);border:1px solid rgba(120,183,255,0.45);color:var(--accent-2);font-family:var(--font-mono);font-weight:800;font-size:9px;padding:2px 6px;">#${escapeHTML(playerCode)}</span>`
+    : '';
 
   let statusBar = '';
   if (isSold) {
@@ -3102,6 +3107,7 @@ function makeTileHTML(player, catId, price, isDirect, isRTM, soldToName) {
       <span class="chip chip-cyan" style="position:absolute;top:8px;left:8px;z-index:5">${catId}</span>
       ${badge}
       ${prevOwnerBadge}
+      ${adminCodeBadge}
       <div class="hover-overlay-anchor" style="position:absolute;inset:0;z-index:10"></div>
     </div>
     <div style="padding:12px">
@@ -3153,6 +3159,62 @@ function renderViewerRosters() {
   });
 }
 
+function renderTeamUpcomingMatches(team) {
+  if (!STATE.schedule || !STATE.schedule.matches || !STATE.schedule.matches.length || !STATE.schedule.teamNumbers) {
+    return `<div style="background:rgba(13,17,23,0.6);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">📅 Next Match Queue</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">No tournament matches scheduled yet.</div>
+    </div>`;
+  }
+
+  const teamPos = Number(STATE.schedule.teamNumbers[team.id]);
+  if (!teamPos) {
+    return `<div style="background:rgba(13,17,23,0.6);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">📅 Next Match Queue</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Team position not assigned in scheduler.</div>
+    </div>`;
+  }
+
+  const matches = STATE.schedule.matches.filter(m => Number(m.team1Pos) === teamPos || Number(m.team2Pos) === teamPos);
+  if (!matches.length) {
+    return `<div style="background:rgba(13,17,23,0.6);border:1px dashed rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;">📅 Next Match Queue</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">No upcoming matches scheduled for ${escapeHTML(team.name)}.</div>
+    </div>`;
+  }
+
+  const matchRows = matches.map((m, idx) => {
+    const isTeam1 = Number(m.team1Pos) === teamPos;
+    const oppPos = isTeam1 ? Number(m.team2Pos) : Number(m.team1Pos);
+    const oppTeam = getTeamByPos(oppPos);
+    const timeStr = m.timeStr || '--:--';
+    const num = m.num || (idx + 1);
+
+    return `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="chip chip-cyan" style="font-size:10px;padding:3px 8px">Match #${num}</span>
+        <span class="mono" style="font-size:11px;color:var(--amber);font-weight:700">⏰ ${escapeHTML(timeStr)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--muted);font-weight:600">VS</span>
+        ${oppTeam ? teamNameWithLogoHTML(oppTeam, 26, 'color:white;font-weight:700;font-size:12px') : `<span style="font-size:11px;color:white;font-weight:700">Pos #${oppPos}</span>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div style="background:rgba(7,18,34,0.75);border:1px solid rgba(120,183,255,0.24);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 10px 30px rgba(0,0,0,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div style="font-size:11px;color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:0.15em;display:flex;align-items:center;gap:6px">
+        <span>📅</span> Next Match Queue
+      </div>
+      <span class="chip chip-purple" style="font-size:9px">${matches.length} Match(es)</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
+      ${matchRows}
+    </div>
+  </div>`;
+}
+
 function renderMyTeam() {
   const t = STATE.teams.find(x => x.id === CURRENT_USER.teamId);
   const div = document.getElementById('dashboardMyTeamContent'); if (!t || !div) return;
@@ -3164,6 +3226,7 @@ function renderMyTeam() {
     </div>
   </div>
   ${t.impactUsed ? `<div style="background:rgba(47,125,246,0.1);border:1px solid rgba(120,183,255,0.24);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--accent-2);font-weight:600;display:flex;align-items:center;gap:8px"><span>⚡</span> Impact Power Deployed</div>` : ''}`;
+  div.innerHTML += renderTeamUpcomingMatches(t);
   div.innerHTML += renderTeamSpendCharts(t);
   const rtmTaggedPlayers = getRTMTaggedPlayersForTeam(t.id);
   if (rtmTaggedPlayers.length) {

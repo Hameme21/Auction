@@ -2373,8 +2373,8 @@ socket.on('code_shuffle:started', () => {
 });
 
 socket.on('player:bid', pl => {
+  const bidderId = pl.highBidderId || pl.teamId;
   const key = `${pl.category}:${pl.name}`;
-  const bidderId = pl.teamId || pl.highBidderId || null;
   if (!STATE.activeBids) STATE.activeBids = {};
   if (!STATE.activeBidders) STATE.activeBidders = {};
   STATE.activeBids[key] = pl.price;
@@ -2383,6 +2383,7 @@ socket.on('player:bid', pl => {
     updatePopupPrice(pl.price, bidderId); 
     resetAndStartTimer(); 
   }
+  playBidBeep();
   const t = STATE.teams.find(x => x.id === bidderId);
   const bidderName = t ? t.name : 'Admin Forced Bid';
   log(`<span style="color:white;font-weight:700">${pl.name}</span> <span style="color:var(--muted)">bid by</span> <span style="color:var(--cyan);font-weight:700">${bidderName}</span> → <span style="color:var(--emerald);font-weight:700">৳${pl.price}</span>`);

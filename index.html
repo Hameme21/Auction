@@ -1373,6 +1373,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
                 <button class="ghost red" onclick="triggerUnsoldFromPopup()" id="btnUnsoldPlayer" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px;border-color:rgba(239,68,68,0.4);color:var(--danger)">❌ UNSOLD</button>
                 <button class="pink" onclick="triggerRTMPopup()" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">🔁 OVERRIDE RTM</button>
               </div>
+              <div id="unsoldAutoDetectContainer"></div>
             
               <div id="teamActionButtons" class="hidden" style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
                 <button id="btnTeamBid" class="green" style="width:100%; padding:14px; font-family:var(--font-display); font-size:15px; letter-spacing:0.05em; box-shadow:0 4px 20px rgba(16,185,129,0.3)">BID ৳<span id="teamBidAmount">0</span></button>
@@ -1758,6 +1759,15 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
         <button class="ghost" onclick="declineUnsoldRoundPrompt()" style="padding:14px;font-family:var(--font-display);letter-spacing:0.04em">No, Show List</button>
         <button class="btn-primary" onclick="confirmUnsoldRoundPrompt()" style="background:linear-gradient(135deg,#ef4444,#dc2626);border-color:#f87171;box-shadow:0 4px 20px rgba(239,68,68,0.4);padding:14px;font-family:var(--font-display);letter-spacing:0.04em">Yes, Start Unsold Round ›</button>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="cannotBidModalOverlay">
+    <div class="modal" style="max-width:440px;text-align:center;position:relative">
+      <div style="font-size:36px;margin-bottom:8px">🔒</div>
+      <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--amber);margin-bottom:12px">Bidding Restricted</h3>
+      <div id="cannotBidModalReason" style="font-size:13px;color:rgba(255,255,255,0.9);line-height:1.55;margin-bottom:20px;background:rgba(0,0,0,0.35);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);text-align:left"></div>
+      <button class="btn-primary" onclick="closeCannotBidModal()" style="width:100%;padding:12px;font-family:var(--font-display);letter-spacing:0.04em">Got It</button>
     </div>
   </div>
 
@@ -2255,14 +2265,27 @@ function closeLocalLivePlayerView() {
   updateLiveIndicator();
 }
 
+let currentCannotBidReason = '';
+
+function showCannotBidModal(reason) {
+  const msgEl = document.getElementById('cannotBidModalReason');
+  if (msgEl) msgEl.innerHTML = reason || 'Bidding is restricted for this player.';
+  document.getElementById('cannotBidModalOverlay')?.classList.remove('hidden');
+}
+
+function closeCannotBidModal() {
+  document.getElementById('cannotBidModalOverlay')?.classList.add('hidden');
+}
+
 function getLiveBidContext() {
-  const cat = STATE.categories.find(c => c.id === activePlayer?.category);
-  const base = Number(cat?.base) || Number(activePlayer?.base) || 0;
+  if (!activePlayer) return { cat: null, base: 0, inc: 0, currentPrice: 0, highBidderId: null, nextBid: 0 };
+  const key = `${activePlayer.category}:${activePlayer.name}`;
+  const cat = STATE.categories.find(c => c.id === activePlayer.category);
+  const base = Number(activePlayer.base) || Number(cat?.base) || 0;
   const inc = Number(cat?.increment) || 0;
-  const currentPrice = Number(document.getElementById('popupPrice')?.textContent) || 0;
-  const key = activePlayer ? `${activePlayer.category}:${activePlayer.name}` : '';
-  const highBidderId = key && STATE.activeBidders ? STATE.activeBidders[key] : null;
-  return { cat, base, inc, currentPrice, highBidderId, nextBid: highBidderId ? currentPrice + inc : base };
+  const currentPrice = (STATE.activeBids && STATE.activeBids[key] !== undefined) ? Number(STATE.activeBids[key]) : Number(document.getElementById('popupPrice')?.textContent) || base;
+  const highBidderId = STATE.activeBidders ? STATE.activeBidders[key] : null;
+  return { cat, base, inc, currentPrice, highBidderId, nextBid: highBidderId ? currentPrice + inc : currentPrice || base };
 }
 
 function getNextCategoryReserve(team, activeCategoryId) {
@@ -2275,13 +2298,69 @@ function getNextCategoryReserve(team, activeCategoryId) {
 }
 
 function canTeamBidActivePlayer(team, bidPrice) {
-  if (!team || !activePlayer) return { ok: false, reserve: 0, purse: 0 };
+  if (!team || !activePlayer) return { ok: false, reserve: 0, purse: 0, reason: 'No active player selected.' };
   const purse = Number(team.purse) || 0;
   const reserve = getNextCategoryReserve(team, activePlayer.category);
   const alreadyFilledCategory = !!team.purchases?.[activePlayer.category];
-  const ok = !alreadyFilledCategory && purse >= bidPrice && purse - bidPrice >= reserve;
-  return { ok, reserve, purse };
+  
+  let ok = true;
+  let reason = '';
+  if (alreadyFilledCategory) {
+    ok = false;
+    reason = `Your franchise (<strong>${escapeHTML(team.name)}</strong>) has already acquired a player in the <strong>${escapeHTML(activePlayer.category)}</strong> category.`;
+  } else if (purse < bidPrice) {
+    ok = false;
+    reason = `Your remaining purse balance (<strong>৳${purse}</strong>) is insufficient for the required bid of <strong>৳${bidPrice}</strong>.`;
+  } else if ((purse - bidPrice) < reserve) {
+    ok = false;
+    reason = `You cannot bid higher because your remaining purse balance (<strong>৳${purse}</strong>) must be reserved to buy required players in upcoming categories at base price (Required Reserve: <strong>৳${reserve}</strong>).`;
+  }
+
+  return { ok, reserve, purse, reason };
 }
+
+function renderUnsoldAutoDetectBanner(player = activePlayer) {
+  const container = document.getElementById('unsoldAutoDetectContainer');
+  if (!container) return;
+  const isUnsoldMode = player && (player.isUnsold || STATE.unsoldRoundActive);
+  if (!isUnsoldMode) {
+    container.innerHTML = '';
+    return;
+  }
+  const catId = player.category;
+  const basePrice = Number(player.base) || 0;
+  const unfulfilledTeams = STATE.teams.filter(t => !t.purchases?.[catId]);
+
+  if (!unfulfilledTeams.length) {
+    container.innerHTML = `<div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px;font-size:11px;color:#fca5a5;margin-top:10px;text-align:center">
+      ⚠️ All franchises already have a player in category <strong>${escapeHTML(catId)}</strong>.
+    </div>`;
+    return;
+  }
+
+  const targetTeam = unfulfilledTeams[0];
+  const teamNames = unfulfilledTeams.map(t => escapeHTML(t.name)).join(', ');
+
+  container.innerHTML = `<div style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.15));border:1px solid rgba(16,185,129,0.4);border-radius:12px;padding:12px;margin-top:12px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:10px;color:var(--emerald);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;display:flex;align-items:center;gap:6px">
+      <span>🎯</span> AUTO-DETECTED UNFILLED FRANCHISE TARGET
+    </div>
+    <div style="font-size:12px;color:white;font-weight:700">
+      Franchise(s) needing <strong>${escapeHTML(catId)}</strong>: <span style="color:var(--cyan)">${teamNames}</span>
+    </div>
+    ${CURRENT_USER.role === 'admin' ? `
+      <button class="green" onclick="autoSellUnsoldPlayer('${escapeHTML(player.category)}', '${escapeHTML(player.name)}', '${targetTeam.id}', ${basePrice})" style="padding:10px;font-family:var(--font-display);font-size:13px;letter-spacing:0.04em;margin-top:4px">
+        ⚡ AUTO-SELL TO ${escapeHTML(targetTeam.name).toUpperCase()} (৳${basePrice}) ›
+      </button>
+    ` : ''}
+  </div>`;
+}
+
+window.autoSellUnsoldPlayer = (category, name, teamId, price) => {
+  socket.emit('player:sold', { category, name, price, isDirect: false, isRTM: false, teamId });
+  const t = STATE.teams.find(x => x.id === teamId);
+  showToast(`⚡ Auto-sold ${name} to ${t ? t.name : teamId} @ ৳${price}!`);
+};
 
 function isTeamRTMEligibleForPlayer(team, player = activePlayer) {
   if (!team || !player) return false;
@@ -2337,26 +2416,31 @@ function updateLiveEligibility() {
     const isWinning = highBidderId === CURRENT_USER.teamId;
     const availability = canTeamBidActivePlayer(myTeam, isWinning ? currentPrice : nextBid);
     const ok = availability.ok || isWinning;
+    currentCannotBidReason = availability.reason;
     if (popup) {
       popup.style.opacity = ok ? '1' : '0.48';
       popup.style.filter = ok ? 'none' : 'grayscale(1)';
       popup.style.pointerEvents = 'auto';
       
       const bidBtn = document.getElementById('btnTeamBid');
-      if (bidBtn && !ok && !bidBtn.disabled) {
-          bidBtn.disabled = true;
-          bidBtn.innerHTML = `CAN'T BID`;
-          bidBtn.style.opacity = '0.45';
+      if (bidBtn) {
+        if (!ok) {
+          bidBtn.disabled = false;
+          bidBtn.innerHTML = `CAN'T BID (WHY?)`;
+          bidBtn.style.opacity = '0.55';
+          bidBtn.onclick = () => showCannotBidModal(availability.reason);
+        }
       }
       if (!ok && STATE.biddingActive) {
-        const toastKey = `${key}:${CURRENT_USER.teamId}:${nextBid}`;
+        const toastKey = `${key}:${CURRENT_USER.teamId}`;
         if (blockedBidToastKey !== toastKey) {
           blockedBidToastKey = toastKey;
-          showToast("You can't bid anymore for this player");
+          showToast(`⚠️ Bidding restricted: ${availability.reason.replace(/<[^>]*>/g, '')}`);
         }
       }
     }
   }
+  renderUnsoldAutoDetectBanner(activePlayer);
 }
 
 function resetAndStartTimer() {
@@ -3890,18 +3974,18 @@ window.adjustBid = (dir) => {
 // Team Live Action "BID"
 document.getElementById('btnTeamBid').onclick = () => {
     if (!activePlayer) return;
-    if (isTimerPaused) {
+    if (isTimerPaused && !activePlayer.isUnsold && !STATE.unsoldRoundActive) {
         showToast('Bidding is paused');
         return;
     }
     const { nextBid: nextPrice } = getLiveBidContext();
     const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
-    if (!canTeamBidActivePlayer(myTeam, nextPrice).ok) {
-        showToast("You can't bid anymore for this player");
+    const availability = canTeamBidActivePlayer(myTeam, nextPrice);
+    if (!availability.ok) {
+        showCannotBidModal(availability.reason);
         updateLiveEligibility();
         return;
     }
-    
     socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: nextPrice, teamId: CURRENT_USER.teamId });
 };
 

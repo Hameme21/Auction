@@ -1294,7 +1294,6 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
           </div>
           <div class="toolbar-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
             <button class="btn-primary small" onclick="shufflePlayerCodes()">Shuffle Codes</button>
-            <button class="ghost small" onclick="startUnsoldRound()" id="btnStartUnsoldRound" style="color:var(--danger);border-color:rgba(239,68,68,0.35)" title="Shuffle only unsold players for the second auction round">🔄 Unsold Round</button>
             <button class="ghost small" onclick="clearPlayerCodes()">Reset Codes</button>
             <div id="unsoldRoundBanner" class="hidden unsold-round-banner">
               <span style="font-size:13px">🔴</span>
@@ -1741,6 +1740,23 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <button onclick="closeImportModal()" class="ghost">Cancel</button>
         <button onclick="confirmImportPlayers()" class="btn-primary" id="btnConfirmImport">Tag Selected (RTM)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="unsoldRoundPromptOverlay">
+    <div class="modal" style="max-width:480px;text-align:center;position:relative">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:8px 18px;margin-bottom:16px">
+        <span style="font-size:20px">🔄</span>
+        <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--danger);letter-spacing:0.1em">REGULAR ROUND COMPLETE</span>
+      </div>
+      <h2 style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:white;margin-bottom:10px">Start Unsold Round?</h2>
+      <p style="color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:24px">
+        All regular auction prospects have been drawn. There are <strong id="unsoldPromptCount" style="color:var(--danger);font-weight:800">0</strong> unsold player(s) available for re-auction.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <button class="ghost" onclick="declineUnsoldRoundPrompt()" style="padding:14px;font-family:var(--font-display);letter-spacing:0.04em">No, Show List</button>
+        <button class="btn-primary" onclick="confirmUnsoldRoundPrompt()" style="background:linear-gradient(135deg,#ef4444,#dc2626);border-color:#f87171;box-shadow:0 4px 20px rgba(239,68,68,0.4);padding:14px;font-family:var(--font-display);letter-spacing:0.04em">Yes, Start Unsold Round ›</button>
       </div>
     </div>
   </div>
@@ -3036,6 +3052,97 @@ function renderLiveIdleCode() {
   idle.innerHTML = makePublicCodeStage(getNextQueuedPlayer(), false);
 }
 
+let hasDeclinedUnsoldPromptSession = false;
+
+function getUnsoldPlayersList() {
+  const list = [];
+  if (!STATE.unsoldPlayers || !STATE.categories) return list;
+  STATE.categories.forEach(cat => {
+    const players = STATE.playersSnapshot[cat.id] || [];
+    players.forEach(p => {
+      const key = `${cat.id}:${p.name}`;
+      let isSold = false;
+      STATE.teams.forEach(t => {
+        if (t.purchases && t.purchases[cat.id] === p.name) isSold = true;
+      });
+      if (!isSold && STATE.unsoldPlayers[key]) {
+        list.push({
+          category: cat.id,
+          name: p.name,
+          base: cat.base,
+          image: p.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
+          code: getPlayerCode(cat.id, p.name)
+        });
+      }
+    });
+  });
+  return list;
+}
+
+function checkUnsoldRoundPrompt() {
+  if (CURRENT_USER.role !== 'admin') return;
+  if (activePlayer) return;
+  if (STATE.unsoldRoundActive) return;
+  if (hasDeclinedUnsoldPromptSession) return;
+
+  const next = getNextQueuedPlayer();
+  if (!next) {
+    const unsoldList = getUnsoldPlayersList();
+    if (unsoldList.length > 0) {
+      document.getElementById('unsoldPromptCount').textContent = unsoldList.length;
+      document.getElementById('unsoldRoundPromptOverlay')?.classList.remove('hidden');
+    }
+  }
+}
+
+window.confirmUnsoldRoundPrompt = () => {
+  document.getElementById('unsoldRoundPromptOverlay')?.classList.add('hidden');
+  hasDeclinedUnsoldPromptSession = false;
+  startUnsoldRound();
+};
+
+window.declineUnsoldRoundPrompt = () => {
+  document.getElementById('unsoldRoundPromptOverlay')?.classList.add('hidden');
+  hasDeclinedUnsoldPromptSession = true;
+  if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();
+};
+
+function renderUnsoldPlayerListUI(unsoldList) {
+  const cardsHTML = unsoldList.map(p => {
+    return `<div style="background:rgba(15,23,42,0.85);border:1px solid rgba(239,68,68,0.28);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;transition:transform 0.2s,border-color 0.2s">
+      <img src="${p.image}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.12)">
+      <div style="min-width:0;flex:1">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap">
+          <span class="chip chip-cyan" style="font-size:9px;padding:1px 6px">${escapeHTML(p.category)}</span>
+          <span class="chip chip-purple" style="font-size:8px;padding:1px 5px">#${escapeHTML(p.code)}</span>
+        </div>
+        <div class="word-break" style="font-family:var(--font-display);font-size:14px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHTML(p.name)}</div>
+        <div class="mono" style="font-size:11px;color:var(--amber);font-weight:700">Base: ৳${p.base}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="unsold-list-wrapper" style="padding:16px;display:flex;flex-direction:column;gap:16px;height:100%;max-height:600px;overflow-y:auto">
+    <div style="background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(153,27,27,0.28));border:1px solid rgba(239,68,68,0.45);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(239,68,68,0.18)">
+      <div style="min-width:0;flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span class="chip chip-pink" style="background:rgba(239,68,68,0.25);color:#fca5a5;border-color:rgba(239,68,68,0.45);font-size:10px">UNSOLD POOL</span>
+          <span class="mono" style="font-size:12px;color:white;font-weight:800">${unsoldList.length} Player(s) Waiting</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75)">Regular round complete. Start randomized auction for all remaining unsold players.</div>
+      </div>
+      <button class="btn-primary" onclick="startUnsoldRound()" style="background:linear-gradient(135deg,#ef4444,#dc2626);border-color:#f87171;box-shadow:0 4px 18px rgba(239,68,68,0.4);padding:10px 20px;font-family:var(--font-display);font-size:14px;letter-spacing:0.04em;flex-shrink:0;width:100%;max-width:220px">
+        ⚡ Start Unsold Round ›
+      </button>
+    </div>
+
+    <div style="font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.14em">Unsold Prospects List (${unsoldList.length})</div>
+    <div class="unsold-players-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:10px">
+      ${cardsHTML}
+    </div>
+  </div>`;
+}
+
 function renderLiveAdminQueue() {
   if (CURRENT_USER.role !== 'admin') return;
   const container = document.getElementById('queuePlayersList');
@@ -3055,27 +3162,41 @@ function renderLiveAdminQueue() {
       return;
   }
   idleState?.classList.remove('hidden');
+
+  const next = getNextQueuedPlayer();
+  if (next) {
+      container.innerHTML = makePublicCodeStage(next, true);
+      return;
+  }
+
+  // No next player in active queue
+  const unsoldList = getUnsoldPlayersList();
+  if (unsoldList.length > 0 && !STATE.unsoldRoundActive) {
+      container.innerHTML = renderUnsoldPlayerListUI(unsoldList);
+      checkUnsoldRoundPrompt();
+      return;
+  }
+
   if (!STATE.lotteryQueue || STATE.lotteryQueue.length === 0) {
       container.innerHTML = makePublicCodeStage(null, false);
       return;
   }
-  const next = getNextQueuedPlayer();
-  if (!next) {
-      container.innerHTML = '<div class="code-stage"><div style="font-size:36px;color:var(--emerald)">✓</div><div style="color:var(--emerald);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.14em">All prospects drafted.</div></div>';
-      return;
-  }
-  container.innerHTML = makePublicCodeStage(next, true);
+
+  container.innerHTML = '<div class="code-stage"><div style="font-size:36px;color:var(--emerald)">✓</div><div style="color:var(--emerald);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.14em">All prospects drafted.</div></div>';
 }
 
 window.shufflePlayerCodes = () => {
+  hasDeclinedUnsoldPromptSession = false;
   if (CURRENT_USER.role === 'admin' && activePlayer) allowActivePlayerCodeQueue = true;
   if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();
   socket.emit('admin:shuffle_codes');
 };
 window.clearPlayerCodes = () => {
+  hasDeclinedUnsoldPromptSession = false;
   closeLocalLivePlayerView();
   STATE.lotteryQueue = [];
   STATE.codeShuffleActive = false;
+  STATE.unsoldRoundActive = false;
   const revealCode = document.getElementById('liveRevealCode');
   if (revealCode) revealCode.textContent = '';
   if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();

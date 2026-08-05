@@ -2280,6 +2280,7 @@ function closeLocalLivePlayerView() {
   allowActivePlayerCodeQueue = false;
   liveRevealToken++;
   blockedBidToastKey = '';
+  closeCannotBidModal();
   const popup = document.getElementById('auctionPlayerPopup');
   popup?.classList.remove('is-code-mode');
   popup?.classList.remove('is-player-live');
@@ -2474,6 +2475,10 @@ function updateLiveEligibility() {
           bidBtn.innerHTML = `CAN'T BID (WHY?)`;
           bidBtn.style.opacity = '0.55';
           bidBtn.onclick = () => showCannotBidModal(availability.reason);
+        } else {
+          bidBtn.disabled = false;
+          bidBtn.style.opacity = '1';
+          bidBtn.onclick = window.handleTeamBidClick;
         }
       }
 
@@ -2489,6 +2494,11 @@ function updateLiveEligibility() {
           btnImpact.style.pointerEvents = 'auto';
           btnImpact.style.position = 'relative';
           btnImpact.style.zIndex = '10';
+          btnImpact.onclick = () => {
+            socket.emit('team:activateImpact', { teamId: CURRENT_USER.teamId, category: activePlayer.category, playerName: activePlayer.name });
+            closeCannotBidModal();
+            showToast('⚡ Impact deployed! Purse updated.');
+          };
         } else {
           btnImpact.classList.add('hidden');
         }
@@ -2642,6 +2652,7 @@ socket.on('popup:open', player => {
   activePlayer = player;
   allowActivePlayerCodeQueue = false;
   blockedBidToastKey = '';
+  closeCannotBidModal();
   if (!player.isUnsold && !STATE.unsoldRoundActive) {
     resetAndStartTimer();
   }

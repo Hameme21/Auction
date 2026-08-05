@@ -819,6 +819,39 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   .admin-command-row, .admin-franchise-grid, .admin-lower-grid { grid-template-columns: 1fr; }
   .team-dashboard-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 650px) {
+  .modal-rtm, .modal {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    padding: 16px 14px !important;
+    margin: 10px auto !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .modal-rtm h2 {
+    font-size: 1.25rem !important;
+  }
+  .modal-rtm p {
+    font-size: 12px !important;
+    margin-bottom: 16px !important;
+  }
+  .modal-rtm select, .modal-rtm input {
+    font-size: 14px !important;
+    padding: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .modal-rtm div[style*="grid-template-columns"], #rtmPromptControls, #rtmActionOverlay div[style*="grid-template-columns"], #rtmAmountOverlay div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .modal-rtm button {
+    min-height: 48px !important;
+    font-size: 13px !important;
+    width: 100% !important;
+  }
+}
 @media (max-width: 767px) {
   body { background: #050a11; }
   #appContainer { padding-bottom: 94px; }
@@ -2443,13 +2476,6 @@ function updateLiveEligibility() {
           bidBtn.onclick = () => showCannotBidModal(availability.reason);
         }
       }
-      if (!ok && STATE.biddingActive) {
-        const toastKey = `${key}:${CURRENT_USER.teamId}`;
-        if (blockedBidToastKey !== toastKey) {
-          blockedBidToastKey = toastKey;
-          showToast(`⚠️ Bidding restricted: ${availability.reason.replace(/<[^>]*>/g, '')}`);
-        }
-      }
     }
   }
   renderUnsoldAutoDetectBanner(activePlayer);
@@ -2594,10 +2620,13 @@ socket.on('timer:sync', data => {
 });
 
 socket.on('popup:open', player => {
-  STATE.biddingActive = false;
+  STATE.biddingActive = true;
   activePlayer = player;
   allowActivePlayerCodeQueue = false;
   blockedBidToastKey = '';
+  if (!player.isUnsold && !STATE.unsoldRoundActive) {
+    resetAndStartTimer();
+  }
   const liveMain = document.getElementById('liveAuctionMain');
   const popup = document.getElementById('auctionPlayerPopup');
   liveMain?.classList.remove('is-revealing-player');

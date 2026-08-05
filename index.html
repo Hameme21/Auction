@@ -2277,15 +2277,27 @@ function closeCannotBidModal() {
   document.getElementById('cannotBidModalOverlay')?.classList.add('hidden');
 }
 
+function calculateNextBid(currentBid, base, inc, highBidderId) {
+  const cur = Number(currentBid) || Number(base) || 0;
+  const b = Number(base) || 0;
+  const step = Number(inc) || 500;
+
+  if (!highBidderId) {
+    return Math.max(b, cur);
+  }
+  return Math.max(b, cur + step);
+}
+
 function getLiveBidContext() {
   if (!activePlayer) return { cat: null, base: 0, inc: 0, currentPrice: 0, highBidderId: null, nextBid: 0 };
   const key = `${activePlayer.category}:${activePlayer.name}`;
   const cat = STATE.categories.find(c => c.id === activePlayer.category);
   const base = Number(activePlayer.base) || Number(cat?.base) || 0;
-  const inc = Number(cat?.increment) || 0;
+  const inc = Number(cat?.increment) || 500;
   const currentPrice = (STATE.activeBids && STATE.activeBids[key] !== undefined) ? Number(STATE.activeBids[key]) : Number(document.getElementById('popupPrice')?.textContent) || base;
   const highBidderId = STATE.activeBidders ? STATE.activeBidders[key] : null;
-  return { cat, base, inc, currentPrice, highBidderId, nextBid: highBidderId ? currentPrice + inc : currentPrice || base };
+  const nextBid = calculateNextBid(currentPrice, base, inc, highBidderId);
+  return { cat, base, inc, currentPrice, highBidderId, nextBid };
 }
 
 function getNextCategoryReserve(team, activeCategoryId) {
@@ -3929,25 +3941,20 @@ window.updatePopupPrice = (p, highBidderId) => {
     
     // Dynamic Team Bid Button Setup
     if (activePlayer && CURRENT_USER.role === 'team') {
-        const cat = STATE.categories.find(c => c.id === activePlayer.category);
-        const inc = Number(cat?.increment) || 0;
-        const base = Number(cat?.base) || 0;
-        const currentBid = Number(p) || 0;
-        const nextBid = highBidderId ? currentBid + inc : base;
-
+        const { currentPrice, nextBid } = getLiveBidContext();
         const bidBtn = document.getElementById('btnTeamBid');
         if (bidBtn) {
             if (!STATE.biddingActive) {
                 bidBtn.innerHTML = `WAITING TO START`;
                 bidBtn.disabled = true;
                 bidBtn.style.opacity = '0.5';
-            } else if (isTimerPaused) {
+            } else if (isTimerPaused && !activePlayer.isUnsold && !STATE.unsoldRoundActive) {
                 bidBtn.innerHTML = `PAUSED`;
                 bidBtn.disabled = true;
                 bidBtn.style.opacity = '0.5';
             } else {
                 if (highBidderId === CURRENT_USER.teamId) {
-                    bidBtn.innerHTML = `WINNING ৳${currentBid}`;
+                    bidBtn.innerHTML = `WINNING ৳${currentPrice}`;
                     bidBtn.disabled = true;
                     bidBtn.style.opacity = '0.7';
                 } else {

@@ -522,6 +522,26 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .chip-cyan, .chip-purple, .chip-emerald { background: rgba(102,255,99,0.09); color: #66ff63; border-color: rgba(102,255,99,0.24); }
 .chip-pink { background: rgba(255,194,10,0.12); color: #ffc20a; border-color: rgba(255,194,10,0.34); }
 
+.draggable-player-tile {
+  cursor: grab;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+.draggable-player-tile:active {
+  cursor: grabbing;
+}
+.draggable-player-tile.is-dragging {
+  opacity: 0.35 !important;
+  transform: scale(0.96);
+  box-shadow: 0 0 24px rgba(102, 255, 99, 0.45) !important;
+}
+.category-drag-over {
+  border-color: #66ff63 !important;
+  background: rgba(102, 255, 99, 0.09) !important;
+  box-shadow: inset 0 0 30px rgba(102, 255, 99, 0.16), 0 0 24px rgba(102, 255, 99, 0.25) !important;
+  transform: scale(1.005);
+}
+
 @media (min-width: 900px) {
   #appContainer { padding-left: 250px; padding-top: 96px; }
   #appContainer::before {
@@ -3624,9 +3644,15 @@ function renderDatabase() {
   if (!STATE.categories.length) { container.innerHTML = '<div style="color:var(--muted);font-size:12px">No categories established.</div>'; return; }
   STATE.categories.forEach(cat => {
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'background:rgba(13,17,23,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:20px;margin-bottom:18px';
+    wrap.className = 'category-card-wrapper';
+    wrap.dataset.dropCategory = cat.id;
+    wrap.style.cssText = 'background:rgba(13,17,23,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:20px;margin-bottom:18px;transition:all 0.25s ease';
+    
     wrap.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:8px">
-      <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:white">${cat.id}</h3>
+      <div style="display:flex;align-items:center;gap:10px">
+        <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:white;margin:0">${cat.id}</h3>
+        ${isAdmin ? `<span style="font-size:10px;color:var(--emerald);background:rgba(16,185,129,0.12);padding:2px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.25);font-weight:700">🎯 Drag Target</span>` : ''}
+      </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="chip chip-cyan">Base ৳${cat.base} · Step ৳${cat.increment}</span>
         ${isAdmin ? `<button class="red small" onclick="deleteCat('${cat.id}')" style="padding:3px 10px;font-size:11px">Drop</button>` : ''}
@@ -3638,9 +3664,41 @@ function renderDatabase() {
     </div>` : ''}
     <div id="playersList-${cat.id}" class="player-grid-lg"></div>`;
     container.appendChild(wrap);
+
+    if (isAdmin) {
+      wrap.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        wrap.classList.add('category-drag-over');
+      });
+
+      wrap.addEventListener('dragleave', (e) => {
+        if (!wrap.contains(e.relatedTarget)) {
+          wrap.classList.remove('category-drag-over');
+        }
+      });
+
+      wrap.addEventListener('drop', (e) => {
+        e.preventDefault();
+        wrap.classList.remove('category-drag-over');
+        try {
+          const raw = e.dataTransfer.getData('text/plain');
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          if (data && data.sourceCategory && data.playerName) {
+            if (data.sourceCategory !== cat.id) {
+              movePlayerCategory(data.sourceCategory, cat.id, data.playerName);
+            }
+          }
+        } catch (err) {
+          console.error('Drop parse error:', err);
+        }
+      });
+    }
+
     const plC = document.getElementById(`playersList-${cat.id}`);
     const players = STATE.playersSnapshot[cat.id] || [];
-    if (!players.length) { plC.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;text-align:center;padding:28px;border:1px dashed rgba(255,255,255,0.06);border-radius:var(--radius)">No players yet.</div>'; }
+    if (!players.length) { plC.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;text-align:center;padding:28px;border:1px dashed rgba(255,255,255,0.06);border-radius:var(--radius)">No players yet. Drop a player card here to assign to this category.</div>'; }
     players.forEach(p => {
       let soldToName = null;
       STATE.teams.forEach(t => { if (t.purchases?.[cat.id] === p.name) soldToName = t.name; });
@@ -3652,17 +3710,33 @@ function renderDatabase() {
       const el = document.createElement('div'); el.innerHTML = tileHTML;
       const tile = el.firstElementChild;
       if (isAdmin) {
+        tile.draggable = true;
+        tile.classList.add('draggable-player-tile');
+        tile.title = 'Drag & drop to move to another category';
+
+        tile.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          e.dataTransfer.setData('text/plain', JSON.stringify({ sourceCategory: cat.id, playerName: p.name }));
+          e.dataTransfer.effectAllowed = 'move';
+          tile.classList.add('is-dragging');
+        });
+
+        tile.addEventListener('dragend', () => {
+          tile.classList.remove('is-dragging');
+        });
+
         const anchor = tile.querySelector('.hover-overlay-anchor');
         if (anchor) {
           anchor.innerHTML = `<div style="position:absolute;top:8px;right:8px;display:flex;gap:5px;z-index:30">
+            <span style="background:rgba(0,0,0,0.75);color:#66ff63;font-size:10px;font-weight:800;padding:3px 7px;border-radius:4px;border:1px solid rgba(102,255,99,0.3);display:flex;align-items:center;gap:3px;cursor:grab;letter-spacing:0.04em">⣿ DRAG</span>
             <button title="Edit" onclick="event.stopPropagation();openPlayerEdit('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">✏️</button>
             ${soldToName ? `<button title="Reset" onclick="event.stopPropagation();resetPlayer('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='var(--amber)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">↺</button>` : ''}
             <button title="Delete Player" onclick="event.stopPropagation();deleteSinglePlayer('${cat.id}','${p.name.replace(/'/g,"\\'")}');" style="width:26px;height:26px;border-radius:50%;background:rgba(239,68,68,0.85);border:1px solid rgba(255,255,255,0.25);color:white;font-size:11px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='rgba(239,68,68,0.85)'">❌</button>
           </div>`;
         }
         if (!soldToName) {
-          tile.style.cursor = 'pointer';
-          tile.onclick = (e) => { if (e.target.closest('button')) return; startAuctionFromQueue(cat.id, p.name, cat.base, p.image); showSection('sectionLiveAuction'); };
+          tile.style.cursor = 'grab';
+          tile.onclick = (e) => { if (e.target.closest('button') || e.target.closest('span')) return; startAuctionFromQueue(cat.id, p.name, cat.base, p.image); showSection('sectionLiveAuction'); };
           const hA = tile.querySelector('.hover-overlay-anchor');
           if (hA) hA.innerHTML += `<div style="position:absolute;inset:0;background:rgba(47,125,246,0.26);opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity 0.25s;z-index:5" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"><span style="background:var(--accent);color:white;font-size:11px;font-weight:700;padding:7px 14px;border-radius:100px;font-family:var(--font-display);letter-spacing:0.06em">→ Live Arena</span></div>`;
         }
@@ -3671,6 +3745,12 @@ function renderDatabase() {
     });
   });
 }
+
+window.movePlayerCategory = (sourceCategory, targetCategory, playerName) => {
+  if (!sourceCategory || !targetCategory || !playerName || sourceCategory === targetCategory) return;
+  socket.emit('admin:move_player_category', { sourceCategory, targetCategory, playerName });
+  showToast(`🚚 Moving ${playerName} from ${sourceCategory} to ${targetCategory}…`);
+};
 
 function renderTeamConfigTable() {
   const container = document.getElementById('teamsConfigContainer');

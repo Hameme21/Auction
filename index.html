@@ -2476,6 +2476,23 @@ function updateLiveEligibility() {
           bidBtn.onclick = () => showCannotBidModal(availability.reason);
         }
       }
+
+      // Keep Deploy Impact button bright, sharp, and fully active in grayed-out space
+      const btnImpact = document.getElementById('btnPopupImpact');
+      if (btnImpact && myTeam) {
+        const impactBonus = Number(STATE.config?.impactAmount || 0);
+        const hasImpact = !myTeam.impactUsed && impactBonus > 0;
+        if (hasImpact) {
+          btnImpact.classList.remove('hidden');
+          btnImpact.style.opacity = '1';
+          btnImpact.style.filter = 'none';
+          btnImpact.style.pointerEvents = 'auto';
+          btnImpact.style.position = 'relative';
+          btnImpact.style.zIndex = '10';
+        } else {
+          btnImpact.classList.add('hidden');
+        }
+      }
     }
   }
   renderUnsoldAutoDetectBanner(activePlayer);
@@ -2614,7 +2631,8 @@ socket.on('timer:sync', data => {
   updateTimerUI();
   if (activePlayer) {
     const key = `${activePlayer.category}:${activePlayer.name}`;
-    updatePopupPrice(document.getElementById('popupPrice')?.textContent || activePlayer.base || 0, STATE.activeBidders ? STATE.activeBidders[key] : null);
+    const priceToUse = (STATE.activeBids && STATE.activeBids[key] !== undefined) ? STATE.activeBids[key] : (activePlayer.currentPrice || Number(document.getElementById('popupPrice')?.textContent) || activePlayer.base || 0);
+    updatePopupPrice(priceToUse, STATE.activeBidders ? STATE.activeBidders[key] : null);
   }
   if (auctionTimeRemaining <= 0) handleTimerExpiry();
 });
@@ -4000,11 +4018,18 @@ window.updatePopupPrice = (p, highBidderId) => {
 // Admin Manually adjusts bid
 window.adjustBid = (dir) => {
   if (!activePlayer) return;
+  const key = `${activePlayer.category}:${activePlayer.name}`;
   const cat = STATE.categories.find(c => c.id === activePlayer.category);
-  let cur = Number(document.getElementById('popupPrice').textContent) || 0;
-  let step = Number(cat?.increment) || 0;
+  let cur = (STATE.activeBids && STATE.activeBids[key] !== undefined) ? Number(STATE.activeBids[key]) : Number(document.getElementById('popupPrice')?.textContent) || Number(activePlayer.base) || Number(cat?.base) || 0;
+  let step = Number(cat?.increment) || 500;
   let next = dir === 'inc' ? cur + step : cur - step;
-  if (next >= Number(cat?.base || 0)) socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: next, teamId: null });
+  const basePrice = Number(activePlayer.base) || Number(cat?.base) || 0;
+  if (next >= basePrice) {
+    if (!STATE.activeBids) STATE.activeBids = {};
+    STATE.activeBids[key] = next;
+    activePlayer.currentPrice = next;
+    socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: next, teamId: null });
+  }
 };
 
 // Team Live Action "BID"

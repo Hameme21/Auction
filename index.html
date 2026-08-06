@@ -2458,7 +2458,24 @@ function getRTMOfferOptions(team) {
     for (let price = currentPrice + inc; price <= maxOffer; price += inc) options.push(price);
   }
   return { options, currentPrice, inc, maxOffer, reserve };
-}
+};
+
+window.handleTeamBidClick = () => {
+    if (!activePlayer) return;
+    if (isTimerPaused && !activePlayer.isUnsold && !STATE.unsoldRoundActive) {
+        showToast('Bidding is paused');
+        return;
+    }
+    const { nextBid: nextPrice } = getLiveBidContext();
+    const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
+    const availability = canTeamBidActivePlayer(myTeam, nextPrice);
+    if (!availability.ok) {
+        showCannotBidModal(availability.reason);
+        updateLiveEligibility();
+        return;
+    }
+    socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: nextPrice, teamId: CURRENT_USER.teamId });
+};
 
 function updateLiveEligibility() {
   if (!activePlayer) return;
@@ -4143,22 +4160,7 @@ window.adjustBid = (dir) => {
 };
 
 // Team Live Action "BID"
-document.getElementById('btnTeamBid').onclick = () => {
-    if (!activePlayer) return;
-    if (isTimerPaused && !activePlayer.isUnsold && !STATE.unsoldRoundActive) {
-        showToast('Bidding is paused');
-        return;
-    }
-    const { nextBid: nextPrice } = getLiveBidContext();
-    const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
-    const availability = canTeamBidActivePlayer(myTeam, nextPrice);
-    if (!availability.ok) {
-        showCannotBidModal(availability.reason);
-        updateLiveEligibility();
-        return;
-    }
-    socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: nextPrice, teamId: CURRENT_USER.teamId });
-};
+document.getElementById('btnTeamBid').onclick = window.handleTeamBidClick;
 
 // Team Live Action "RTM"
 document.getElementById('btnTeamRTM').onclick = () => {

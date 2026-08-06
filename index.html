@@ -138,6 +138,10 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   .mobile-exit-btn:not(.hidden) { display: inline-flex; }
   body { padding-bottom: 70px; }
   #appContainer main { padding: 16px 14px; padding-bottom: 80px; }
+  .hover-overlay-anchor button { width: 38px !important; height: 38px !important; font-size: 15px !important; }
+}
+@media (hover: none) {
+  .hover-overlay-anchor > div { opacity: 1 !important; }
 }
 
 #toastContainer { position: fixed; top: 12px; right: 12px; left: 12px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
@@ -2615,10 +2619,25 @@ socket.on('auction:enter', data => {
 });
 socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.role || selectedLoginRole || 'team'; document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); applyParticipantAuthRole(failedRole); teamAuthOverlay.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('teamAuthMsg').textContent = msg; });
 socket.on('state:updated', s => {
+  const prev = STATE;
   const shouldClearActivePlayer = activePlayer && s && !s.currentActivePlayer && !s.biddingActive;
   STATE = s;
   if (shouldClearActivePlayer) closeLocalLivePlayerView();
-  renderAll();
+  
+  renderScoreboards();
+  const dbChanged = !prev || 
+    JSON.stringify(prev.playersSnapshot) !== JSON.stringify(s.playersSnapshot) ||
+    JSON.stringify(prev.categories) !== JSON.stringify(s.categories) ||
+    JSON.stringify(prev.soldPrices) !== JSON.stringify(s.soldPrices) ||
+    JSON.stringify(prev.teams) !== JSON.stringify(s.teams);
+
+  if (dbChanged) {
+    renderDatabase();
+    renderTeamConfigTable();
+    renderViewerRosters();
+  }
+  renderScheduler();
+  updateLiveIndicator();
 });
 
 socket.on('code_shuffle:started', () => {
@@ -3409,7 +3428,7 @@ function renderScoreboards() {
     c.style.gap = '8px';
     c.style.alignContent = 'start'; // Prevents vertical stretching
 
-    STATE.teams.forEach(t => {
+    c.innerHTML = STATE.teams.map(t => {
       const isTeamDashboardStandings = CURRENT_USER.role === 'team' && id === 'dashboardScoreboard';
       const captainHTML = captainPillHTML(t, 'compact');
       const middleHTML = isTeamDashboardStandings
@@ -3422,12 +3441,12 @@ function renderScoreboards() {
             <div style="font-family:var(--font-display);font-weight:700;font-size:12px;color:white;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(t.name)}</div>
             <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">${t.purchases ? Object.keys(t.purchases).length : 0} players</div>
           </div>`;
-      c.innerHTML += `<div data-team-id="${t.id}" class="score-tile" style="display:flex;align-items:center;text-align:left;gap:12px;padding:10px 12px;">
+      return `<div data-team-id="${t.id}" class="score-tile" style="display:flex;align-items:center;text-align:left;gap:12px;padding:10px 12px;">
         ${teamAvatarHTML(t, 34)}
         ${middleHTML}
         <div class="mono" style="font-size:13px;font-weight:700;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.12);border-radius:6px;padding:4px 8px;flex-shrink:0;">৳${t.purse}</div>
       </div>`;
-    });
+    }).join('');
   });
   updateLiveEligibility();
 }
@@ -3462,7 +3481,7 @@ function makeTileHTML(player, catId, price, isDirect, isRTM, soldToName) {
   }
   return `<div class="player-tile" data-name="${player.name}" data-price="${price}" style="${isSold ? 'opacity:0.75' : ''}">
     <div class="player-img-h" style="position:relative;height:140px;background:#0d1117;overflow:hidden">
-      <img src="${img}" style="width:100%;height:100%;object-fit:cover;opacity:0.75;transition:transform 0.4s,opacity 0.3s" onmouseover="this.style.transform='scale(1.05)';this.style.opacity='0.9'" onmouseout="this.style.transform='';this.style.opacity='0.75'">
+      <img src="${img}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;opacity:0.75;transition:transform 0.4s,opacity 0.3s" onmouseover="this.style.transform='scale(1.05)';this.style.opacity='0.9'" onmouseout="this.style.transform='';this.style.opacity='0.75'">
       <div style="position:absolute;inset:0;background:linear-gradient(to top,#060910 0%,transparent 60%)"></div>
       <span class="chip chip-cyan" style="position:absolute;top:8px;left:8px;z-index:5">${catId}</span>
       ${badge}

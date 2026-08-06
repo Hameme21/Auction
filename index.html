@@ -2142,7 +2142,12 @@ async function playQueuedPlayerReveal(player, context) {
   document.getElementById('liveAuctionMain')?.classList.remove('is-revealing-player');
   updateLiveIndicator();
   if (CURRENT_USER.role === 'admin') {
-    socket.emit('admin:start_timer');
+    showToast('⏱️ Bidding starts in 5 seconds…');
+    setTimeout(() => {
+      if (revealToken === liveRevealToken && activePlayer) {
+        socket.emit('admin:start_timer');
+      }
+    }, 5000);
     idleState?.classList.remove('hidden');
     idleState?.classList.add('admin-code-active');
     renderLiveAdminQueue();
@@ -2769,7 +2774,12 @@ socket.on('popup:open', player => {
       playerLoader?.classList.add('hidden');
       body.classList.remove('is-preparing-player');
       if (CURRENT_USER.role === 'admin') {
-        socket.emit('admin:start_timer');
+        showToast('⏱️ Bidding starts in 5 seconds…');
+        setTimeout(() => {
+          if (revealToken === liveRevealToken && activePlayer) {
+            socket.emit('admin:start_timer');
+          }
+        }, 5000);
         idleState?.classList.remove('hidden');
         idleState?.classList.add('admin-code-active');
         renderLiveAdminQueue();

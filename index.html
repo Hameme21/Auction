@@ -2372,10 +2372,15 @@ function canTeamBidActivePlayer(team, bidPrice) {
   const purse = Number(team.purse) || 0;
   const reserve = getNextCategoryReserve(team, activePlayer.category);
   const alreadyFilledCategory = !!team.purchases?.[activePlayer.category];
+  const key = `${activePlayer.category}:${activePlayer.name}`;
+  const isWinning = STATE.activeBidders ? (STATE.activeBidders[key] === team.id) : false;
   
   let ok = true;
   let reason = '';
-  if (alreadyFilledCategory) {
+  if (isWinning) {
+    ok = false;
+    reason = `Your franchise (<strong>${escapeHTML(team.name)}</strong>) is currently the <strong>highest bidder</strong> for this player. You cannot bid against yourself.`;
+  } else if (alreadyFilledCategory) {
     ok = false;
     reason = `Your franchise (<strong>${escapeHTML(team.name)}</strong>) has already acquired a player in the <strong>${escapeHTML(activePlayer.category)}</strong> category.`;
   } else if (purse < bidPrice) {
@@ -2386,7 +2391,7 @@ function canTeamBidActivePlayer(team, bidPrice) {
     reason = `You cannot bid higher because your remaining purse balance (<strong>৳${purse}</strong>) must be reserved to buy required players in upcoming categories at base price (Required Reserve: <strong>৳${reserve}</strong>).`;
   }
 
-  return { ok, reserve, purse, reason };
+  return { ok, isWinning, reserve, purse, reason };
 }
 
 function renderUnsoldAutoDetectBanner(player = activePlayer) {
@@ -2502,16 +2507,21 @@ function updateLiveEligibility() {
     const myTeam = STATE.teams.find(t => t.id === CURRENT_USER.teamId);
     const isWinning = highBidderId === CURRENT_USER.teamId;
     const availability = canTeamBidActivePlayer(myTeam, isWinning ? currentPrice : nextBid);
-    const ok = availability.ok || isWinning;
+    const ok = availability.ok;
     currentCannotBidReason = availability.reason;
     if (popup) {
-      popup.style.opacity = ok ? '1' : '0.48';
-      popup.style.filter = ok ? 'none' : 'grayscale(1)';
+      popup.style.opacity = (ok || isWinning) ? '1' : '0.48';
+      popup.style.filter = (ok || isWinning) ? 'none' : 'grayscale(1)';
       popup.style.pointerEvents = 'auto';
       
       const bidBtn = document.getElementById('btnTeamBid');
       if (bidBtn) {
-        if (!ok) {
+        if (isWinning) {
+          bidBtn.disabled = false;
+          bidBtn.innerHTML = `YOU ARE HIGH BIDDER 👑`;
+          bidBtn.style.opacity = '0.85';
+          bidBtn.onclick = () => showCannotBidModal(availability.reason);
+        } else if (!ok) {
           bidBtn.disabled = false;
           bidBtn.innerHTML = `CAN'T BID (WHY?)`;
           bidBtn.style.opacity = '0.55';

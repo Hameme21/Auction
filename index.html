@@ -2142,6 +2142,7 @@ async function playQueuedPlayerReveal(player, context) {
   document.getElementById('liveAuctionMain')?.classList.remove('is-revealing-player');
   updateLiveIndicator();
   if (CURRENT_USER.role === 'admin') {
+    socket.emit('admin:start_timer');
     idleState?.classList.remove('hidden');
     idleState?.classList.add('admin-code-active');
     renderLiveAdminQueue();
@@ -2768,6 +2769,7 @@ socket.on('popup:open', player => {
       playerLoader?.classList.add('hidden');
       body.classList.remove('is-preparing-player');
       if (CURRENT_USER.role === 'admin') {
+        socket.emit('admin:start_timer');
         idleState?.classList.remove('hidden');
         idleState?.classList.add('admin-code-active');
         renderLiveAdminQueue();

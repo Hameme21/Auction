@@ -2162,8 +2162,8 @@ async function playQueuedPlayerReveal(player, context) {
   body.classList.remove('is-preparing-player');
   document.getElementById('liveAuctionMain')?.classList.remove('is-revealing-player');
   updateLiveIndicator();
+  showToast('⏱️ Bidding starts in 5 seconds…');
   if (CURRENT_USER.role === 'admin') {
-    showToast('⏱️ Bidding starts in 5 seconds…');
     setTimeout(() => {
       if (revealToken === liveRevealToken && activePlayer) {
         socket.emit('admin:start_timer');
@@ -2799,8 +2799,8 @@ socket.on('popup:open', player => {
       if (revealToken !== liveRevealToken) return;
       playerLoader?.classList.add('hidden');
       body.classList.remove('is-preparing-player');
+      showToast('⏱️ Bidding starts in 5 seconds…');
       if (CURRENT_USER.role === 'admin') {
-        showToast('⏱️ Bidding starts in 5 seconds…');
         setTimeout(() => {
           if (revealToken === liveRevealToken && activePlayer) {
             socket.emit('admin:start_timer');

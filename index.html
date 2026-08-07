@@ -3498,11 +3498,14 @@ window.clearPlayerCodes = () => {
   STATE.lotteryQueue = [];
   STATE.codeShuffleActive = false;
   STATE.unsoldRoundActive = false;
+  document.getElementById('unsoldRoundPromptOverlay')?.classList.add('hidden');
+  document.getElementById('unsoldRoundBanner')?.classList.add('hidden');
   const revealCode = document.getElementById('liveRevealCode');
   if (revealCode) revealCode.textContent = '';
   if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();
   else renderLiveIdleCode();
   updateLiveIndicator();
+  updateUnsoldRoundBanner();
   socket.emit('admin:reset_codes');
 };
 window.revealShuffledCode = () => {
@@ -4448,7 +4451,7 @@ window.triggerUnsoldFromPopup = () => {
 function updateUnsoldRoundBanner() {
     const banner = document.getElementById('unsoldRoundBanner');
     if (!banner) return;
-    const isUnsoldActive = !!STATE.unsoldRoundActive || ((STATE.lotteryQueue || []).length > 0 && STATE.lotteryQueue.every(p => p.isUnsold));
+    const isUnsoldActive = !!STATE.unsoldRoundActive && ((STATE.lotteryQueue || []).length > 0 && STATE.lotteryQueue.every(p => p.isUnsold));
     banner.classList.toggle('hidden', !isUnsoldActive);
 }
 

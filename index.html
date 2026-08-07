@@ -3301,11 +3301,26 @@ function renderAll() {
   updateUnsoldRoundBanner();
 }
 
-function getNextQueuedPlayer() {
+function getNextPickedPlayer() {
+  if (!STATE.pickedPlayerCode) return null;
   return (STATE.lotteryQueue || []).find(p => {
+    const isPicked = (p.code === STATE.pickedPlayerCode || getPlayerCode(p.category, p.name) === STATE.pickedPlayerCode);
     const isActive = activePlayer && p.category === activePlayer.category && p.name === activePlayer.name;
-    return !isActive && !STATE.teams.some(t => t.purchases?.[p.category] === p.name);
+    return isPicked && !isActive && !STATE.teams.some(t => t.purchases?.[p.category] === p.name);
   });
+}
+
+function getNextQueuedPlayer() {
+  return getNextPickedPlayer();
+}
+
+function makeCodePoolStageHTML(count, includeAdminButton = false) {
+  return `<div class="code-stage live-code-stage full-bleed is-empty" id="activeCodeCard" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center">
+    <div style="font-size:32px">🎰</div>
+    <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:white;letter-spacing:0.04em">Code Pool Ready (${count} Players)</div>
+    <div style="font-size:11px;color:var(--muted);max-width:280px">Code shuffle active. Admin must manually pick each player code.</div>
+    ${includeAdminButton ? `<button class="btn-primary" onclick="socket.emit('admin:pick_code')" style="background:linear-gradient(135deg,var(--emerald),#059669);border-color:#34d399;font-weight:800;letter-spacing:0.04em;padding:10px 22px;margin-top:6px">🎲 Pick Player Code</button>` : ''}
+  </div>`;
 }
 
 function makeCodeStageInnerHTML(next, includeAdminButton = false, codeAttrs = '', clueAttrs = '') {
@@ -3350,7 +3365,17 @@ function renderLiveIdleCode() {
   const idle = document.getElementById('idleWaitingMessage');
   if (!idle) return;
   idle.style.padding = '0';
-  idle.innerHTML = makePublicCodeStage(getNextQueuedPlayer(), false);
+  const picked = getNextPickedPlayer();
+  if (picked) {
+      idle.innerHTML = makePublicCodeStage(picked, false);
+      return;
+  }
+  const unpurchasedCount = (STATE.lotteryQueue || []).filter(p => !STATE.teams.some(t => t.purchases?.[p.category] === p.name)).length;
+  if (unpurchasedCount > 0) {
+      idle.innerHTML = makeCodePoolStageHTML(unpurchasedCount, false);
+      return;
+  }
+  idle.innerHTML = makePublicCodeStage(null, false);
 }
 
 let hasDeclinedUnsoldPromptSession = false;
@@ -3438,12 +3463,6 @@ function renderLiveAdminQueue() {
   const container = document.getElementById('queuePlayersList');
   const idleState = document.getElementById('auctionIdleState');
   container.innerHTML = '';
-  if (activePlayer && allowActivePlayerCodeQueue) {
-      idleState?.classList.add('hidden');
-      idleState?.classList.remove('admin-code-active');
-      renderPopupCodeStage(getNextQueuedPlayer());
-      return;
-  }
   if (activePlayer) {
       document.getElementById('auctionPlayerPopup')?.classList.remove('is-code-mode');
       document.getElementById('liveCodeReveal')?.classList.add('hidden');
@@ -3453,9 +3472,15 @@ function renderLiveAdminQueue() {
   }
   idleState?.classList.remove('hidden');
 
-  const next = getNextQueuedPlayer();
-  if (next) {
-      container.innerHTML = makePublicCodeStage(next, true);
+  const picked = getNextPickedPlayer();
+  if (picked) {
+      container.innerHTML = makePublicCodeStage(picked, true);
+      return;
+  }
+
+  const unpurchasedCount = (STATE.lotteryQueue || []).filter(p => !STATE.teams.some(t => t.purchases?.[p.category] === p.name)).length;
+  if (unpurchasedCount > 0) {
+      container.innerHTML = makeCodePoolStageHTML(unpurchasedCount, true);
       return;
   }
 
@@ -3498,8 +3523,8 @@ window.clearPlayerCodes = () => {
   socket.emit('admin:reset_codes');
 };
 window.revealShuffledCode = () => {
-  const next = getNextQueuedPlayer();
-  if (!next) return showToast('No hidden player codes left');
+  const next = getNextPickedPlayer();
+  if (!next) return showToast('Pick a player code first using "🎲 Pick Player Code"');
   const btn = document.getElementById('btnRevealCode');
   if (btn) {
     if (btn.disabled) return; // Prevent duplicate reveal triggers

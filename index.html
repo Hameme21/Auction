@@ -3317,23 +3317,27 @@ function getNextQueuedPlayer() {
 function makeCodePoolStageHTML(count, includeAdminButton = false) {
   return `<div class="code-stage live-code-stage full-bleed is-empty" id="activeCodeCard" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center">
     <div style="font-size:32px">🎰</div>
-    <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:white;letter-spacing:0.04em">Code Pool Ready (${count} Players)</div>
-    <div style="font-size:11px;color:var(--muted);max-width:280px">Code shuffle active. Admin must manually pick each player code.</div>
-    ${includeAdminButton ? `<button class="btn-primary" onclick="socket.emit('admin:pick_code')" style="background:linear-gradient(135deg,var(--emerald),#059669);border-color:#34d399;font-weight:800;letter-spacing:0.04em;padding:10px 22px;margin-top:6px">🎲 Pick Player Code</button>` : ''}
+    <div style="font-family:var(--font-display);font-size:16px;font-weight:800;color:white;letter-spacing:0.04em">Code Shuffle Ready (${count} Players)</div>
+    <div style="font-size:11px;color:var(--muted);max-width:280px">Click Shuffle Codes below to draw a player code.</div>
+    ${includeAdminButton ? `<button class="btn-primary" onclick="shufflePlayerCodes()" style="background:linear-gradient(135deg,var(--emerald),#059669);border-color:#34d399;font-weight:800;letter-spacing:0.04em;padding:10px 22px;margin-top:6px">🎲 SHUFFLE CODES</button>` : ''}
   </div>`;
 }
 
 function makeCodeStageInnerHTML(next, includeAdminButton = false, codeAttrs = '', clueAttrs = '') {
   if (!next) {
     return `<div class="code-stage-empty-label" ${codeAttrs}>No active code</div>
-      <div class="code-clue" ${clueAttrs}>Awaiting shuffle</div>`;
+      <div class="code-clue" ${clueAttrs}>Click Shuffle Codes below to begin</div>
+      ${includeAdminButton ? `<button class="btn-primary" onclick="shufflePlayerCodes()" style="background:linear-gradient(135deg,var(--emerald),#059669);border-color:#34d399;font-weight:800;letter-spacing:0.04em;padding:10px 22px;margin-top:12px">🎲 SHUFFLE CODES</button>` : ''}`;
   }
   const code = next.code || getPlayerCode(next.category, next.name);
   const isPrevOwned = STATE.previousOwners && STATE.previousOwners[`${next.category}:${next.name}`];
   return `<div style="font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.16em">Next player code</div>
     ${makeCasinoCodeValue(code, codeAttrs)}
     <div class="code-clue" ${clueAttrs}>${next.category} category${next.isUnsold ? ' · unsold return' : ''}${isPrevOwned ? ' · RTM eligible' : ''}</div>
-    ${includeAdminButton ? `<button class="btn-primary" id="btnRevealCode" onclick="revealShuffledCode()">Show Player</button>` : ''}`;
+    ${includeAdminButton ? `<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px;flex-wrap:wrap">
+      <button class="btn-primary" id="btnRevealCode" onclick="revealShuffledCode()">Show Player</button>
+      <button class="ghost small" onclick="shufflePlayerCodes()" style="color:var(--cyan);border-color:rgba(37,212,255,0.3);padding:8px 14px;font-size:12px">🎲 Re-Shuffle</button>
+    </div>` : ''}`;
 }
 
 function makePublicCodeStage(next, includeAdminButton = false) {

@@ -415,6 +415,27 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes softGlow { 0%,100% { box-shadow: 0 0 0 rgba(37,212,255,0); } 50% { box-shadow: 0 0 28px rgba(37,212,255,0.22); } }
 @keyframes shimmer { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
 
+#hammer {
+  position: fixed;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  width: 170px;
+  height: 170px;
+  z-index: 10000;
+  pointer-events: none;
+}
+#hammer.swing {
+  display: block !important;
+  animation: hammerSwing 0.65s cubic-bezier(0.36, 0, 0.66, -0.56) 3;
+}
+@keyframes hammerSwing {
+  0% { transform: translate(-50%, -50%) rotate(-45deg) scale(1); }
+  35% { transform: translate(-50%, -70%) rotate(-85deg) scale(1.15); }
+  70% { transform: translate(-50%, -30%) rotate(25deg) scale(1.2); filter: drop-shadow(0 0 35px rgba(255,194,10,0.95)); }
+  100% { transform: translate(-50%, -50%) rotate(-45deg) scale(1); }
+}
+
 header .header-right { display: flex; align-items: center; gap: 8px; }
 header { box-shadow: 0 10px 34px rgba(0,0,0,0.28); }
 #mainContentContainer > div:not(.hidden) { animation: panelIn 0.24s ease-out; }
@@ -1828,8 +1849,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     </div>
   </div>
 
-  <img id="hammer" src="hammer.png" alt="">
-  <audio id="hammerAudio" src="hammer.wav"></audio>
+  <img id="hammer" src="hammer.png" class="hidden" alt="Hammer">
+  <audio id="hammerAudio" src="hammer.wav" preload="auto"></audio>
 </div>
 
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" onerror="window.__socketIoLoadFailed=true"></script>
@@ -2725,9 +2746,14 @@ socket.on('popup:open', player => {
   allowActivePlayerCodeQueue = false;
   blockedBidToastKey = '';
   closeCannotBidModal();
-  if (!player.isUnsold && !STATE.unsoldRoundActive) {
-    resetAndStartTimer();
-  }
+  
+  // Keep timer PAUSED at 30s during player reveal phase
+  window.timerHandled = false;
+  auctionTimeRemaining = 30;
+  isTimerPaused = true;
+  const btn = document.getElementById('btnPauseTimer');
+  if (btn) btn.textContent = '▶️';
+  updateTimerUI();
   const liveMain = document.getElementById('liveAuctionMain');
   const popup = document.getElementById('auctionPlayerPopup');
   liveMain?.classList.remove('is-revealing-player');
@@ -2875,12 +2901,24 @@ socket.on('player:sold', data => {
   document.getElementById('soldAnimationOverlay').classList.remove('hidden');
   
   const hammer = document.getElementById('hammer');
-  hammer.style.display = 'block'; hammer.classList.remove('swing'); void hammer.offsetWidth; hammer.classList.add('swing');
-  const audio = document.getElementById('hammerAudio');
-  if (audio) { audio.pause(); audio.currentTime = 0; audio.play().catch(() => {}); }
+  if (hammer) {
+    hammer.classList.remove('hidden');
+    hammer.classList.remove('swing');
+    void hammer.offsetWidth;
+    hammer.classList.add('swing');
+  }
+  try {
+    const audio = document.getElementById('hammerAudio');
+    if (audio && audio.src && !audio.error) {
+      audio.pause(); audio.currentTime = 0; audio.play().catch(() => playJackpotChime());
+    } else {
+      playJackpotChime();
+    }
+  } catch(e) {}
   
   setTimeout(() => {
     document.getElementById('soldAnimationOverlay').classList.add('hidden');
+    if (hammer) hammer.classList.add('hidden');
     renderAll();
   }, 3500);
   

@@ -416,6 +416,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes shimmer { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
 
 #hammer {
+  display: none !important;
   position: fixed;
   top: 42%;
   left: 50%;
@@ -424,10 +425,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   height: 170px;
   z-index: 10000;
   pointer-events: none;
+  opacity: 0;
 }
 #hammer.swing {
   display: block !important;
-  animation: hammerSwing 0.65s cubic-bezier(0.36, 0, 0.66, -0.56) 3;
+  opacity: 1 !important;
+  animation: hammerSwing 0.65s cubic-bezier(0.36, 0, 0.66, -0.56) 3 forwards;
 }
 @keyframes hammerSwing {
   0% { transform: translate(-50%, -50%) rotate(-45deg) scale(1); }
@@ -2332,6 +2335,13 @@ function closeLocalLivePlayerView() {
   liveRevealToken++;
   blockedBidToastKey = '';
   closeCannotBidModal();
+  const hammer = document.getElementById('hammer');
+  if (hammer) {
+    hammer.classList.remove('swing');
+    hammer.classList.add('hidden');
+    hammer.style.display = 'none';
+    hammer.style.opacity = '0';
+  }
   const popup = document.getElementById('auctionPlayerPopup');
   popup?.classList.remove('is-code-mode');
   popup?.classList.remove('is-player-live');
@@ -2586,15 +2596,22 @@ function updateLiveEligibility() {
   renderUnsoldAutoDetectBanner(activePlayer);
 }
 
-function resetAndStartTimer() {
+function resetAndStartTimer(forceStartNow = false) {
   window.timerHandled = false;
-  auctionTimeRemaining = 30; isTimerPaused = false;
-  const btn = document.getElementById('btnPauseTimer');
-  if (btn) btn.textContent = '⏸️';
-  updateTimerUI();
-  
-  if (CURRENT_USER.role === 'admin' && STATE.biddingActive) {
-    socket.emit('admin:timer_control', { paused: false, time: 30 });
+  auctionTimeRemaining = 30;
+  if (forceStartNow) {
+    isTimerPaused = false;
+    const btn = document.getElementById('btnPauseTimer');
+    if (btn) btn.textContent = '⏸️';
+    updateTimerUI();
+    if (CURRENT_USER.role === 'admin' && STATE.biddingActive) {
+      socket.emit('admin:start_timer');
+    }
+  } else {
+    isTimerPaused = true;
+    const btn = document.getElementById('btnPauseTimer');
+    if (btn) btn.textContent = '▶️';
+    updateTimerUI();
   }
 }
 
@@ -2903,9 +2920,18 @@ socket.on('player:sold', data => {
   const hammer = document.getElementById('hammer');
   if (hammer) {
     hammer.classList.remove('hidden');
+    hammer.style.display = 'block';
+    hammer.style.opacity = '1';
     hammer.classList.remove('swing');
     void hammer.offsetWidth;
     hammer.classList.add('swing');
+    
+    setTimeout(() => {
+      hammer.classList.remove('swing');
+      hammer.classList.add('hidden');
+      hammer.style.display = 'none';
+      hammer.style.opacity = '0';
+    }, 2000);
   }
   try {
     const audio = document.getElementById('hammerAudio');
@@ -2918,7 +2944,12 @@ socket.on('player:sold', data => {
   
   setTimeout(() => {
     document.getElementById('soldAnimationOverlay').classList.add('hidden');
-    if (hammer) hammer.classList.add('hidden');
+    if (hammer) {
+      hammer.classList.remove('swing');
+      hammer.classList.add('hidden');
+      hammer.style.display = 'none';
+      hammer.style.opacity = '0';
+    }
     renderAll();
   }, 3500);
   

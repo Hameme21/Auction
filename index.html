@@ -3381,19 +3381,8 @@ function getUnsoldPlayersList() {
 }
 
 function checkUnsoldRoundPrompt() {
-  if (CURRENT_USER.role !== 'admin') return;
-  if (activePlayer) return;
-  if (STATE.unsoldRoundActive) return;
-  if (hasDeclinedUnsoldPromptSession) return;
-
-  const next = getNextQueuedPlayer();
-  if (!next) {
-    const unsoldList = getUnsoldPlayersList();
-    if (unsoldList.length > 0) {
-      document.getElementById('unsoldPromptCount').textContent = unsoldList.length;
-      document.getElementById('unsoldRoundPromptOverlay')?.classList.remove('hidden');
-    }
-  }
+  // Manual admin action required - disabled automatic modal popup
+  return;
 }
 
 window.confirmUnsoldRoundPrompt = () => {
@@ -3488,7 +3477,7 @@ function renderLiveAdminQueue() {
 
 window.shufflePlayerCodes = () => {
   hasDeclinedUnsoldPromptSession = false;
-  if (CURRENT_USER.role === 'admin' && activePlayer) allowActivePlayerCodeQueue = true;
+  allowActivePlayerCodeQueue = false;
   if (CURRENT_USER.role === 'admin') renderLiveAdminQueue();
   socket.emit('admin:shuffle_codes');
 };

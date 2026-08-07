@@ -2686,29 +2686,15 @@ socket.on('auction:enter', data => {
   saveSession({ kind: 'participant', hostId: CURRENT_USER.hostId || auth.hostId, role: data.role, teamId: data.teamId || auth.teamId || '', password: auth.password || '' });
   restoringSession = false;
   pendingAuthSession = null;
+  renderAll();
   finishEnterApp(resumeToDashboard ? 'sectionDashboard' : getSavedSession()?.sectionId);
 });
 socket.on('auth:team_error', msg => { const failedRole = pendingAuthSession?.role || selectedLoginRole || 'team'; document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); applyParticipantAuthRole(failedRole); teamAuthOverlay.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('teamAuthMsg').textContent = msg; });
 socket.on('state:updated', s => {
-  const prev = STATE;
   const shouldClearActivePlayer = activePlayer && s && !s.currentActivePlayer && !s.biddingActive;
   STATE = s;
   if (shouldClearActivePlayer) closeLocalLivePlayerView();
-  
-  renderScoreboards();
-  const dbChanged = !prev || 
-    JSON.stringify(prev.playersSnapshot) !== JSON.stringify(s.playersSnapshot) ||
-    JSON.stringify(prev.categories) !== JSON.stringify(s.categories) ||
-    JSON.stringify(prev.soldPrices) !== JSON.stringify(s.soldPrices) ||
-    JSON.stringify(prev.teams) !== JSON.stringify(s.teams);
-
-  if (dbChanged) {
-    renderDatabase();
-    renderTeamConfigTable();
-    renderViewerRosters();
-  }
-  renderScheduler();
-  updateLiveIndicator();
+  renderAll();
 });
 
 socket.on('code_shuffle:started', () => {

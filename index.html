@@ -2733,7 +2733,7 @@ socket.on('player:bid', pl => {
   STATE.activeBidders[key] = bidderId;
   if (activePlayer?.name === pl.name) { 
     updatePopupPrice(pl.price, bidderId); 
-    resetAndStartTimer(); 
+    resetAndStartTimer(true); 
   }
   playBidBeep();
   const t = STATE.teams.find(x => x.id === bidderId);

@@ -478,8 +478,11 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
   #teamActionButtons > div { grid-template-columns: 1fr !important; }
   .timer-pill { top: 10px; padding: 5px 12px; }
   #auctionTimerText { font-size: 1.05rem !important; }
-  #viewerPriceDisplay { text-align: left !important; width: 100%; }
-  #auctionPlayerPopup { min-height: 430px; }
+  .live-photo-panel { max-height: 230px !important; min-height: 180px !important; flex: none !important; }
+  .live-info-panel { flex-shrink: 0 !important; gap: 8px !important; }
+  #viewerPriceDisplay { text-align: left !important; width: 100% !important; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 6px !important; padding: 10px 14px !important; }
+  #viewerPriceDisplay > div:first-child { display: flex; align-items: center; gap: 8px; }
+  #auctionPlayerPopup { min-height: auto !important; max-height: 92vh !important; overflow-y: auto !important; }
 }
 @media (max-width: 520px) {
   body { font-size: 13px; }
@@ -489,7 +492,6 @@ button:active:not(:disabled), .tab:active, #topNav a:active, #mobileBottomNav .m
   header .header-right button { min-height: 34px; }
   .player-grid-lg, .player-grid-sm { grid-template-columns: 1fr 1fr; }
   .chip { max-width: 100%; white-space: normal; justify-content: center; text-align: center; }
-  #auctionPlayerPopup { min-height: 460px; }
   #adminBidControls { width: 100%; justify-content: space-between; }
 }
 @media (max-width: 380px) {
@@ -1427,6 +1429,10 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 
                 <div class="live-category-badge">
                   <span id="popupCat" class="chip chip-cyan" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-size: 21px; padding: 8px 14px; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0.8px;">CATEGORY</span>
+                </div>
+
+                <div id="mobileWinningBadgeContainer" style="position:absolute; top:8px; right:8px; z-index:10;">
+                  <span id="mobileWinningBadge" class="chip" style="background:rgba(6,17,29,0.88); backdrop-filter:blur(10px); border:1px solid rgba(120,183,255,0.3); font-size:12px; padding:6px 12px; font-weight:800; border-radius:8px; color:var(--emerald); box-shadow:0 4px 14px rgba(0,0,0,0.6);">No Bids Yet</span>
                 </div>
 
                 <div class="live-photo-name" style="z-index: 10;">
@@ -2637,8 +2643,10 @@ function handleTimerExpiry() {
   window.timerHandled = true;
   if (CURRENT_USER.role === 'admin' && activePlayer) { 
       const sale = getActiveSaleContext();
-      if (sale?.highBidderId) {
+      if (sale?.highBidderId && sale.highBidderId !== 'ADMIN') {
           triggerSoldFromPopup();
+      } else if (sale && (sale.currentPrice > sale.base || sale.highBidderId === 'ADMIN')) {
+          openSoldConfirmation(sale.category, sale.name, sale.currentPrice, false, false);
       } else if (sale) {
           markActivePlayerUnsold(sale);
       }
@@ -4208,8 +4216,22 @@ window.updatePopupPrice = (p, highBidderId) => {
     document.getElementById('viewerPrice').textContent = p; 
     
     const highBidderTeam = STATE.teams.find(t => t.id === highBidderId);
-    const hbName = highBidderTeam ? highBidderTeam.name : (highBidderId || 'No Bids Yet');
+    let hbName = 'No Bids Yet';
+    if (highBidderTeam) {
+        hbName = highBidderTeam.name;
+    } else if (highBidderId === 'ADMIN' || (!highBidderId && activePlayer && Number(p) > Number(activePlayer.base || 0))) {
+        hbName = 'ADMIN INCREASED';
+    } else if (highBidderId) {
+        hbName = highBidderId;
+    }
+    
     document.querySelectorAll('.high-bidder-name').forEach(el => el.textContent = hbName);
+
+    const mobBadge = document.getElementById('mobileWinningBadge');
+    if (mobBadge) {
+        mobBadge.textContent = highBidderTeam ? `👑 ${highBidderTeam.name}` : (hbName === 'ADMIN INCREASED' ? '⚡ ADMIN INCREASED' : 'No Bids Yet');
+        mobBadge.style.color = highBidderTeam ? 'var(--emerald)' : (hbName === 'ADMIN INCREASED' ? 'var(--amber)' : 'var(--muted)');
+    }
     
     // Dynamic Team Bid Button Setup
     if (activePlayer && CURRENT_USER.role === 'team') {
@@ -4226,11 +4248,12 @@ window.updatePopupPrice = (p, highBidderId) => {
                 bidBtn.style.opacity = '0.5';
             } else {
                 if (highBidderId === CURRENT_USER.teamId) {
-                    bidBtn.innerHTML = `WINNING ৳${currentPrice}`;
+                    bidBtn.innerHTML = `YOU ARE WINNING 👑 (৳${currentPrice})`;
                     bidBtn.disabled = true;
-                    bidBtn.style.opacity = '0.7';
+                    bidBtn.style.opacity = '0.85';
                 } else {
-                    bidBtn.innerHTML = `BID ৳${nextBid}`;
+                    const winLabel = highBidderTeam ? ` (Winning: ${highBidderTeam.name})` : '';
+                    bidBtn.innerHTML = `BID ৳${nextBid}${winLabel}`;
                     bidBtn.disabled = false;
                     bidBtn.style.opacity = '1';
                 }
@@ -4251,9 +4274,11 @@ window.adjustBid = (dir) => {
   const basePrice = Number(activePlayer.base) || Number(cat?.base) || 0;
   if (next >= basePrice) {
     if (!STATE.activeBids) STATE.activeBids = {};
+    if (!STATE.activeBidders) STATE.activeBidders = {};
     STATE.activeBids[key] = next;
+    STATE.activeBidders[key] = 'ADMIN';
     activePlayer.currentPrice = next;
-    socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: next, teamId: null });
+    socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: next, teamId: 'ADMIN' });
   }
 };
 
@@ -4433,13 +4458,13 @@ function markActivePlayerUnsold(sale) {
 window.triggerSoldFromPopup = () => {
     const sale = getActiveSaleContext();
     if (!sale) return;
-    if (sale.highBidderId) {
+    if (sale.highBidderId && sale.highBidderId !== 'ADMIN') {
       socket.emit('player:sold', { category: sale.category, name: sale.name, price: sale.currentPrice, isDirect: false, isRTM: false, teamId: sale.highBidderId });
       const t = STATE.teams.find(x => x.id === sale.highBidderId);
       showToast(`Sold to ${t ? t.name : sale.highBidderId}`);
       return;
     }
-    if (sale.currentPrice > sale.base) {
+    if (sale.currentPrice > sale.base || sale.highBidderId === 'ADMIN') {
       openSoldConfirmation(sale.category, sale.name, sale.currentPrice, false, false);
       return;
     }

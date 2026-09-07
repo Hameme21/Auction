@@ -2722,7 +2722,7 @@
             <div style="display: flex; gap: 8px;">
               <div class="input-wrapper" style="flex: 1;">
                 <span class="input-icon">🌐</span>
-                <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin, bpl, ipl" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyHostId();}" />
+                <input type="text" id="login-team-host" class="form-control" value="" placeholder="Enter Host ID (e.g. bpl, ipl, admin)" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyHostId();}" oninput="handleHostIdInput(this.value)" autocomplete="off" />
               </div>
               <button type="button" class="btn-primary" style="padding: 0 16px; font-size: 0.85rem; white-space: nowrap;" onclick="verifyHostId()">
                 Verify Host 🔍
@@ -2825,7 +2825,7 @@
               <label>Host ID</label>
               <div class="input-wrapper">
                 <span class="input-icon">🌐</span>
-                <input type="text" id="login-viewer-host-input" class="form-control" value="admin" placeholder="Enter Host ID (e.g. admin)" />
+                <input type="text" id="login-viewer-host-input" class="form-control" value="" placeholder="Enter Host ID (e.g. bpl, ipl, admin)" autocomplete="off" />
               </div>
             </div>
           </div>
@@ -3972,9 +3972,11 @@
           }
         }
 
-        // Default: Auto-refresh teams for currently selected host
+        // Auto-refresh teams for currently selected host if one was provided
         const hostId = getSelectedHostId();
-        socket.emit('participant:connect', hostId);
+        if (hostId) {
+          socket.emit('participant:connect', hostId);
+        }
         
         // Hide loading screen if still visible
         setTimeout(() => {
@@ -4118,38 +4120,11 @@
 
       // Team Discovery Response
       socket.on('init:teams_available', ({ hostId, teams, notFound, state }) => {
-        const status = document.getElementById('host-verify-status');
-        const teamsSection = document.getElementById('login-teams-section');
-
         if (notFound) {
-          currentVerifiedHost = null;
-          if (status) status.innerHTML = `❌ <span style="color:var(--accent-red);font-weight:700;">Host "${hostId}" not found.</span> Verify Host ID or register as new Manager.`;
-          if (teamsSection) teamsSection.style.display = 'none';
-          showLoginAlert(`Host "${hostId}" is not registered. Please check Host ID or register.`, 'error');
+          handleHostNotFound(hostId);
           return;
         }
-
-        currentVerifiedHost = hostId;
-        SESSION.hostId = hostId;
-        if (state) Object.assign(STATE, state);
-        if (teams && Array.isArray(teams)) {
-          STATE.teams = teams;
-          try {
-            localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(teams));
-          } catch (e) {}
-        }
-
-        if (status) {
-          status.innerHTML = `✅ <span style="color:var(--accent-green);font-weight:700;">Host "${hostId}" verified!</span> ${(teams || []).length} franchises enrolled.`;
-        }
-        if (teamsSection) teamsSection.style.display = 'block';
-
-        populateTeamDropdown(STATE.teams);
-        renderLoginTeamsGrid(STATE.teams);
-        renderTeamsGrid();
-        renderDashboardView();
-        renderMiniStandings();
-        hideLoginAlert();
+        applyVerifiedHostData({ hostId, teams, state });
       });
 
       // Admin Login Success
@@ -4175,7 +4150,16 @@
 
       // Auth Errors
       socket.on('auth:portal_error', (msg) => {
-        showLoginAlert(`Manager Auth Error: ${msg}`, 'error');
+        const mgrPortal = document.getElementById('portal-manager');
+        const isMgrActive = mgrPortal && mgrPortal.style.display !== 'none';
+        if (isMgrActive) {
+          showLoginAlert(`Manager Auth Error: ${msg}`, 'error');
+        } else {
+          console.warn('Background Manager Auth Error:', msg);
+          if (document.getElementById('screen-login').style.display !== 'none') {
+            localStorage.removeItem('AUCTION_AUTH_SESSION');
+          }
+        }
         const loader = document.getElementById('app-loading-screen');
         if (loader) hideAppLoader();
       });
@@ -6131,57 +6115,136 @@
     function getSelectedHostId() {
       // Look in team portal or viewer portal
       const teamHost = document.getElementById('login-team-host');
-      if (teamHost && teamHost.value.trim()) return teamHost.value.trim();
+      if (teamHost && teamHost.value && teamHost.value.trim()) return teamHost.value.trim();
       const viewerHost = document.getElementById('login-viewer-host-input');
-      if (viewerHost && viewerHost.value.trim()) return viewerHost.value.trim();
-      return SESSION.hostId || 'admin';
+      if (viewerHost && viewerHost.value && viewerHost.value.trim()) return viewerHost.value.trim();
+      return SESSION.hostId || null;
     }
 
-    
     // Franchise Team Selection on Login Page
     let hostInputDebounceTimer = null;
     let selectedLoginTeamId = null;
-
-    
     let currentVerifiedHost = null;
 
-    function verifyHostId() {
-      const input = document.getElementById('login-team-host');
+    function applyVerifiedHostData({ hostId, teams, state }) {
+      currentVerifiedHost = hostId;
+      SESSION.hostId = hostId;
       const status = document.getElementById('host-verify-status');
       const teamsSection = document.getElementById('login-teams-section');
-      const hostId = input ? (input.value || 'admin').trim().toLowerCase() : 'admin';
 
-      if (!hostId) {
-        showLoginAlert("Please enter a valid Host ID", "error");
-        return;
+      if (state) Object.assign(STATE, state);
+      if (teams && Array.isArray(teams)) {
+        STATE.teams = teams;
+        try {
+          localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(teams));
+        } catch (e) {}
       }
 
       if (status) {
-        status.innerHTML = '⏳ <span style="color:var(--accent-amber);">Verifying Host ID with server...</span>';
+        const count = (teams || []).length;
+        status.innerHTML = `✅ <span style="color:var(--accent-green);font-weight:700;">Host "${hostId}" verified!</span> ${count} franchise${count === 1 ? '' : 's'} enrolled.`;
       }
+      if (teamsSection) teamsSection.style.display = 'block';
 
-      SESSION.hostId = hostId;
+      populateTeamDropdown(STATE.teams);
+      renderLoginTeamsGrid(STATE.teams);
+      renderTeamsGrid();
+      renderDashboardView();
+      renderMiniStandings();
+      hideLoginAlert();
+
+      // Synchronize socket room
       if (socket && socket.connected) {
         socket.emit('participant:connect', hostId);
-      } else {
-        // Fallback check against cached store
-        if (status) status.innerHTML = '⚠️ Connecting to server...';
-        initSocket();
+      }
+    }
+
+    function handleHostNotFound(hostId) {
+      currentVerifiedHost = null;
+      const status = document.getElementById('host-verify-status');
+      const teamsSection = document.getElementById('login-teams-section');
+
+      if (status) {
+        status.innerHTML = `❌ <span style="color:var(--accent-red);font-weight:700;">Host "${hostId}" not found.</span> Verify Host ID or register as new Manager.`;
+      }
+      if (teamsSection) teamsSection.style.display = 'none';
+      showLoginAlert(`Host "${hostId}" is not registered. Please check Host ID or register as new Manager.`, 'error');
+    }
+
+    async function verifyHostId(hostOverride) {
+      const input = document.getElementById('login-team-host');
+      const status = document.getElementById('host-verify-status');
+      const teamsSection = document.getElementById('login-teams-section');
+      const raw = hostOverride !== undefined ? hostOverride : (input ? input.value : '');
+      const cleanHost = (raw || '').trim().toLowerCase();
+
+      if (!cleanHost) {
+        if (status) status.innerHTML = 'Enter Host ID and verify to load franchises.';
+        if (teamsSection) teamsSection.style.display = 'none';
+        showLoginAlert("Please enter a Host ID", "error");
+        return;
+      }
+
+      if (cleanHost === currentVerifiedHost && teamsSection && teamsSection.style.display !== 'none') {
+        return; // Already verified and loaded
+      }
+
+      if (status) {
+        status.innerHTML = '⚡ <span style="color:var(--accent-indigo);font-weight:600;">Verifying Host ID...</span>';
+      }
+
+      // 1. Instant HTTP validation (fastest path: ~30-100ms directly from server in-memory cache)
+      const baseUrl = getStoredServerUrl();
+      let httpHandled = false;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch(`${baseUrl}/api/verify-host/${encodeURIComponent(cleanHost)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ok) {
+            httpHandled = true;
+            applyVerifiedHostData(data);
+            return;
+          }
+        } else if (res.status === 404) {
+          httpHandled = true;
+          handleHostNotFound(cleanHost);
+          return;
+        }
+      } catch (err) {
+        // Fallback to socket emit below if fetch fails
+      }
+
+      // 2. WebSocket Fallback
+      if (!httpHandled) {
+        SESSION.hostId = cleanHost;
+        if (socket && socket.connected) {
+          socket.emit('participant:connect', cleanHost);
+        } else {
+          initSocket();
+        }
       }
     }
 
     function handleHostIdInput(hostId) {
       if (hostInputDebounceTimer) clearTimeout(hostInputDebounceTimer);
+      const clean = (hostId || '').trim();
+      if (!clean) {
+        hideLoginAlert();
+        const status = document.getElementById('host-verify-status');
+        if (status) status.innerHTML = 'Enter Host ID and verify to load franchises.';
+        const teamsSection = document.getElementById('login-teams-section');
+        if (teamsSection) teamsSection.style.display = 'none';
+        return;
+      }
       hostInputDebounceTimer = setTimeout(() => {
-        const cleanHost = (hostId || 'admin').trim();
-        SESSION.hostId = cleanHost;
-        if (socket && socket.connected) {
-          socket.emit('participant:connect', cleanHost);
-        } else {
-          // If socket not connected yet, render from local state
-          renderLoginTeamsGrid(STATE.teams || []);
-        }
-      }, 250);
+        verifyHostId(clean);
+      }, 400);
     }
 
     function renderLoginTeamsGrid(teams) {
@@ -6245,7 +6308,7 @@
     }
 
     function submitFranchiseLogin() {
-      const hostId = (document.getElementById('login-team-host').value || 'admin').trim();
+      const hostId = (document.getElementById('login-team-host').value || '').trim();
       const teamId = (document.getElementById('login-team-id-input').value || '').trim().toUpperCase();
       const password = document.getElementById('login-team-password').value;
 
@@ -6322,7 +6385,11 @@
     }
 
     function submitSpectatorEntry() {
-      const hostId = document.getElementById('login-viewer-host-input').value.trim() || 'admin';
+      const hostId = (document.getElementById('login-viewer-host-input').value || '').trim();
+      if (!hostId) {
+        showLoginAlert("Please enter a Host ID to launch stream", "error");
+        return;
+      }
       SESSION.hostId = hostId;
 
       // Save credential helper for auto-refresh
@@ -6474,9 +6541,6 @@
       } catch (e) {
         console.warn('Session restoration error', e);
       }
-
-      // Automatically verify initial host
-      verifyHostId();
 
       hideAppLoader();
       initSocket();

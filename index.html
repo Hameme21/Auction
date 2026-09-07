@@ -3371,6 +3371,8 @@
               <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <button class="btn-primary" onclick="openAddCategoryModal()">➕ Add Category</button>
                 <button class="btn-secondary" onclick="openAddPlayerModal()">👤 Add Player</button>
+                <button class="btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="adminClearAllPlayers()">🗑️ Delete All Players</button>
+                <button class="btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="adminClearAllPlayers()">🗑️ Delete All Players</button>
               </div>
             </div>
             <div id="admin-categories-cards-list" class="cat-cards-grid"></div>
@@ -6059,7 +6061,45 @@
     }
     function adminResetImpact(teamId) { socket.emit('admin:resetImpact', { teamId }); }
     function adminResetAll() {
-      if (confirm("MASTER FULL RESET: Clear all sales, reset purses to ৳500?")) socket.emit('admin:resetAll');
+      if (confirm("🚨 MASTER FULL RESET:\n\nThis will permanently DELETE ALL PLAYERS, clear all sales, reset bids, and restore franchise purses to ৳500 in the database (including Firebase).\n\nAre you sure you want to completely wipe all players and reset?")) {
+        // Immediately wipe local state
+        STATE.playersSnapshot = {};
+        STATE.lotteryQueue = [];
+        STATE.unsoldPlayers = {};
+        STATE.soldPrices = {};
+        STATE.activeBids = {};
+        STATE.activeBidders = {};
+        STATE.directSigns = {};
+        STATE.rtmEvents = {};
+        STATE.currentActivePlayer = null;
+        STATE.pickedPlayerCode = null;
+        if (STATE.teams && Array.isArray(STATE.teams)) {
+          STATE.teams.forEach(t => {
+            t.purse = 500;
+            t.purchases = {};
+            t.impactUsed = false;
+            t.impactActive = false;
+            t.directSignUsed = false;
+            t.rtmUsed = false;
+          });
+        }
+        renderCurrentView();
+        socket.emit('admin:resetAll');
+        showToast("🚨 Master Reset: Deleting all players and resetting database...", "normal");
+      }
+    }
+
+    function adminClearAllPlayers() {
+      if (confirm("🗑️ DELETE ALL PLAYERS:\n\nThis will permanently remove all players from all categories in the database (including Firebase).\n\nAre you sure?")) {
+        STATE.playersSnapshot = {};
+        STATE.lotteryQueue = [];
+        STATE.unsoldPlayers = {};
+        STATE.currentActivePlayer = null;
+        STATE.pickedPlayerCode = null;
+        renderCurrentView();
+        socket.emit('admin:clear_all_players');
+        showToast("🗑️ Deleting all players from database...", "normal");
+      }
     }
 
     function updatePurseDisplays() {

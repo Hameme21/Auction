@@ -2181,6 +2181,275 @@
       .bid-buttons-grid { grid-template-columns: 1fr; }
       .admin-actions-grid { grid-template-columns: 1fr; }
     }
+  
+    /* =========================================================
+       CASINO SLOT MACHINE GPU ACCELERATED 3D ANIMATION & STYLES
+       ========================================================= */
+    .slot-machine-cabinet {
+      background: linear-gradient(165deg, #0f172a 0%, #1e1b4b 50%, #090d16 100%);
+      border: 2px solid rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.25), 0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 1.5rem 1.75rem;
+      max-width: 480px;
+      margin: 0 auto 1.5rem auto;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .slot-machine-cabinet::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #ec4899, #38bdf8, #10b981);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+    }
+    .slot-machine-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #fbbf24;
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Slot Reels Display Window with 3D Depth & GPU Acceleration */
+    .slot-reels-window {
+      background: #020617;
+      border: 3px solid #f59e0b;
+      border-radius: 16px;
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.95), 0 0 25px rgba(245, 158, 11, 0.35);
+      height: 95px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      perspective: 1000px;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+    .slot-reels-window::before, .slot-reels-window::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; height: 25px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .slot-reels-window::before {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.95), transparent);
+    }
+    .slot-reels-window::after {
+      bottom: 0;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.95), transparent);
+    }
+
+    /* Single 3D Rotating Drum Wheel */
+    .slot-drum-strip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+    .slot-drum-strip.spinning {
+      animation: slotBlurSpin 0.16s linear infinite;
+    }
+    @keyframes slotBlurSpin {
+      0% { transform: translate3d(0, 0, 0); filter: blur(2px); }
+      50% { transform: translate3d(0, -95px, 0); filter: blur(3.5px); }
+      100% { transform: translate3d(0, -190px, 0); filter: blur(2px); }
+    }
+
+    .slot-cell {
+      height: 95px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 3.4rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      color: #38bdf8;
+      text-shadow: 0 0 25px rgba(56, 189, 248, 0.8), 0 0 50px rgba(56, 189, 248, 0.4);
+      transform: translate3d(0, 0, 0);
+    }
+
+    /* Winner Lock Flash Glow */
+    .slot-cell.winner-lock {
+      animation: slotJackpotFlash 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes slotJackpotFlash {
+      0% { transform: scale(0.65) translate3d(0, 0, 0); opacity: 0.5; filter: brightness(1.5); }
+      50% { transform: scale(1.15) translate3d(0, 0, 0); text-shadow: 0 0 45px #38bdf8, 0 0 60px #f59e0b; }
+      100% { transform: scale(1) translate3d(0, 0, 0); opacity: 1; filter: brightness(1); }
+    }
+
+    /* =========================================================
+       LIVE ARENA PLAYER CARD DIMENSION & AESTHETIC UPGRADE
+       ========================================================= */
+    .stage-card {
+      padding: 2.25rem !important;
+      border-radius: 28px !important;
+      background: linear-gradient(155deg, rgba(20, 30, 55, 0.9) 0%, rgba(12, 18, 36, 0.96) 60%, rgba(20, 15, 45, 0.92) 100%) !important;
+      box-shadow: 0 25px 65px -10px rgba(0, 0, 0, 0.75), 0 0 40px rgba(99, 102, 241, 0.15) !important;
+    }
+    .player-profile-row {
+      display: grid !important;
+      grid-template-columns: 280px 1fr !important;
+      gap: 2.5rem !important;
+      align-items: center !important;
+      margin-bottom: 2rem !important;
+    }
+    @media (max-width: 900px) {
+      .player-profile-row {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+        text-align: center !important;
+      }
+    }
+    .portrait-box {
+      max-width: 280px !important;
+      width: 100% !important;
+      aspect-ratio: 1 / 1.05 !important;
+      border-radius: 24px !important;
+      border: 3px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(99, 102, 241, 0.25) !important;
+    }
+    .player-details h2 {
+      font-size: 2.5rem !important;
+      font-weight: 900 !important;
+      letter-spacing: -0.03em !important;
+      background: linear-gradient(135deg, #ffffff 30%, #c7d2fe 80%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.6rem !important;
+      line-height: 1.15 !important;
+    }
+    .bidding-meter {
+      background: linear-gradient(135deg, rgba(3, 7, 18, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 18px !important;
+      padding: 1.4rem 1.6rem !important;
+    }
+
+    /* =========================================================
+       COMBINED TOGGLE TIMER PLAY / PAUSE BUTTON
+       ========================================================= */
+    .btn-timer-toggle {
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-family: var(--font-main);
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+    }
+    .btn-timer-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.55);
+    }
+    .btn-timer-toggle.is-paused {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    /* =========================================================
+       DISTINGUISH CATEGORY DIVIDER HEADERS & SPACING IN PLAYERS
+       ========================================================= */
+    .category-group-header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0 0.6rem 0;
+      margin-top: 1rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+    .category-group-header:first-child {
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .category-group-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .category-group-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.5), transparent);
+    }
+    .category-group-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* =========================================================
+       MOBILE NAVBAR DASHBOARD PLACEMENT (RIGHT OF ALL SECTIONS)
+       ========================================================= */
+    @media (max-width: 900px) {
+      .nav-tabs {
+        display: flex !important;
+        flex-direction: row !important;
+      }
+      .nav-btn-arena { order: 1 !important; }
+      .nav-btn-franchises { order: 2 !important; }
+      .nav-btn-catalog { order: 3 !important; }
+      .nav-btn-schedule { order: 4 !important; }
+      .nav-btn-dashboard { 
+        order: 5 !important; /* On mobile: Rightmost */
+        margin-left: auto !important;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.3)) !important;
+        border: 1px solid rgba(168, 85, 247, 0.5) !important;
+      }
+    }
+    @media (min-width: 901px) {
+      .nav-btn-dashboard {
+        order: -1 !important; /* On PC: Above all sections */
+      }
+    }
+
+    /* Smooth 60fps Transitions */
+    * {
+      -webkit-font-smoothing: antialiased;
+    }
+    .view-container {
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-container.active {
+      animation: smoothSlideFade 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes smoothSlideFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
   </style>
 </head>
 <body>
@@ -2396,19 +2665,19 @@
 
         <!-- Navigation Tabs (Sidebar on PC, Horizontal Scroll on Mobile) -->
         <nav class="nav-tabs">
-          <button class="nav-tab-btn active" onclick="switchView('view-arena')">
-            <span>🏟️</span> <span>Live Arena</span>
-          </button>
-          <button class="nav-tab-btn" onclick="switchView('view-dashboard')">
+          <button class="nav-tab-btn nav-btn-dashboard" onclick="switchView('view-dashboard')">
             <span>📊</span> <span>Dashboard</span>
           </button>
-          <button class="nav-tab-btn" onclick="switchView('view-franchises')">
+          <button class="nav-tab-btn nav-btn-arena active" onclick="switchView('view-arena')">
+            <span>🏟️</span> <span>Live Arena</span>
+          </button>
+          <button class="nav-tab-btn nav-btn-franchises" onclick="switchView('view-franchises')">
             <span>🛡️</span> <span>Franchises</span>
           </button>
-          <button class="nav-tab-btn" onclick="switchView('view-catalog')">
+          <button class="nav-tab-btn nav-btn-catalog" onclick="switchView('view-catalog')">
             <span>👥</span> <span>Players</span>
           </button>
-          <button class="nav-tab-btn" onclick="switchView('view-schedule')">
+          <button class="nav-tab-btn nav-btn-schedule" onclick="switchView('view-schedule')">
             <span>📅</span> <span>Fixtures</span>
           </button>
         </nav>
@@ -2451,6 +2720,41 @@
 
     <!-- Main Content Views -->
     <main class="app-main">
+
+      <!-- VIEW: FRANCHISES SUMMARY DASHBOARD -->
+      <div id="view-dashboard" class="view-container">
+        <div style="margin-bottom: 1.75rem;">
+          <h2 style="font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #fff 30%, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            📊 Franchises Summary Dashboard
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Real-time auction financial overview, top acquired players, and circular franchise budget visualizers.
+          </p>
+        </div>
+
+        <!-- KPI Metrics Strip -->
+        <div class="dashboard-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-lbl">Total Turnover (Spent)</div>
+            <div class="kpi-val" id="kpi-total-spent" style="color: var(--accent-green);">৳0</div>
+            <div class="kpi-sub">Across all registered franchises</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Players Sold</div>
+            <div class="kpi-val" id="kpi-players-sold" style="color: #38bdf8;">0</div>
+            <div class="kpi-sub" id="kpi-sold-sub">0 available / 0 unsold</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Average Acquisition</div>
+            <div class="kpi-val" id="kpi-avg-bid" style="color: var(--accent-amber);">৳0</div>
+            <div class="kpi-sub">Per acquired player</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Enrolled Franchises</div>
+            <div class="kpi-val" id="kpi-teams-count" style="color: var(--accent-pink);">0</div>
+            <div class="kpi-sub">Active in this league</div>
+          </div>
+        </div>
 
       <!-- VIEW 1: LIVE ARENA (MAIN STAGE) -->
       <div id="view-arena" class="view-container active">
@@ -2565,9 +2869,12 @@
                   <div class="admin-controls-card">
                     <h3>⚙️ Auctioneer Command Desk</h3>
                     
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.85rem;">
-                      <button class="btn-secondary" onclick="adminStartTimer()">▶️ Start Timer</button>
-                      <button class="btn-secondary" onclick="adminPauseTimer()">⏸️ Pause</button>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.85rem; align-items: center;">
+                      <!-- Single Combined Play / Pause Toggle Button -->
+                      <button id="btn-timer-toggle" class="btn-timer-toggle" onclick="adminToggleTimer()">
+                        <span id="timer-toggle-icon">▶️</span>
+                        <span id="timer-toggle-label">Start Timer</span>
+                      </button>
                       <button class="btn-secondary" onclick="adminResetTimer(30)">🔄 30s</button>
                       <button class="btn-secondary" onclick="adminResetTimer(15)">15s</button>
                     </div>
@@ -2614,10 +2921,18 @@
               </p>
 
               <!-- Live Drawn Code Reveal Banner (Visible to all: Teams, Viewers, and Admin) -->
-              <div id="stage-drawn-code-box" style="display: none; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 2px solid #38bdf8; border-radius: 20px; padding: 1.5rem; max-width: 420px; margin: 0 auto 1.5rem auto; box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);">
-                <span style="font-size: 0.75rem; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">UNIQUE DRAWN CODE</span>
-                <div id="stage-drawn-code-text" style="font-size: 3rem; font-family: var(--font-mono); font-weight: 900; color: #38bdf8; letter-spacing: 0.15em; margin: 0.4rem 0;">----</div>
-                <span id="stage-drawn-code-sub" style="font-size: 0.85rem; color: #cbd5e1;">Revealing Player Card shortly...</span>
+              <div id="stage-drawn-code-box" class="slot-machine-cabinet" style="display: none;">
+                <div class="slot-machine-title">
+                  <span>🎰</span> <span>LOTTERY LUCKY REEL</span> <span>🎰</span>
+                </div>
+                <div class="slot-reels-window">
+                  <div class="slot-drum-strip" id="slot-drum-strip">
+                    <div class="slot-cell" id="stage-drawn-code-text">----</div>
+                  </div>
+                </div>
+                <div id="stage-drawn-code-sub" style="font-size: 0.82rem; color: #94a3b8; font-family: var(--font-mono); margin-top: 0.75rem;">
+                  Jackpot Draw Confirmed • Revealing Contender...
+                </div>
               </div>
 
               <!-- Admin Lottery Controls -->
@@ -2707,40 +3022,7 @@
         </div>
       </div>
 
-      <!-- VIEW: FRANCHISES SUMMARY DASHBOARD -->
-      <div id="view-dashboard" class="view-container">
-        <div style="margin-bottom: 1.75rem;">
-          <h2 style="font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #fff 30%, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            📊 Franchises Summary Dashboard
-          </h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">
-            Real-time auction financial overview, top acquired players, and circular franchise budget visualizers.
-          </p>
-        </div>
-
-        <!-- KPI Metrics Strip -->
-        <div class="dashboard-kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-lbl">Total Turnover (Spent)</div>
-            <div class="kpi-val" id="kpi-total-spent" style="color: var(--accent-green);">৳0</div>
-            <div class="kpi-sub">Across all registered franchises</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-lbl">Players Sold</div>
-            <div class="kpi-val" id="kpi-players-sold" style="color: #38bdf8;">0</div>
-            <div class="kpi-sub" id="kpi-sold-sub">0 available / 0 unsold</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-lbl">Average Acquisition</div>
-            <div class="kpi-val" id="kpi-avg-bid" style="color: var(--accent-amber);">৳0</div>
-            <div class="kpi-sub">Per acquired player</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-lbl">Enrolled Franchises</div>
-            <div class="kpi-val" id="kpi-teams-count" style="color: var(--accent-pink);">0</div>
-            <div class="kpi-sub">Active in this league</div>
-          </div>
-        </div>
+      
 
         <!-- 2 Column Layout: Top Solds Leaderboard & Budget Visualizer Grid -->
         <div class="dashboard-columns">
@@ -4161,6 +4443,35 @@
     // Admin Controls
     function adminStartTimer() { socket.emit('admin:start_timer'); }
     function adminPauseTimer() { socket.emit('admin:timer_control', { paused: true, time: TIMER_STATE.time }); }
+    
+    // Combined Play / Pause Timer Controller
+    function adminToggleTimer() {
+      if (TIMER_STATE.paused || TIMER_STATE.time <= 0) {
+        // If timer is paused or completed, start/resume it
+        socket.emit('admin:start_timer');
+      } else {
+        // Pause active timer
+        socket.emit('admin:timer_control', { paused: true, time: TIMER_STATE.time });
+      }
+    }
+
+    function updateTimerToggleButton(paused, time) {
+      const toggleBtn = document.getElementById('btn-timer-toggle');
+      const icon = document.getElementById('timer-toggle-icon');
+      const label = document.getElementById('timer-toggle-label');
+      if (!toggleBtn || !icon || !label) return;
+
+      if (!paused && time > 0) {
+        toggleBtn.classList.remove('is-paused');
+        icon.textContent = '⏸️';
+        label.textContent = 'Pause Timer';
+      } else {
+        toggleBtn.classList.add('is-paused');
+        icon.textContent = '▶️';
+        label.textContent = time > 0 ? 'Resume Timer' : 'Restart Timer';
+      }
+    }
+
     function adminResetTimer(seconds) { socket.emit('admin:timer_control', { paused: false, time: seconds }); }
     function adminMarkSold(isDirect = false) {
       if (!STATE.currentActivePlayer) return;
@@ -4284,25 +4595,39 @@
     function playShuffleAnimation(data) {
       const overlay = document.getElementById('lottery-shuffle-overlay');
       const codeDisplay = document.getElementById('overlay-shuffle-code');
-      if (overlay) overlay.style.display = 'flex';
+      const codeBox = document.getElementById('stage-drawn-code-box');
+      const codeText = document.getElementById('stage-drawn-code-text');
+      const drumStrip = document.getElementById('slot-drum-strip');
 
-      const mockCodes = ['BAT01', 'BOWL12', 'AR44', 'WK09', 'PACE88', 'SPIN15'];
+      if (overlay) overlay.style.display = 'flex';
+      if (codeBox) codeBox.style.display = 'block';
+      if (drumStrip) drumStrip.classList.add('spinning');
+
+      const mockCodes = ['777', 'JACKPOT', 'ACE01', 'BAT99', 'BOWL88', 'STRIKE', 'GOLD07', 'SLOT21'];
       let ticks = 0;
       const interval = setInterval(() => {
-        if (codeDisplay) codeDisplay.textContent = mockCodes[Math.floor(Math.random() * mockCodes.length)];
+        const rand = mockCodes[Math.floor(Math.random() * mockCodes.length)];
+        if (codeDisplay) codeDisplay.textContent = rand;
+        if (codeText) codeText.textContent = rand;
         SOUNDS.playTick(false);
         ticks++;
-        if (ticks >= 12) {
+        if (ticks >= 14) {
           clearInterval(interval);
-          const chosenCode = STATE.pickedPlayerCode || 'CODE_DRAWN';
+          const chosenCode = STATE.pickedPlayerCode || 'DRAWN';
+
+          // Stop spinning and lock winner cell with 3D jackpot slam
+          if (drumStrip) drumStrip.classList.remove('spinning');
           if (codeDisplay) codeDisplay.textContent = chosenCode;
-          setTimeout(() => { 
-            if (overlay) overlay.style.display = 'none'; 
-            // Show the drawn code box first
-            const codeBox = document.getElementById('stage-drawn-code-box');
-            const codeText = document.getElementById('stage-drawn-code-text');
-            if (codeBox) codeBox.style.display = 'block';
-            if (codeText) codeText.textContent = chosenCode;
+          if (codeText) {
+            codeText.textContent = chosenCode;
+            codeText.classList.remove('winner-lock');
+            void codeText.offsetWidth; // Trigger GPU reflow
+            codeText.classList.add('winner-lock');
+          }
+          SOUNDS.playGavel();
+
+          setTimeout(() => {
+            if (overlay) overlay.style.display = 'none';
 
             // Auto-reveal the corresponding player card after 1.8 seconds
             setTimeout(() => {
@@ -4310,13 +4635,14 @@
                 revealPickedPlayerCard();
               }
             }, 1800);
-          }, 800);
+          }, 600);
         }
-      }, 90);
+      }, 75);
     }
 
     // Timer Graphic
     function renderTimer(seconds, paused) {
+      updateTimerToggleButton(paused, seconds);
       const numElem = document.getElementById('timer-number');
       const circle = document.getElementById('timer-circle');
       const caption = document.getElementById('timer-status-caption');
@@ -4640,8 +4966,11 @@
 
       // 2. Render Rich Player Cards Grid
       if (cardsContainer) {
-        cardsContainer.innerHTML = filtered.map(p => {
-          const key = `${p.categoryId}:${p.name}`;
+        let lastCategoryId = null;
+        let cardsHtml = '';
+
+        filtered.forEach(p => {
+          const key = p.categoryId + ':' + p.name;
           let buyerTeam = null;
           (STATE.teams || []).forEach(t => {
             if (t.purchases && t.purchases[p.categoryId] === p.name) buyerTeam = t;
@@ -4654,6 +4983,23 @@
           const isRTM = !!(STATE.rtmEvents && STATE.rtmEvents[key]);
           const colorIdx = getCategoryColorIndex(p.categoryId, categories);
 
+          // Add Category Divider Header when category changes in list
+          if (p.categoryId !== lastCategoryId) {
+            lastCategoryId = p.categoryId;
+            const countInCat = filtered.filter(item => item.categoryId === p.categoryId).length;
+            cardsHtml += `
+              <div class="category-group-header">
+                <div class="category-group-title">
+                  <span class="player-category-tag cat-badge-c${colorIdx}" style="font-size: 0.85rem; padding: 4px 12px;">
+                    🏷️ ${p.categoryName}
+                  </span>
+                </div>
+                <div class="category-group-line"></div>
+                <div class="category-group-count">${countInCat} Player${countInCat !== 1 ? 's' : ''}</div>
+              </div>
+            `;
+          }
+
           const cardStateClass = buyerTeam ? 'is-sold' : isUnsold ? 'is-unsold' : '';
 
           let statusTag = '<span style="color:#10b981;display:flex;align-items:center;gap:4px;">🟢 Available</span>';
@@ -4663,7 +5009,6 @@
             statusTag = '<span style="color:#ef4444;display:flex;align-items:center;gap:4px;">❌ Unsold</span>';
           }
 
-          // Active or Final Bidding Amount
           let displayBiddingAmount = '৳' + p.base;
           let biddingLabel = 'Base Price';
           if (pricePaid) {
@@ -4681,7 +5026,7 @@
             </div>
           ` : '';
 
-          return `
+          cardsHtml += `
             <div class="player-pool-card cat-border-c${colorIdx} ${cardStateClass}">
               <div class="player-card-top">
                 <div class="player-avatar-wrap">
@@ -4695,7 +5040,6 @@
                 </div>
               </div>
 
-              <!-- Pricing & Bid Increments Details -->
               <div class="player-pricing-box">
                 <div class="pricing-item">
                   <span class="pricing-lbl">${biddingLabel}</span>
@@ -4717,7 +5061,9 @@
               </div>
             </div>
           `;
-        }).join('');
+        });
+
+        cardsContainer.innerHTML = cardsHtml;
       }
     }
 
@@ -5353,4 +5699,3 @@
   </script>
 </body>
 </html>
-

@@ -6176,7 +6176,7 @@
       const status = document.getElementById('host-verify-status');
       const teamsSection = document.getElementById('login-teams-section');
       const raw = hostOverride !== undefined ? hostOverride : (input ? input.value : '');
-      const cleanHost = (raw || '').trim().toLowerCase();
+      const cleanHost = (raw || '').trim();
 
       if (!cleanHost) {
         if (status) status.innerHTML = 'Enter Host ID and verify to load franchises.';
@@ -6185,7 +6185,7 @@
         return;
       }
 
-      if (cleanHost === currentVerifiedHost && teamsSection && teamsSection.style.display !== 'none') {
+      if (currentVerifiedHost && cleanHost.toLowerCase() === currentVerifiedHost.toLowerCase() && teamsSection && teamsSection.style.display !== 'none') {
         return; // Already verified and loaded
       }
 
@@ -6213,7 +6213,8 @@
           }
         } else if (res.status === 404) {
           httpHandled = true;
-          handleHostNotFound(cleanHost);
+          const data = await res.json().catch(() => ({}));
+          handleHostNotFound(data.hostId || cleanHost);
           return;
         }
       } catch (err) {

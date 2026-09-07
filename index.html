@@ -1669,19 +1669,140 @@
       margin-top: 4px;
     }
 
-    @media (max-width: 640px) {
-      header.app-header { flex-direction: column; align-items: stretch; }
+    /* =========================================================
+       FULLSCREEN GLOBAL LOADING SCREEN
+       ========================================================= */
+    #app-loading-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, #0f172a 0%, #030712 100%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    #app-loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .loading-spinner {
+      width: 58px;
+      height: 58px;
+      border: 4px solid rgba(255, 255, 255, 0.08);
+      border-top-color: var(--accent-indigo);
+      border-right-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #fff 30%, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .loading-subtext {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* =========================================================
+       CATEGORY MANAGEMENT SECTION STYLING
+       ========================================================= */
+    .cat-admin-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .cat-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .cat-admin-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.88));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: var(--transition);
+    }
+    .cat-admin-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .cat-admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .cat-admin-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    /* =========================================================
+       MOBILE & PC RESPONSIVE ENHANCEMENTS
+       ========================================================= */
+    @media (max-width: 900px) {
+      main.app-main { padding: 1rem; }
+      .stage-card { padding: 1.25rem; }
+      .player-profile-row { flex-direction: column; align-items: center; text-align: center; }
+      .player-meta-badges { justify-content: center; }
+      .bidding-meter { grid-template-columns: 1fr; }
       .login-topbar { position: relative; top: 0; left: 0; right: 0; margin-bottom: 1.5rem; }
       .login-hero-card { margin-top: 0; }
+      .nav-tabs { overflow-x: auto; width: 100%; padding-bottom: 4px; }
+      .nav-tab-btn { flex-shrink: 0; font-size: 0.82rem; padding: 8px 12px; }
+      .header-actions { flex-wrap: wrap; justify-content: flex-end; width: 100%; gap: 6px; }
+    }
+
+    @media (max-width: 640px) {
+      header.app-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 1rem; }
+      .login-topbar { flex-direction: column; gap: 10px; text-align: center; }
+      .login-hero-card { border-radius: 20px; }
+      .login-header-banner { padding: 1.75rem 1.25rem 1rem; }
+      .login-header-banner h2 { font-size: 1.7rem; }
+      .login-portal-tabs { margin: 0 1rem 1.25rem; }
+      .login-portal-body { padding: 0 1.25rem 1.75rem; }
       .sold-stamp-banner { font-size: 2.2rem; padding: 0.3rem 1.2rem; }
       .sold-player-card { padding: 1rem 1.5rem; }
       .sold-player-card .sold-name { font-size: 1.3rem; }
       .hammer-graphic-wrap { width: 160px; height: 160px; }
       .hammer-graphic { width: 130px; height: 130px; }
+      .bid-buttons-grid { grid-template-columns: 1fr; }
+      .admin-actions-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Fullscreen Global Loading Screen -->
+  <div id="app-loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">CONNECTING TO ARENA</div>
+    <div class="loading-subtext">Synchronizing Live Auction State...</div>
+  </div>
 
   <!-- =========================================================
        SCREEN 1: DEDICATED HIGH-END LOGIN / GATEWAY PAGE
@@ -1740,37 +1861,18 @@
         <!-- PORTAL 1: FRANCHISE TEAM -->
         <div id="portal-team">
           <div class="form-group">
-            <label>League Selection / Host</label>
-            <div style="display: flex; gap: 0.5rem;">
-              <select id="login-league-select" class="form-control no-icon" onchange="onLeagueSelectChange(this.value)">
-                <option value="admin">Premier Cricket League (admin)</option>
-                <option value="super_t20">Super T20 Championship</option>
-                <option value="custom">Custom League Host...</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group" id="login-custom-host-group" style="display: none;">
-            <label>Custom Host Manager ID</label>
+            <label>Host ID</label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input type="text" id="login-custom-host-input" class="form-control" placeholder="Enter Host Manager Username" />
+              <span class="input-icon">🌐</span>
+              <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin" />
             </div>
-          </div>
-
-          <div style="margin-bottom: 1.25rem;">
-            <button class="btn-secondary" style="width: 100%; padding: 10px; font-weight: 700;" onclick="discoverLeagueTeams()">
-              🔄 Fetch Franchises
-            </button>
           </div>
 
           <div class="form-group">
-            <label>Select Your Franchise Team</label>
+            <label>Franchise Team ID</label>
             <div class="input-wrapper">
               <span class="input-icon">🛡️</span>
-              <select id="login-team-select" class="form-control">
-                <option value="">-- Click "Fetch Franchises" to load teams --</option>
-              </select>
+              <input type="text" id="login-team-id-input" class="form-control" placeholder="e.g. CSK, MI, KKR" style="text-transform: uppercase;" />
             </div>
           </div>
 
@@ -1828,7 +1930,7 @@
           <div class="vip-ticket-card">
             <span class="vip-badge-tag">VIP SPECTATOR PASS</span>
             <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem;">Instant Arena Access</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">No passwords or registrations required.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">No passwords required. Just enter the Host ID to watch live.</p>
             
             <ul class="vip-features-list">
               <li><span>⚡</span> 100% Real-Time Synchronized Bids & Countdown</li>
@@ -1838,10 +1940,10 @@
             </ul>
 
             <div class="form-group" style="text-align: left; margin-bottom: 0;">
-              <label>Target League Host</label>
+              <label>Host ID</label>
               <div class="input-wrapper">
                 <span class="input-icon">🌐</span>
-                <input type="text" id="login-viewer-host-input" class="form-control" value="admin" placeholder="e.g. admin" />
+                <input type="text" id="login-viewer-host-input" class="form-control" value="admin" placeholder="Enter Host ID (e.g. admin)" />
               </div>
             </div>
           </div>
@@ -1916,9 +2018,6 @@
         </button>
         <button class="nav-tab-btn" onclick="switchView('view-schedule')">
           <span>📅</span> Fixtures
-        </button>
-        <button class="nav-tab-btn" id="admin-nav-tab" style="display: none;" onclick="switchView('view-admin')">
-          <span>⚙️</span> Console
         </button>
       </nav>
 
@@ -2111,30 +2210,37 @@
               </div>
             </div>
 
-            <!-- Empty Stage Display -->
+            <!-- Empty Stage Display & Code Shuffle Revealer -->
             <div class="empty-stage-state" id="empty-stage-card">
               <div class="empty-stage-icon">🏟️</div>
-              <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Auction Stage is Clear</h3>
-              <p style="color: var(--text-muted); font-size: 0.92rem; max-width: 440px; margin: 0 auto 1.5rem auto;">
-                Waiting for the League Manager to introduce the next player or draw a lottery token.
+              <h3 id="empty-stage-heading" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Auction Stage is Clear</h3>
+              <p id="empty-stage-desc" style="color: var(--text-muted); font-size: 0.92rem; max-width: 440px; margin: 0 auto 1.5rem auto;">
+                Waiting for the League Manager to shuffle codes or reveal the next player.
               </p>
 
-              <!-- Admin Lottery Desk -->
-              <div id="admin-lottery-launchpad" style="display: none; max-width: 500px; margin: 0 auto;">
+              <!-- Live Drawn Code Reveal Banner (Visible to all: Teams, Viewers, and Admin) -->
+              <div id="stage-drawn-code-box" style="display: none; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 2px solid #38bdf8; border-radius: 20px; padding: 1.5rem; max-width: 420px; margin: 0 auto 1.5rem auto; box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);">
+                <span style="font-size: 0.75rem; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">UNIQUE DRAWN CODE</span>
+                <div id="stage-drawn-code-text" style="font-size: 3rem; font-family: var(--font-mono); font-weight: 900; color: #38bdf8; letter-spacing: 0.15em; margin: 0.4rem 0;">----</div>
+                <span id="stage-drawn-code-sub" style="font-size: 0.85rem; color: #cbd5e1;">Revealing Player Card shortly...</span>
+              </div>
+
+              <!-- Admin Lottery Controls -->
+              <div id="admin-lottery-launchpad" style="display: none; max-width: 520px; margin: 0 auto;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                   <button class="btn-primary" onclick="adminShuffleCodes()">
-                    🎲 Shuffle Pool
+                    🎲 Shuffle Pool Codes
                   </button>
                   <button class="btn-secondary" onclick="adminShuffleUnsold()">
-                    ♻️ Shuffle Unsold Round
+                    ♻️ Shuffle Unsold Pool
                   </button>
                 </div>
-                <div style="display: flex; gap: 0.75rem; justify-content: center;">
-                  <button class="btn-secondary" onclick="adminPickCode()">
+                <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                  <button id="btn-admin-pick-next" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800; padding: 10px 20px;" onclick="adminPickCode()">
                     🎯 Pick Next Code
                   </button>
                   <button class="btn-danger" onclick="adminResetCodes()">
-                    ⏹️ Deactivate Shuffle
+                    🔄 Reset Codes
                   </button>
                 </div>
               </div>
@@ -2208,16 +2314,39 @@
 
       <!-- VIEW 2: FRANCHISES & ROSTERS -->
       <div id="view-franchises" class="view-container">
-        <div style="margin-bottom: 1.5rem;">
-          <h2 style="font-size: 1.6rem; font-weight: 800;">Franchise Rosters & Purse Reserves</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Inspect each team's spending, category acquisitions, and required reserve requirements.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800;">Franchise Rosters & Purse Reserves</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Inspect team purses, spending, category acquisitions, and reserve calculations.</p>
+          </div>
+          <div id="admin-franchise-actions" style="display: none; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="openAddTeamModal()">➕ Add Franchise</button>
+            <button class="btn-secondary" onclick="openImpactConfigModal()">⚡ Edit Impact Purse</button>
+            <button class="btn-danger" onclick="adminResetAll()">🚨 Master Reset All</button>
+          </div>
         </div>
         <div class="teams-grid" id="teams-full-grid"></div>
       </div>
 
-      <!-- VIEW 3: PLAYERS & CATALOG -->
+      <!-- VIEW 3: PLAYERS & CATEGORIES -->
       <div id="view-catalog" class="view-container">
         <div class="glass-panel">
+          
+          <!-- Category Admin Toolbar (for admin to edit categories and base prices) -->
+          <div id="admin-category-panel" style="display: none; margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <div class="cat-admin-toolbar">
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #a5b4fc;">🏷️ Category & Pricing Management</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Configure categories, player base prices, and increment steps per bid.</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn-primary" onclick="openAddCategoryModal()">➕ Add Category</button>
+                <button class="btn-secondary" onclick="openAddPlayerModal()">👤 Add Player</button>
+              </div>
+            </div>
+            <div id="admin-categories-cards-list" class="cat-cards-grid"></div>
+          </div>
+
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             <div>
               <h2 style="font-size: 1.5rem; font-weight: 800;">Players Pool & Categories</h2>
@@ -2278,7 +2407,7 @@
               <h2 style="font-size: 1.5rem; font-weight: 800;">Tournament Fixtures & Matches</h2>
               <p style="color: var(--text-muted); font-size: 0.88rem;">Official match schedule and tournament timetable.</p>
             </div>
-            <div id="admin-schedule-bar" style="display: none; display: flex; gap: 0.5rem;">
+            <div id="admin-schedule-bar" style="display: none; display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <button class="btn-primary" onclick="openAddMatchModal()">➕ Add Fixture</button>
               <button class="btn-secondary" onclick="autoGenerateRoundRobin()">⚡ Generate Round-Robin</button>
               <button class="btn-danger" onclick="resetTournamentSchedule()">🔄 Reset Schedule</button>
@@ -2289,114 +2418,132 @@
         </div>
       </div>
 
-      <!-- VIEW 5: ADMIN CONSOLE -->
-      <div id="view-admin" class="view-container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem;">
-          
-          <!-- Impact Booster Config -->
-          <div class="glass-panel">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: #a5b4fc;">
-              ⚙️ Impact Booster Settings
-            </h3>
-            <div class="form-group">
-              <label>Impact Booster Bonus (৳)</label>
-              <div style="display: flex; gap: 0.5rem;">
-                <input type="number" id="admin-cfg-impact-input" class="form-control no-icon" placeholder="e.g. 50" />
-                <button class="btn-primary" onclick="saveImpactConfig()">Save</button>
-              </div>
-              <span style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px; display: block;">
-                Each franchise can trigger this boost once per tournament.
-              </span>
-            </div>
-          </div>
+    </main>
+  </div>
 
-          <!-- Add Category -->
-          <div class="glass-panel">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: #a5b4fc;">
-              ➕ Add Category
-            </h3>
-            <div class="form-group">
-              <label>Category ID (e.g. BAT, BOWL, AR)</label>
-              <input type="text" id="new-cat-id" class="form-control no-icon" placeholder="BAT" />
-            </div>
-            <div class="form-group">
-              <label>Display Name</label>
-              <input type="text" id="new-cat-name" class="form-control no-icon" placeholder="Batsmen" />
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
-              <div>
-                <label>Base Price (৳)</label>
-                <input type="number" id="new-cat-base" class="form-control no-icon" placeholder="50" />
-              </div>
-              <div>
-                <label>Increment Step (৳)</label>
-                <input type="number" id="new-cat-inc" class="form-control no-icon" placeholder="10" />
-              </div>
-            </div>
-            <button class="btn-primary" style="width: 100%;" onclick="adminAddCategory()">Create Category</button>
+  <!-- FRANCHISE EDIT / ADD MODAL -->
+  <div class="modal-backdrop" id="team-edit-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="team-modal-title">Edit Franchise Team</h3>
+        <button class="btn-icon" onclick="closeTeamModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-team-original-id" />
+        <div class="form-group">
+          <label>Franchise Team ID (Unique)</label>
+          <input type="text" id="edit-team-id" class="form-control no-icon" placeholder="e.g. CSK, MI" style="text-transform: uppercase;" />
+        </div>
+        <div class="form-group">
+          <label>Franchise Name</label>
+          <input type="text" id="edit-team-name" class="form-control no-icon" placeholder="Chennai Super Kings" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
+          <div>
+            <label>Purse (৳)</label>
+            <input type="number" id="edit-team-purse" class="form-control no-icon" value="500" />
           </div>
-
-          <!-- Add Player -->
-          <div class="glass-panel">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: #a5b4fc;">
-              👤 Add Player
-            </h3>
-            <div class="form-group">
-              <label>Category</label>
-              <select id="admin-add-player-cat" class="form-control no-icon"></select>
-            </div>
-            <div class="form-group">
-              <label>Player Name</label>
-              <input type="text" id="admin-add-player-name" class="form-control no-icon" placeholder="e.g. Virat Kohli" />
-            </div>
-            <div class="form-group">
-              <label>Photo URL (Optional)</label>
-              <input type="text" id="admin-add-player-img" class="form-control no-icon" placeholder="https://..." />
-            </div>
-            <button class="btn-primary" style="width: 100%;" onclick="adminAddPlayer()">Add Player to Pool</button>
+          <div>
+            <label>Franchise Password</label>
+            <input type="text" id="edit-team-pass" class="form-control no-icon" placeholder="Password" />
           </div>
-
-          <!-- Add Franchise Team -->
-          <div class="glass-panel">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: #a5b4fc;">
-              🛡️ Add Franchise Team
-            </h3>
-            <div class="form-group">
-              <label>Team ID (e.g. CSK, MI, KKR)</label>
-              <input type="text" id="new-team-id" class="form-control no-icon" placeholder="CSK" />
-            </div>
-            <div class="form-group">
-              <label>Team Name</label>
-              <input type="text" id="new-team-name" class="form-control no-icon" placeholder="Chennai Super Kings" />
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
-              <div>
-                <label>Starting Purse (৳)</label>
-                <input type="number" id="new-team-purse" class="form-control no-icon" value="500" />
-              </div>
-              <div>
-                <label>Team Password</label>
-                <input type="text" id="new-team-pass" class="form-control no-icon" placeholder="team123" />
-              </div>
-            </div>
-            <button class="btn-primary" style="width: 100%;" onclick="adminAddTeam()">Create Franchise</button>
-          </div>
-
-          <!-- Danger Zone -->
-          <div class="glass-panel" style="border-color: rgba(239, 68, 68, 0.35); grid-column: 1 / -1;">
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: #ef4444;">
-              ⚠️ Master Danger Zone
-            </h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
-              Master reset clears all sales, restores initial purses (৳500), clears RTM events, and deactivates active rounds.
-            </p>
-            <button class="btn-danger" onclick="adminResetAll()">🚨 Master Full Reset (Reset All)</button>
-          </div>
-
+        </div>
+        <div class="form-group">
+          <label>Logo URL (Optional)</label>
+          <input type="text" id="edit-team-logo" class="form-control no-icon" placeholder="https://..." />
         </div>
       </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeTeamModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveTeamForm()">Save Franchise</button>
+      </div>
+    </div>
+  </div>
 
-    </main>
+  <!-- CATEGORY EDIT / ADD MODAL -->
+  <div class="modal-backdrop" id="category-edit-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="cat-modal-title">Edit Category</h3>
+        <button class="btn-icon" onclick="closeCategoryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-cat-original-id" />
+        <div class="form-group">
+          <label>Category ID (e.g. BAT, BOWL, AR)</label>
+          <input type="text" id="edit-cat-id" class="form-control no-icon" placeholder="BAT" style="text-transform: uppercase;" />
+        </div>
+        <div class="form-group">
+          <label>Category Name</label>
+          <input type="text" id="edit-cat-name" class="form-control no-icon" placeholder="Batsmen" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
+          <div>
+            <label>Player Base Price (৳)</label>
+            <input type="number" id="edit-cat-base" class="form-control no-icon" placeholder="50" />
+          </div>
+          <div>
+            <label>Increment per Bid (৳)</label>
+            <input type="number" id="edit-cat-inc" class="form-control no-icon" placeholder="10" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveCategoryForm()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT BOOSTER PURSE CONFIG MODAL -->
+  <div class="modal-backdrop" id="impact-config-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>⚡ Edit Impact Purse Bonus</h3>
+        <button class="btn-icon" onclick="closeImpactModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Impact Booster Bonus (৳)</label>
+          <input type="number" id="edit-impact-amount" class="form-control no-icon" placeholder="e.g. 50" />
+          <span style="font-size: 0.74rem; color: var(--text-muted); margin-top: 5px; display: block;">
+            Each franchise can activate this boost once during the auction to increase their purse.
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeImpactModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveImpactPurseAmount()">Save Impact Amount</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PLAYER TO CATEGORY MODAL -->
+  <div class="modal-backdrop" id="player-add-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>👤 Add Player to Pool</h3>
+        <button class="btn-icon" onclick="closeAddPlayerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Target Category</label>
+          <select id="modal-player-cat-select" class="form-control no-icon"></select>
+        </div>
+        <div class="form-group">
+          <label>Player Full Name</label>
+          <input type="text" id="modal-player-name-input" class="form-control no-icon" placeholder="e.g. Shakib Al Hasan" />
+        </div>
+        <div class="form-group">
+          <label>Photo URL (Optional)</label>
+          <input type="text" id="modal-player-img-input" class="form-control no-icon" placeholder="https://..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeAddPlayerModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveNewPlayerToPool()">Add Player</button>
+      </div>
+    </div>
   </div>
 
   <!-- FIXTURE ADD MODAL -->
@@ -2612,14 +2759,36 @@
       config: { impactAmount: 0 }
     };
 
-    // User Session
+    // User Session & Persistence
     const SESSION = {
       role: 'viewer', // 'admin' | 'team' | 'viewer'
       teamId: null,
       username: null,
       hostId: 'admin',
-      activeCategoryFilter: 'all'
+      activeCategoryFilter: 'all',
+      activeView: 'view-arena'
     };
+
+    function saveUserSession() {
+      try {
+        const payload = {
+          role: SESSION.role,
+          teamId: SESSION.teamId,
+          username: SESSION.username,
+          hostId: SESSION.hostId || 'admin',
+          activeView: SESSION.activeView || 'view-arena'
+        };
+        localStorage.setItem('AUCTION_AUTH_SESSION', JSON.stringify(payload));
+      } catch (e) {
+        console.warn('Could not persist session', e);
+      }
+    }
+
+    function clearUserSession() {
+      try {
+        localStorage.removeItem('AUCTION_AUTH_SESSION');
+      } catch (e) {}
+    }
 
     let TIMER_STATE = { paused: false, time: 30 };
     let socket = null;
@@ -2688,9 +2857,42 @@
       socket.on('connect', () => {
         updateConnectionStatus('online', 'Connected');
         showToast("Connected to live auction server", "normal");
-        // Auto-refresh teams for currently selected host
+        
+        // Attempt session auto-restore if stored
+        const savedSession = localStorage.getItem('AUCTION_AUTH_SESSION');
+        if (savedSession) {
+          try {
+            const parsed = JSON.parse(savedSession);
+            if (parsed && parsed.hostId) {
+              SESSION.hostId = parsed.hostId;
+              SESSION.activeView = parsed.activeView || 'view-arena';
+              socket.emit('participant:connect', parsed.hostId);
+
+              if (parsed.role === 'admin' && parsed.username && parsed.password) {
+                socket.emit('manager:login', { username: parsed.username, password: parsed.password });
+                return;
+              } else if (parsed.role === 'team' && parsed.teamId && parsed.password) {
+                socket.emit('team:login', { teamId: parsed.teamId, password: parsed.password, role: 'team' });
+                return;
+              } else if (parsed.role === 'viewer') {
+                socket.emit('team:login', { teamId: null, password: '', role: 'viewer' });
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn("Session restore error", e);
+          }
+        }
+
+        // Default: Auto-refresh teams for currently selected host
         const hostId = getSelectedHostId();
         socket.emit('participant:connect', hostId);
+        
+        // Hide loading screen if still visible
+        setTimeout(() => {
+          const loader = document.getElementById('app-loading-screen');
+          if (loader) loader.classList.add('hidden');
+        }, 500);
       });
 
       socket.on('disconnect', () => {
@@ -2699,14 +2901,35 @@
 
       socket.on('connect_error', () => {
         updateConnectionStatus('offline', 'Offline');
+        const loader = document.getElementById('app-loading-screen');
+        if (loader) loader.classList.add('hidden');
       });
 
       // Synchronized State Updates
       socket.on('state:updated', (newState) => {
         if (!newState) return;
         Object.assign(STATE, newState);
+
+        // Code Shuffle and Player Reveal Sequence handling
+        const codeBox = document.getElementById('stage-drawn-code-box');
+        const codeText = document.getElementById('stage-drawn-code-text');
+        const pickNextBtn = document.getElementById('btn-admin-pick-next');
+
+        if (STATE.pickedPlayerCode && !STATE.currentActivePlayer) {
+          if (codeBox) codeBox.style.display = 'block';
+          if (codeText) codeText.textContent = STATE.pickedPlayerCode;
+          if (pickNextBtn) pickNextBtn.style.display = 'none';
+        } else {
+          if (codeBox) codeBox.style.display = 'none';
+          if (pickNextBtn) pickNextBtn.style.display = 'inline-flex';
+        }
+
         renderCurrentView();
         updatePurseDisplays();
+
+        // Ensure loader is hidden once state is received
+        const loader = document.getElementById('app-loading-screen');
+        if (loader) loader.classList.add('hidden');
       });
 
       // Timer Sync
@@ -2725,6 +2948,8 @@
       // Player On Stage (Popup Open)
       socket.on('popup:open', (playerData) => {
         STATE.currentActivePlayer = playerData;
+        const codeBox = document.getElementById('stage-drawn-code-box');
+        if (codeBox) codeBox.style.display = 'none';
         renderActivePlayerStage(playerData);
         SOUNDS.playTick();
       });
@@ -2813,6 +3038,7 @@
         SESSION.username = username;
         SESSION.teamId = null;
         if (state) Object.assign(STATE, state);
+        saveUserSession();
         transitionToArenaScreen();
         showToast(`Welcome League Manager (${username})`, 'normal');
       });
@@ -2822,6 +3048,7 @@
         SESSION.role = role || 'viewer';
         SESSION.teamId = teamId || null;
         if (state) Object.assign(STATE, state);
+        saveUserSession();
         transitionToArenaScreen();
         showToast(role === 'team' ? `Entered as franchise ${teamId}` : 'Viewing Live Arena as Spectator', 'normal');
       });
@@ -2829,6 +3056,8 @@
       // Auth Errors
       socket.on('auth:portal_error', (msg) => {
         showLoginAlert(`Manager Auth Error: ${msg}`, 'error');
+        const loader = document.getElementById('app-loading-screen');
+        if (loader) loader.classList.add('hidden');
       });
 
       socket.on('auth:portal_success', ({ msg }) => {
@@ -2838,18 +3067,27 @@
 
       socket.on('auth:team_error', (msg) => {
         showLoginAlert(`Franchise Error: ${msg}`, 'error');
+        const loader = document.getElementById('app-loading-screen');
+        if (loader) loader.classList.add('hidden');
       });
     }
 
     // Screen Switching: Login vs Arena
     function transitionToArenaScreen() {
+      const loader = document.getElementById('app-loading-screen');
+      if (loader) loader.classList.add('hidden');
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-arena').style.display = 'flex';
       applyRolePermissions();
-      renderCurrentView();
+      if (SESSION.activeView) {
+        switchView(SESSION.activeView);
+      } else {
+        renderCurrentView();
+      }
     }
 
     function logoutToLoginScreen() {
+      clearUserSession();
       SESSION.role = 'viewer';
       SESSION.teamId = null;
       SESSION.username = null;
@@ -2887,6 +3125,8 @@
       const adminNavTab = document.getElementById('admin-nav-tab');
       const adminLaunchpad = document.getElementById('admin-lottery-launchpad');
       const adminScheduleBar = document.getElementById('admin-schedule-bar');
+      const adminFranchiseActions = document.getElementById('admin-franchise-actions');
+      const adminCategoryPanel = document.getElementById('admin-category-panel');
       const thAdmin = document.getElementById('th-admin-actions');
       const headerPurse = document.getElementById('arena-purse-pill');
       const hostLabel = document.getElementById('header-league-host');
@@ -2896,24 +3136,27 @@
 
       if (SESSION.role === 'admin') {
         roleText.textContent = `Admin (${SESSION.username || 'Manager'})`;
-        adminNavTab.style.display = 'inline-flex';
-        adminLaunchpad.style.display = 'block';
-        adminScheduleBar.style.display = 'flex';
+        if (adminLaunchpad) adminLaunchpad.style.display = 'block';
+        if (adminScheduleBar) adminScheduleBar.style.display = 'flex';
+        if (adminFranchiseActions) adminFranchiseActions.style.display = 'flex';
+        if (adminCategoryPanel) adminCategoryPanel.style.display = 'block';
         if (thAdmin) thAdmin.style.display = 'table-cell';
         headerPurse.style.display = 'none';
       } else if (SESSION.role === 'team') {
         const team = getMyTeam();
         roleText.textContent = team ? team.name : `Franchise (${SESSION.teamId})`;
-        adminNavTab.style.display = 'none';
-        adminLaunchpad.style.display = 'none';
-        adminScheduleBar.style.display = 'none';
+        if (adminLaunchpad) adminLaunchpad.style.display = 'none';
+        if (adminScheduleBar) adminScheduleBar.style.display = 'none';
+        if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
+        if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
         if (thAdmin) thAdmin.style.display = 'none';
         headerPurse.style.display = 'inline-flex';
       } else {
         roleText.textContent = 'Spectator Mode';
-        adminNavTab.style.display = 'none';
-        adminLaunchpad.style.display = 'none';
-        adminScheduleBar.style.display = 'none';
+        if (adminLaunchpad) adminLaunchpad.style.display = 'none';
+        if (adminScheduleBar) adminScheduleBar.style.display = 'none';
+        if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
+        if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
         if (thAdmin) thAdmin.style.display = 'none';
         headerPurse.style.display = 'none';
       }
@@ -2923,12 +3166,14 @@
 
     // View Switching in Arena
     function switchView(viewId) {
+      SESSION.activeView = viewId;
+      saveUserSession();
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-tab-btn').forEach(el => el.classList.remove('active'));
       const target = document.getElementById(viewId);
       if (target) target.classList.add('active');
 
-      const btn = Array.from(document.querySelectorAll('.nav-tab-btn')).find(b => b.getAttribute('onclick').includes(viewId));
+      const btn = Array.from(document.querySelectorAll('.nav-tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId));
       if (btn) btn.classList.add('active');
 
       renderCurrentView();
@@ -3288,25 +3533,92 @@
     function adminCloseStage() { socket.emit('admin:close_popup'); }
     function adminShuffleCodes() { socket.emit('admin:shuffle_codes'); }
     function adminShuffleUnsold() { socket.emit('admin:shuffle_unsold'); }
-    function adminPickCode() { socket.emit('admin:pick_code'); }
-    function adminResetCodes() { socket.emit('admin:reset_codes'); }
+    function adminPickCode() { 
+      // If code was already picked and drawn box is displayed, reveal the player card
+      if (STATE.pickedPlayerCode && !STATE.currentActivePlayer) {
+        revealPickedPlayerCard();
+        return;
+      }
+      socket.emit('admin:pick_code'); 
+    }
+    function adminResetCodes() { 
+      socket.emit('admin:reset_codes'); 
+      const codeBox = document.getElementById('stage-drawn-code-box');
+      if (codeBox) codeBox.style.display = 'none';
+      const pickNextBtn = document.getElementById('btn-admin-pick-next');
+      if (pickNextBtn) {
+        pickNextBtn.style.display = 'inline-flex';
+        pickNextBtn.textContent = '🎯 Pick Next Code';
+      }
+    }
+
+    // Helper: Find player in lotteryQueue / snapshot by picked code and stage them
+    function revealPickedPlayerCard() {
+      if (!STATE.pickedPlayerCode) return;
+      const queue = STATE.lotteryQueue || [];
+      const matched = queue.find(p => p.code === STATE.pickedPlayerCode || (p.code && p.code.toUpperCase() === STATE.pickedPlayerCode.toUpperCase()));
+      if (matched) {
+        const cat = (STATE.categories || []).find(c => c.id === matched.category);
+        socket.emit('admin:select_player', {
+          category: matched.category,
+          name: matched.name,
+          base: matched.base || (cat ? cat.base : 50),
+          image: matched.image || '',
+          code: matched.code,
+          revealCode: false
+        });
+      } else {
+        // Find player by code across all categories snapshot
+        for (const catId in STATE.playersSnapshot) {
+          const cat = (STATE.categories || []).find(c => c.id === catId);
+          const pList = STATE.playersSnapshot[catId] || [];
+          const found = pList.find(p => p.code === STATE.pickedPlayerCode || p.name === STATE.pickedPlayerCode);
+          if (found) {
+            socket.emit('admin:select_player', {
+              category: catId,
+              name: found.name,
+              base: found.base || (cat ? cat.base : 50),
+              image: found.image || '',
+              code: found.code || STATE.pickedPlayerCode,
+              revealCode: false
+            });
+            return;
+          }
+        }
+      }
+    }
 
     // Lottery Reel Animation
     function playShuffleAnimation(data) {
       const overlay = document.getElementById('lottery-shuffle-overlay');
       const codeDisplay = document.getElementById('overlay-shuffle-code');
-      overlay.style.display = 'flex';
+      if (overlay) overlay.style.display = 'flex';
 
       const mockCodes = ['BAT01', 'BOWL12', 'AR44', 'WK09', 'PACE88', 'SPIN15'];
       let ticks = 0;
       const interval = setInterval(() => {
-        codeDisplay.textContent = mockCodes[Math.floor(Math.random() * mockCodes.length)];
+        if (codeDisplay) codeDisplay.textContent = mockCodes[Math.floor(Math.random() * mockCodes.length)];
         SOUNDS.playTick(false);
         ticks++;
         if (ticks >= 12) {
           clearInterval(interval);
-          codeDisplay.textContent = STATE.pickedPlayerCode || 'REVEALED';
-          setTimeout(() => { overlay.style.display = 'none'; }, 800);
+          const chosenCode = STATE.pickedPlayerCode || 'CODE_DRAWN';
+          if (codeDisplay) codeDisplay.textContent = chosenCode;
+          setTimeout(() => { 
+            if (overlay) overlay.style.display = 'none'; 
+            // Show the drawn code box first
+            const codeBox = document.getElementById('stage-drawn-code-box');
+            const codeText = document.getElementById('stage-drawn-code-text');
+            if (codeBox) codeBox.style.display = 'block';
+            if (codeText) codeText.textContent = chosenCode;
+
+            // Auto-reveal the corresponding player card after 1.8 seconds
+            setTimeout(() => {
+              if (SESSION.role === 'admin' && STATE.pickedPlayerCode && !STATE.currentActivePlayer) {
+                revealPickedPlayerCard();
+              }
+            }, 1800);
+          }, 800);
         }
       }, 90);
     }
@@ -3414,7 +3726,8 @@
         }).join('');
 
         const adminActions = SESSION.role === 'admin' ? `
-          <div style="display:flex;gap:0.5rem;margin-top:1rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex;gap:0.5rem;margin-top:1rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;">
+            <button class="btn-primary" style="padding:4px 10px;font-size:0.75rem;background:linear-gradient(135deg,#6366f1,#4f46e5);" onclick="openEditTeamModal('${team.id}')">✏️ Edit Franchise</button>
             <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetTeam('${team.id}')">Reset Team</button>
             <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetImpact('${team.id}')">Reset Impact</button>
           </div>
@@ -3493,6 +3806,39 @@
       const pillsContainer = document.getElementById('catalog-category-pills');
 
       const categories = STATE.categories || [];
+
+      // Render Admin Category Management Cards (if admin)
+      const adminCatGrid = document.getElementById('admin-categories-cards-list');
+      if (adminCatGrid) {
+        if (!categories.length) {
+          adminCatGrid.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">No categories configured yet. Click "Add Category" above.</div>';
+        } else {
+          adminCatGrid.innerHTML = categories.map((cat, i) => {
+            const colorIdx = i % 6;
+            return `
+              <div class="cat-admin-card cat-border-c${colorIdx}">
+                <div class="cat-admin-card-head">
+                  <div>
+                    <h4 style="font-size:1.05rem;font-weight:700;">${cat.name}</h4>
+                    <span class="player-category-tag cat-badge-c${colorIdx}">ID: ${cat.id}</span>
+                  </div>
+                  <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="openEditCategoryModal('${cat.id}')">✏️ Edit</button>
+                </div>
+                <div class="cat-admin-stats">
+                  <div>
+                    <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Base Price</div>
+                    <div style="font-family:var(--font-mono);font-weight:700;color:var(--accent-green);">৳${cat.base || 50}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Increment / Bid</div>
+                    <div style="font-family:var(--font-mono);font-weight:700;color:#38bdf8;">+৳${cat.increment || 10}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
 
       if (pillsContainer) {
         pillsContainer.innerHTML = `
@@ -3833,37 +4179,214 @@
       showToast(`Impact bonus set to ৳${amt}`, 'normal');
     }
 
-    function adminAddCategory() {
-      const id = document.getElementById('new-cat-id').value.trim().toUpperCase();
-      const name = document.getElementById('new-cat-name').value.trim();
-      const base = Number(document.getElementById('new-cat-base').value) || 50;
-      const inc = Number(document.getElementById('new-cat-inc').value) || 10;
+    // =========================================================
+    // MODALS & DIRECT IN-PLACE ADMIN MANAGEMENT
+    // =========================================================
 
-      if (!id || !name) {
-        showToast("Enter ID and Name", "normal");
-        return;
-      }
-
-      const currentCats = [...(STATE.categories || [])];
-      if (currentCats.some(c => c.id === id)) {
-        showToast("Category ID exists", "normal");
-        return;
-      }
-      currentCats.push({ id, name, base, increment: inc });
-
-      socket.emit('admin:updateConfig', { categories: currentCats });
-      showToast(`Category ${name} created`, 'normal');
-      document.getElementById('new-cat-id').value = '';
-      document.getElementById('new-cat-name').value = '';
+    // Franchise Team Modal (Add & Edit)
+    function openAddTeamModal() {
+      document.getElementById('team-modal-title').textContent = '➕ Add Franchise Team';
+      document.getElementById('edit-team-original-id').value = '';
+      document.getElementById('edit-team-id').value = '';
+      document.getElementById('edit-team-id').disabled = false;
+      document.getElementById('edit-team-name').value = '';
+      document.getElementById('edit-team-purse').value = '500';
+      document.getElementById('edit-team-pass').value = '';
+      document.getElementById('edit-team-logo').value = '';
+      document.getElementById('team-edit-modal').classList.add('open');
     }
 
-    function adminAddPlayer() {
-      const cat = document.getElementById('admin-add-player-cat').value;
-      const name = document.getElementById('admin-add-player-name').value.trim();
-      const img = document.getElementById('admin-add-player-img').value.trim();
+    function openEditTeamModal(teamId) {
+      const team = (STATE.teams || []).find(t => t.id === teamId);
+      if (!team) return;
+      document.getElementById('team-modal-title').textContent = `✏️ Edit Franchise (${team.id})`;
+      document.getElementById('edit-team-original-id').value = team.id;
+      document.getElementById('edit-team-id').value = team.id;
+      document.getElementById('edit-team-id').disabled = false; // Allow updating ID if needed
+      document.getElementById('edit-team-name').value = team.name || '';
+      document.getElementById('edit-team-purse').value = team.purse !== undefined ? team.purse : 500;
+      document.getElementById('edit-team-pass').value = team.password || '';
+      document.getElementById('edit-team-logo').value = team.logo || '';
+      document.getElementById('team-edit-modal').classList.add('open');
+    }
+
+    function closeTeamModal() {
+      document.getElementById('team-edit-modal').classList.remove('open');
+    }
+
+    function saveTeamForm() {
+      const origId = document.getElementById('edit-team-original-id').value;
+      const id = document.getElementById('edit-team-id').value.trim().toUpperCase();
+      const name = document.getElementById('edit-team-name').value.trim();
+      const purse = Number(document.getElementById('edit-team-purse').value) || 500;
+      const pass = document.getElementById('edit-team-pass').value.trim();
+      const logo = document.getElementById('edit-team-logo').value.trim();
+
+      if (!id || !name || !pass) {
+        showToast("Provide Franchise ID, Name, and Password", "normal");
+        return;
+      }
+
+      let currentTeams = [...(STATE.teams || [])];
+
+      if (origId) {
+        // Editing existing team
+        const idx = currentTeams.findIndex(t => t.id === origId);
+        if (idx >= 0) {
+          currentTeams[idx] = {
+            ...currentTeams[idx],
+            id: id,
+            name: name,
+            purse: purse,
+            password: pass,
+            logo: logo
+          };
+          // Also emit logo update if logo changed
+          if (logo) {
+            socket.emit('admin:setTeamLogo', { teamId: id, logoUrl: logo });
+          }
+          showToast(`Franchise ${name} updated`, 'normal');
+        }
+      } else {
+        // Adding new team
+        if (currentTeams.some(t => t.id === id)) {
+          showToast("Franchise ID already exists", "normal");
+          return;
+        }
+        currentTeams.push({
+          id,
+          name,
+          purse,
+          password: pass,
+          logo: logo,
+          purchases: {},
+          impactUsed: false,
+          impactActive: false,
+          directSignUsed: false,
+          rtmUsed: false
+        });
+        showToast(`Franchise ${name} added`, 'normal');
+      }
+
+      socket.emit('admin:updateConfig', { teams: currentTeams });
+      closeTeamModal();
+    }
+
+    // Category Modal (Add & Edit)
+    function openAddCategoryModal() {
+      document.getElementById('cat-modal-title').textContent = '➕ Add Category';
+      document.getElementById('edit-cat-original-id').value = '';
+      document.getElementById('edit-cat-id').value = '';
+      document.getElementById('edit-cat-id').disabled = false;
+      document.getElementById('edit-cat-name').value = '';
+      document.getElementById('edit-cat-base').value = '50';
+      document.getElementById('edit-cat-inc').value = '10';
+      document.getElementById('category-edit-modal').classList.add('open');
+    }
+
+    function openEditCategoryModal(catId) {
+      const cat = (STATE.categories || []).find(c => c.id === catId);
+      if (!cat) return;
+      document.getElementById('cat-modal-title').textContent = `✏️ Edit Category (${cat.id})`;
+      document.getElementById('edit-cat-original-id').value = cat.id;
+      document.getElementById('edit-cat-id').value = cat.id;
+      document.getElementById('edit-cat-id').disabled = false;
+      document.getElementById('edit-cat-name').value = cat.name || '';
+      document.getElementById('edit-cat-base').value = cat.base || 50;
+      document.getElementById('edit-cat-inc').value = cat.increment || 10;
+      document.getElementById('category-edit-modal').classList.add('open');
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('category-edit-modal').classList.remove('open');
+    }
+
+    function saveCategoryForm() {
+      const origId = document.getElementById('edit-cat-original-id').value;
+      const id = document.getElementById('edit-cat-id').value.trim().toUpperCase();
+      const name = document.getElementById('edit-cat-name').value.trim();
+      const base = Number(document.getElementById('edit-cat-base').value) || 50;
+      const inc = Number(document.getElementById('edit-cat-inc').value) || 10;
+
+      if (!id || !name) {
+        showToast("Enter Category ID and Name", "normal");
+        return;
+      }
+
+      let currentCats = [...(STATE.categories || [])];
+
+      if (origId) {
+        // Editing existing category
+        const idx = currentCats.findIndex(c => c.id === origId);
+        if (idx >= 0) {
+          currentCats[idx] = {
+            ...currentCats[idx],
+            id: id,
+            name: name,
+            base: base,
+            increment: inc
+          };
+          showToast(`Category ${name} updated`, 'normal');
+        }
+      } else {
+        // Adding new category
+        if (currentCats.some(c => c.id === id)) {
+          showToast("Category ID already exists", "normal");
+          return;
+        }
+        currentCats.push({ id, name, base, increment: inc });
+        showToast(`Category ${name} created`, 'normal');
+      }
+
+      socket.emit('admin:updateConfig', { categories: currentCats });
+      closeCategoryModal();
+    }
+
+    // Impact Purse Booster Modal
+    function openImpactConfigModal() {
+      const input = document.getElementById('edit-impact-amount');
+      if (input) {
+        input.value = (STATE.config && STATE.config.impactAmount) || 0;
+      }
+      document.getElementById('impact-config-modal').classList.add('open');
+    }
+
+    function closeImpactModal() {
+      document.getElementById('impact-config-modal').classList.remove('open');
+    }
+
+    function saveImpactPurseAmount() {
+      const amt = Number(document.getElementById('edit-impact-amount').value) || 0;
+      socket.emit('admin:updateConfig', { impactAmount: amt });
+      showToast(`Impact bonus set to ৳${amt}`, 'normal');
+      closeImpactModal();
+    }
+
+    // Add Player to Pool Modal
+    function openAddPlayerModal() {
+      const sel = document.getElementById('modal-player-cat-select');
+      const cats = STATE.categories || [];
+      if (!cats.length) {
+        showToast("Please create a category first", "normal");
+        return;
+      }
+      sel.innerHTML = cats.map(c => `<option value="${c.id}">${c.name} (${c.id})</option>`).join('');
+      document.getElementById('modal-player-name-input').value = '';
+      document.getElementById('modal-player-img-input').value = '';
+      document.getElementById('player-add-modal').classList.add('open');
+    }
+
+    function closeAddPlayerModal() {
+      document.getElementById('player-add-modal').classList.remove('open');
+    }
+
+    function saveNewPlayerToPool() {
+      const cat = document.getElementById('modal-player-cat-select').value;
+      const name = document.getElementById('modal-player-name-input').value.trim();
+      const img = document.getElementById('modal-player-img-input').value.trim();
 
       if (!cat || !name) {
-        showToast("Select category and enter name", "normal");
+        showToast("Select category and enter player name", "normal");
         return;
       }
 
@@ -3871,45 +4394,8 @@
       currentPlayers.push({ name, image: img });
 
       socket.emit('players:save', { category: cat, players: currentPlayers });
-      showToast(`Player ${name} added`, 'normal');
-      document.getElementById('admin-add-player-name').value = '';
-      document.getElementById('admin-add-player-img').value = '';
-    }
-
-    function adminAddTeam() {
-      const id = document.getElementById('new-team-id').value.trim().toUpperCase();
-      const name = document.getElementById('new-team-name').value.trim();
-      const purse = Number(document.getElementById('new-team-purse').value) || 500;
-      const password = document.getElementById('new-team-pass').value.trim();
-
-      if (!id || !name || !password) {
-        showToast("Provide ID, Name, and Password", "normal");
-        return;
-      }
-
-      const currentTeams = [...(STATE.teams || [])];
-      if (currentTeams.some(t => t.id === id)) {
-        showToast("Team ID exists", "normal");
-        return;
-      }
-
-      currentTeams.push({
-        id,
-        name,
-        purse,
-        password,
-        purchases: {},
-        impactUsed: false,
-        impactActive: false,
-        directSignUsed: false,
-        rtmUsed: false
-      });
-
-      socket.emit('admin:updateConfig', { teams: currentTeams });
-      showToast(`Team ${name} added`, 'normal');
-      document.getElementById('new-team-id').value = '';
-      document.getElementById('new-team-name').value = '';
-      document.getElementById('new-team-pass').value = '';
+      showToast(`Player ${name} added to ${cat}`, 'normal');
+      closeAddPlayerModal();
     }
 
     function adminResetTeam(teamId) {
@@ -3946,42 +4432,44 @@
       hideLoginAlert();
     }
 
-    function onLeagueSelectChange(val) {
-      const customGroup = document.getElementById('login-custom-host-group');
-      customGroup.style.display = val === 'custom' ? 'block' : 'none';
-    }
-
     function getSelectedHostId() {
-      const sel = document.getElementById('login-league-select').value;
-      if (sel === 'custom') {
-        return document.getElementById('login-custom-host-input').value.trim() || 'admin';
-      }
-      return sel;
-    }
-
-    function discoverLeagueTeams() {
-      const hostId = getSelectedHostId();
-      SESSION.hostId = hostId;
-      showLoginAlert(`Fetching teams for league host "${hostId}"...`, 'success');
-      socket.emit('participant:connect', hostId);
-    }
-
-    function populateTeamDropdown(teams) {
-      const select = document.getElementById('login-team-select');
-      if (!teams || !teams.length) {
-        select.innerHTML = '<option value="">-- No teams registered in this league yet --</option>';
-        return;
-      }
-      select.innerHTML = teams.map(t => `<option value="${t.id}">🛡️ ${t.name} (Purse: ৳${t.purse || 500})</option>`).join('');
+      // Look in team portal or viewer portal
+      const teamHost = document.getElementById('login-team-host');
+      if (teamHost && teamHost.value.trim()) return teamHost.value.trim();
+      const viewerHost = document.getElementById('login-viewer-host-input');
+      if (viewerHost && viewerHost.value.trim()) return viewerHost.value.trim();
+      return SESSION.hostId || 'admin';
     }
 
     function submitFranchiseLogin() {
-      const teamId = document.getElementById('login-team-select').value;
+      const hostId = (document.getElementById('login-team-host').value || 'admin').trim();
+      const teamId = (document.getElementById('login-team-id-input').value || '').trim().toUpperCase();
       const password = document.getElementById('login-team-password').value;
-      if (!teamId) {
-        showLoginAlert("Select a franchise team", "error");
+
+      if (!hostId || !teamId || !password) {
+        showLoginAlert("Please enter Host ID, Franchise Team ID, and Password", "error");
         return;
       }
+
+      SESSION.hostId = hostId;
+      SESSION.teamId = teamId;
+
+      // Save credential helper for auto-refresh
+      try {
+        const payload = {
+          role: 'team',
+          teamId: teamId,
+          password: password,
+          hostId: hostId,
+          activeView: SESSION.activeView || 'view-arena'
+        };
+        localStorage.setItem('AUCTION_AUTH_SESSION', JSON.stringify(payload));
+      } catch (e) {}
+
+      const loader = document.getElementById('app-loading-screen');
+      if (loader) loader.classList.remove('hidden');
+
+      socket.emit('participant:connect', hostId);
       socket.emit('team:login', { teamId, password, role: 'team' });
     }
 
@@ -4005,6 +4493,24 @@
         return;
       }
 
+      SESSION.username = username;
+      SESSION.hostId = username;
+
+      // Save credential helper for auto-refresh
+      try {
+        const payload = {
+          role: 'admin',
+          username: username,
+          password: password,
+          hostId: username,
+          activeView: SESSION.activeView || 'view-arena'
+        };
+        localStorage.setItem('AUCTION_AUTH_SESSION', JSON.stringify(payload));
+      } catch (e) {}
+
+      const loader = document.getElementById('app-loading-screen');
+      if (loader) loader.classList.remove('hidden');
+
       if (managerMode === 'login') {
         socket.emit('manager:login', { username, password });
       } else {
@@ -4015,6 +4521,20 @@
     function submitSpectatorEntry() {
       const hostId = document.getElementById('login-viewer-host-input').value.trim() || 'admin';
       SESSION.hostId = hostId;
+
+      // Save credential helper for auto-refresh
+      try {
+        const payload = {
+          role: 'viewer',
+          hostId: hostId,
+          activeView: SESSION.activeView || 'view-arena'
+        };
+        localStorage.setItem('AUCTION_AUTH_SESSION', JSON.stringify(payload));
+      } catch (e) {}
+
+      const loader = document.getElementById('app-loading-screen');
+      if (loader) loader.classList.remove('hidden');
+
       socket.emit('participant:connect', hostId);
       socket.emit('team:login', { teamId: null, password: '', role: 'viewer' });
     }

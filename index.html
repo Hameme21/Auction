@@ -2061,17 +2061,21 @@
       inset: 0;
       background: radial-gradient(circle at 50% 30%, #0f172a 0%, #030712 100%);
       z-index: 99999;
-      display: flex;
+      display: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1.25rem;
-      transition: opacity 0.35s ease, visibility 0.35s ease;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
     }
-    #app-loading-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+    #app-loading-screen.active {
+      display: flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
     }
     .loading-spinner {
       width: 58px;
@@ -2182,7 +2186,7 @@
 <body>
 
   <!-- Fullscreen Global Loading Screen -->
-  <div id="app-loading-screen">
+  <div id="app-loading-screen" style="display: none;">
     <div class="loading-spinner"></div>
     <div class="loading-text">CONNECTING TO ARENA</div>
     <div class="loading-subtext">Synchronizing Live Auction State...</div>
@@ -3273,7 +3277,7 @@
     }
 
     
-    // Fullscreen Global App Loader Controller with Auto-Timeout Fail-Safe
+    // Fullscreen Global App Loader Controller
     let appLoaderTimer = null;
     function showAppLoader(statusText, subText) {
       const loader = document.getElementById('app-loading-screen');
@@ -3286,26 +3290,22 @@
         const subEl = loader.querySelector('.loading-subtext');
         if (subEl) subEl.textContent = subText;
       }
-      showAppLoader('CONNECTING TO ARENA', 'Authenticating and loading auction state...');
       loader.style.display = 'flex';
+      loader.classList.add('active');
 
-      // Guaranteed fail-safe timeout to prevent infinite stuck screen
+      // Auto-dismiss safety timeout: guaranteed 1800ms limit so it NEVER locks the user out
       if (appLoaderTimer) clearTimeout(appLoaderTimer);
       appLoaderTimer = setTimeout(() => {
         hideAppLoader();
-      }, 2500);
+      }, 1800);
     }
 
     function hideAppLoader() {
       if (appLoaderTimer) clearTimeout(appLoaderTimer);
       const loader = document.getElementById('app-loading-screen');
       if (loader) {
-        hideAppLoader();
-        setTimeout(() => {
-          if (loader.classList.contains('hidden')) {
-            loader.style.display = 'none';
-          }
-        }, 360);
+        loader.classList.remove('active');
+        loader.style.display = 'none';
       }
     }
 
@@ -5337,8 +5337,10 @@
 
     // Startup Initialization
     window.addEventListener('DOMContentLoaded', () => {
+      hideAppLoader();
       initSocket();
       window.addEventListener('click', () => SOUNDS.init(), { once: true });
+      window.addEventListener('load', () => hideAppLoader());
     });
   </script>
 </body>

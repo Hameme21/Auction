@@ -452,6 +452,390 @@
       animation: fadeIn 0.3s ease;
     }
 
+    /* PC SIDEBAR & MOBILE NAVBAR LAYOUT */
+    #screen-arena {
+      display: none;
+      min-height: 100vh;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    /* Desktop layout with Left Sidebar */
+    @media (min-width: 901px) {
+      #screen-arena {
+        flex-direction: row !important;
+      }
+      .app-header {
+        width: 270px !important;
+        min-width: 270px !important;
+        height: 100vh !important;
+        position: sticky !important;
+        top: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: stretch !important;
+        padding: 1.75rem 1.25rem !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border-right: 1px solid var(--card-border) !important;
+        border-bottom: none !important;
+        box-shadow: 6px 0 30px rgba(0, 0, 0, 0.45) !important;
+        z-index: 100 !important;
+      }
+      .sidebar-brand-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .nav-tabs {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-top: 1.5rem !important;
+      }
+      .nav-tab-btn {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding: 11px 16px !important;
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        gap: 12px !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid transparent !important;
+      }
+      .nav-tab-btn:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        transform: translateX(3px) !important;
+      }
+      .nav-tab-btn.active {
+        background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple)) !important;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.45) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+      }
+      .header-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.85rem !important;
+        align-items: stretch !important;
+        padding-top: 1.25rem !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+      }
+      .header-actions .badge-status,
+      .header-actions .badge-role,
+      .header-actions .purse-pill,
+      .header-actions .btn-logout {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .header-action-row {
+        display: flex !important;
+        gap: 0.5rem !important;
+      }
+      .header-action-row .btn-icon {
+        flex: 1 !important;
+      }
+      main.app-main {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 2rem !important;
+        max-width: 1600px !important;
+        overflow-x: hidden !important;
+      }
+    }
+
+    /* Mobile & Tablet layout with Top Bar & Scrollable Navbar */
+    @media (max-width: 900px) {
+      #screen-arena {
+        flex-direction: column !important;
+      }
+      .app-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 90 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 0.75rem 1rem !important;
+        background: rgba(15, 23, 42, 0.94) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-bottom: 1px solid var(--card-border) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+      }
+      .mobile-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .nav-tabs {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding: 4px !important;
+        background: rgba(3, 7, 18, 0.65) !important;
+        border-radius: 12px !important;
+      }
+      .nav-tabs::-webkit-scrollbar {
+        display: none !important;
+      }
+      .nav-tab-btn {
+        flex-shrink: 0 !important;
+        font-size: 0.82rem !important;
+        padding: 8px 13px !important;
+        border-radius: 9px !important;
+        white-space: nowrap !important;
+      }
+      .header-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+      }
+      main.app-main {
+        padding: 1rem 0.75rem !important;
+      }
+    }
+
+    /* FRANCHISES DASHBOARD STYLES */
+    .dashboard-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-indigo), var(--accent-cyan));
+    }
+    .kpi-lbl {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .kpi-val {
+      font-family: var(--font-mono);
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .dashboard-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 1080px) {
+      .dashboard-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animated Circle Budget Gauge */
+    .budget-circle-wrap {
+      position: relative;
+      width: 105px;
+      height: 105px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .budget-circle-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .budget-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 8;
+    }
+    .budget-circle-fill {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .budget-circle-pct {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+    }
+    .budget-circle-pct span {
+      display: block;
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .franchise-budget-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.65), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      transition: var(--transition);
+    }
+    .franchise-budget-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+    .franchise-budget-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .franchise-budget-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .franchise-budget-meta {
+      display: flex;
+      gap: 8px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+    .franchise-budget-nums {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+
+    /* Top Solds Table / Card list */
+    .top-sold-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 8px;
+      transition: var(--transition);
+    }
+    .top-sold-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .top-sold-rank {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    .top-sold-rank.rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
+    .top-sold-rank.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #000; }
+    .top-sold-rank.rank-3 { background: linear-gradient(135deg, #b45309, #78350f); color: #fff; }
+    .top-sold-rank.rank-other { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); }
+
+    /* MOBILE BUG FIXES: PLAYER SECTION */
+    @media (max-width: 640px) {
+      .players-cards-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+      }
+      .player-pool-card {
+        padding: 1rem !important;
+      }
+      .player-card-top {
+        gap: 10px !important;
+      }
+      .player-avatar-wrap {
+        width: 58px !important;
+        height: 58px !important;
+        border-radius: 12px !important;
+      }
+      .player-card-name {
+        font-size: 1rem !important;
+      }
+      .player-pricing-box {
+        grid-template-columns: 1fr 1fr !important;
+        padding: 8px 10px !important;
+        gap: 6px !important;
+      }
+      .pricing-val {
+        font-size: 0.88rem !important;
+      }
+      .pricing-lbl {
+        font-size: 0.62rem !important;
+      }
+      .player-card-footer {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .player-card-actions {
+        width: 100% !important;
+        justify-content: flex-end !important;
+      }
+      .player-card-actions button {
+        flex: 1 !important;
+      }
+      #catalog-search {
+        width: 100% !important;
+      }
+      #catalog-status-filter {
+        width: 100% !important;
+      }
+    }
+
+
     /* Top Navigation Bar */
     header.app-header {
       position: sticky;
@@ -1997,31 +2381,36 @@
     
     <!-- Top Navigation Header -->
     <header class="app-header">
-      <div class="login-brand" style="cursor: pointer;" onclick="switchView('view-arena')">
-        <div class="login-brand-icon" style="width: 36px; height: 36px; font-size: 1.15rem;">⚡</div>
-        <div class="login-brand-text">
-          <h1 id="header-league-name" style="font-size: 1.05rem;">AUCTION ARENA</h1>
-          <span id="header-league-host">HOST: ADMIN</span>
+      <div class="sidebar-brand-group">
+        <div class="login-brand" style="cursor: pointer;" onclick="switchView('view-arena')">
+          <div class="login-brand-icon" style="width: 40px; height: 40px; font-size: 1.25rem;">⚡</div>
+          <div class="login-brand-text">
+            <h1 id="header-league-name" style="font-size: 1.1rem; line-height: 1.1;">AUCTION ARENA</h1>
+            <span id="header-league-host">HOST: ADMIN</span>
+          </div>
         </div>
+
+        <!-- Navigation Tabs (Sidebar on PC, Horizontal Scroll on Mobile) -->
+        <nav class="nav-tabs">
+          <button class="nav-tab-btn active" onclick="switchView('view-arena')">
+            <span>🏟️</span> <span>Live Arena</span>
+          </button>
+          <button class="nav-tab-btn" onclick="switchView('view-dashboard')">
+            <span>📊</span> <span>Dashboard</span>
+          </button>
+          <button class="nav-tab-btn" onclick="switchView('view-franchises')">
+            <span>🛡️</span> <span>Franchises</span>
+          </button>
+          <button class="nav-tab-btn" onclick="switchView('view-catalog')">
+            <span>👥</span> <span>Players</span>
+          </button>
+          <button class="nav-tab-btn" onclick="switchView('view-schedule')">
+            <span>📅</span> <span>Fixtures</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Nav Tabs -->
-      <nav class="nav-tabs">
-        <button class="nav-tab-btn active" onclick="switchView('view-arena')">
-          <span>🏟️</span> Live Arena
-        </button>
-        <button class="nav-tab-btn" onclick="switchView('view-franchises')">
-          <span>🛡️</span> Franchises
-        </button>
-        <button class="nav-tab-btn" onclick="switchView('view-catalog')">
-          <span>👥</span> Players
-        </button>
-        <button class="nav-tab-btn" onclick="switchView('view-schedule')">
-          <span>📅</span> Fixtures
-        </button>
-      </nav>
-
-      <!-- Header Controls -->
+      <!-- Controls & Status (Bottom in PC Sidebar, Top/Inline on Mobile) -->
       <div class="header-actions">
         <!-- Live Connection Pill -->
         <div class="badge-status" id="arena-conn-badge">
@@ -2042,15 +2431,17 @@
           </span>
         </div>
 
-        <!-- Audio Toggle -->
-        <button class="btn-icon" id="arena-sound-btn" title="Toggle Sound" onclick="toggleAudio()">
-          🔊
-        </button>
+        <div class="header-action-row">
+          <!-- Audio Toggle -->
+          <button class="btn-icon" id="arena-sound-btn" title="Toggle Sound" onclick="toggleAudio()">
+            🔊
+          </button>
 
-        <!-- Exit / Switch Account -->
-        <button class="btn-logout" onclick="logoutToLoginScreen()">
-          <span>🚪</span> Logout
-        </button>
+          <!-- Exit / Switch Account -->
+          <button class="btn-logout" onclick="logoutToLoginScreen()">
+            <span>🚪</span> Logout
+          </button>
+        </div>
       </div>
     </header>
 
@@ -2312,6 +2703,77 @@
         </div>
       </div>
 
+      <!-- VIEW: FRANCHISES SUMMARY DASHBOARD -->
+      <div id="view-dashboard" class="view-container">
+        <div style="margin-bottom: 1.75rem;">
+          <h2 style="font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #fff 30%, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            📊 Franchises Summary Dashboard
+          </h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Real-time auction financial overview, top acquired players, and circular franchise budget visualizers.
+          </p>
+        </div>
+
+        <!-- KPI Metrics Strip -->
+        <div class="dashboard-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-lbl">Total Turnover (Spent)</div>
+            <div class="kpi-val" id="kpi-total-spent" style="color: var(--accent-green);">৳0</div>
+            <div class="kpi-sub">Across all registered franchises</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Players Sold</div>
+            <div class="kpi-val" id="kpi-players-sold" style="color: #38bdf8;">0</div>
+            <div class="kpi-sub" id="kpi-sold-sub">0 available / 0 unsold</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Average Acquisition</div>
+            <div class="kpi-val" id="kpi-avg-bid" style="color: var(--accent-amber);">৳0</div>
+            <div class="kpi-sub">Per acquired player</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Enrolled Franchises</div>
+            <div class="kpi-val" id="kpi-teams-count" style="color: var(--accent-pink);">0</div>
+            <div class="kpi-sub">Active in this league</div>
+          </div>
+        </div>
+
+        <!-- 2 Column Layout: Top Solds Leaderboard & Budget Visualizer Grid -->
+        <div class="dashboard-columns">
+          
+          <!-- Column 1: Top Solds Leaderboard -->
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>🏆</span> Top Solds Leaderboard
+              </h3>
+              <span class="badge-code" id="dash-top-sold-count">0 Recorded</span>
+            </div>
+            <div id="dash-top-solds-list">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                No players sold yet in this auction.
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Franchise Budget Visualizer with Animated Fill Circles -->
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>⭕</span> Remaining Budget & Roster Fill
+              </h3>
+              <span style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">Animated Circular Visualizer</span>
+            </div>
+            <div id="dash-budget-circles-grid" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 520px; overflow-y: auto; padding-right: 4px;">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                No franchises enrolled yet.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- VIEW 2: FRANCHISES & ROSTERS -->
       <div id="view-franchises" class="view-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -2469,13 +2931,10 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit-cat-original-id" />
-        <div class="form-group">
-          <label>Category ID (e.g. BAT, BOWL, AR)</label>
-          <input type="text" id="edit-cat-id" class="form-control no-icon" placeholder="BAT" style="text-transform: uppercase;" />
-        </div>
+        <input type="hidden" id="edit-cat-id" />
         <div class="form-group">
           <label>Category Name</label>
-          <input type="text" id="edit-cat-name" class="form-control no-icon" placeholder="Batsmen" />
+          <input type="text" id="edit-cat-name" class="form-control no-icon" placeholder="e.g. Batsmen, Pace Bowler, All-Rounder" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
           <div>
@@ -2813,6 +3272,43 @@
       return DEFAULT_SERVER_URL;
     }
 
+    
+    // Fullscreen Global App Loader Controller with Auto-Timeout Fail-Safe
+    let appLoaderTimer = null;
+    function showAppLoader(statusText, subText) {
+      const loader = document.getElementById('app-loading-screen');
+      if (!loader) return;
+      if (statusText) {
+        const titleEl = loader.querySelector('.loading-text');
+        if (titleEl) titleEl.textContent = statusText;
+      }
+      if (subText) {
+        const subEl = loader.querySelector('.loading-subtext');
+        if (subEl) subEl.textContent = subText;
+      }
+      showAppLoader('CONNECTING TO ARENA', 'Authenticating and loading auction state...');
+      loader.style.display = 'flex';
+
+      // Guaranteed fail-safe timeout to prevent infinite stuck screen
+      if (appLoaderTimer) clearTimeout(appLoaderTimer);
+      appLoaderTimer = setTimeout(() => {
+        hideAppLoader();
+      }, 2500);
+    }
+
+    function hideAppLoader() {
+      if (appLoaderTimer) clearTimeout(appLoaderTimer);
+      const loader = document.getElementById('app-loading-screen');
+      if (loader) {
+        hideAppLoader();
+        setTimeout(() => {
+          if (loader.classList.contains('hidden')) {
+            loader.style.display = 'none';
+          }
+        }, 360);
+      }
+    }
+
     function initSocket(customUrl) {
       const targetUrl = customUrl || getStoredServerUrl();
       document.getElementById('server-url-input').value = targetUrl;
@@ -2891,7 +3387,7 @@
         // Hide loading screen if still visible
         setTimeout(() => {
           const loader = document.getElementById('app-loading-screen');
-          if (loader) loader.classList.add('hidden');
+          if (loader) hideAppLoader();
         }, 500);
       });
 
@@ -2902,7 +3398,7 @@
       socket.on('connect_error', () => {
         updateConnectionStatus('offline', 'Offline');
         const loader = document.getElementById('app-loading-screen');
-        if (loader) loader.classList.add('hidden');
+        if (loader) hideAppLoader();
       });
 
       // Synchronized State Updates
@@ -2929,7 +3425,7 @@
 
         // Ensure loader is hidden once state is received
         const loader = document.getElementById('app-loading-screen');
-        if (loader) loader.classList.add('hidden');
+        if (loader) hideAppLoader();
       });
 
       // Timer Sync
@@ -3018,6 +3514,7 @@
       socket.on('schedule:updated', (newSchedule) => {
         STATE.schedule = newSchedule;
         renderScheduleView();
+      renderDashboardView();
       });
 
       // Admin Toast Alerts
@@ -3057,7 +3554,7 @@
       socket.on('auth:portal_error', (msg) => {
         showLoginAlert(`Manager Auth Error: ${msg}`, 'error');
         const loader = document.getElementById('app-loading-screen');
-        if (loader) loader.classList.add('hidden');
+        if (loader) hideAppLoader();
       });
 
       socket.on('auth:portal_success', ({ msg }) => {
@@ -3068,19 +3565,20 @@
       socket.on('auth:team_error', (msg) => {
         showLoginAlert(`Franchise Error: ${msg}`, 'error');
         const loader = document.getElementById('app-loading-screen');
-        if (loader) loader.classList.add('hidden');
+        if (loader) hideAppLoader();
       });
     }
 
     // Screen Switching: Login vs Arena
     function transitionToArenaScreen() {
+      hideAppLoader();
       const loader = document.getElementById('app-loading-screen');
-      if (loader) loader.classList.add('hidden');
+      if (loader) hideAppLoader();
       document.getElementById('screen-login').style.display = 'none';
       document.getElementById('screen-arena').style.display = 'flex';
       applyRolePermissions();
       if (SESSION.activeView) {
-        switchView(SESSION.activeView);
+        switchView(SESSION.activeView || 'view-arena');
       } else {
         renderCurrentView();
       }
@@ -3177,6 +3675,192 @@
       if (btn) btn.classList.add('active');
 
       renderCurrentView();
+    }
+
+    
+    // Franchises Summary Dashboard Renderer
+    function renderDashboardView() {
+      const teams = STATE.teams || [];
+      const categories = STATE.categories || [];
+      const soldPrices = STATE.soldPrices || {};
+      const unsoldPlayers = STATE.unsoldPlayers || {};
+
+      // 1. Calculate Summary Financials & Counts
+      let totalSpent = 0;
+      let totalSoldPlayers = 0;
+      let allSoldItems = [];
+
+      teams.forEach(team => {
+        const startingPurse = Math.max(Number(team.purse) || 0, 500);
+        let teamSpent = 0;
+
+        if (team.purchases) {
+          Object.keys(team.purchases).forEach(catId => {
+            const playerName = team.purchases[catId];
+            const priceKey = catId + ':' + playerName;
+            const cat = categories.find(c => c.id === catId);
+            const price = Number(soldPrices[priceKey]) || (cat ? Number(cat.base) : 50) || 0;
+            totalSpent += price;
+            teamSpent += price;
+            totalSoldPlayers++;
+
+            // Find player photo
+            let playerImg = '';
+            const catList = (STATE.playersSnapshot && STATE.playersSnapshot[catId]) || [];
+            const foundPlayer = catList.find(p => p.name === playerName);
+            if (foundPlayer) playerImg = foundPlayer.image || '';
+
+            allSoldItems.push({
+              name: playerName,
+              categoryName: cat ? cat.name : catId,
+              teamId: team.id,
+              teamName: team.name,
+              teamLogo: team.logo || '',
+              price: price,
+              image: playerImg
+            });
+          });
+        }
+      });
+
+      // Calculate total players across snapshots
+      let totalPoolCount = 0;
+      categories.forEach(cat => {
+        const catList = (STATE.playersSnapshot && STATE.playersSnapshot[cat.id]) || [];
+        totalPoolCount += catList.length;
+      });
+      const unsoldLength = Object.keys(unsoldPlayers).length;
+      const availableCount = Math.max(0, totalPoolCount - totalSoldPlayers - unsoldLength);
+      const avgAcquisition = totalSoldPlayers > 0 ? Math.round(totalSpent / totalSoldPlayers) : 0;
+
+      // Update KPI Cards
+      const elSpent = document.getElementById('kpi-total-spent');
+      const elSold = document.getElementById('kpi-players-sold');
+      const elSoldSub = document.getElementById('kpi-sold-sub');
+      const elAvg = document.getElementById('kpi-avg-bid');
+      const elCount = document.getElementById('kpi-teams-count');
+
+      if (elSpent) elSpent.textContent = '৳' + totalSpent.toLocaleString();
+      if (elSold) elSold.textContent = totalSoldPlayers;
+      if (elSoldSub) elSoldSub.textContent = availableCount + ' pool / ' + unsoldLength + ' unsold';
+      if (elAvg) elAvg.textContent = '৳' + avgAcquisition.toLocaleString();
+      if (elCount) elCount.textContent = teams.length;
+
+      // 2. Render Top Solds Leaderboard (Sorted by highest price)
+      const topSoldsContainer = document.getElementById('dash-top-solds-list');
+      const topSoldCountBadge = document.getElementById('dash-top-sold-count');
+      if (topSoldCountBadge) topSoldCountBadge.textContent = allSoldItems.length + ' Sold';
+
+      allSoldItems.sort((a, b) => b.price - a.price);
+
+      if (topSoldsContainer) {
+        if (!allSoldItems.length) {
+          topSoldsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No players sold yet in this auction. Once players are acquired, they will appear here ranked by highest price.</div>';
+        } else {
+          topSoldsContainer.innerHTML = allSoldItems.slice(0, 10).map((item, idx) => {
+            const rank = idx + 1;
+            const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+            return `
+              <div class="top-sold-row">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                  <div class="top-sold-rank ${rankClass}">#${rank}</div>
+                  <img src="${item.image || ''}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.12);" onerror="handleImageFallback(this)" />
+                  <div style="min-width: 0;">
+                    <div style="font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.name}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">
+                      <span>🏷️ ${item.categoryName}</span> • <span style="color: #38bdf8; font-weight: 600;">${item.teamName}</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 900; color: var(--accent-green); white-space: nowrap;">
+                  ৳${item.price.toLocaleString()}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. Render Remaining Budget with Animated Circle Gauge
+      const circlesGrid = document.getElementById('dash-budget-circles-grid');
+      if (circlesGrid) {
+        if (!teams.length) {
+          circlesGrid.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No franchise teams registered yet.</div>';
+        } else {
+          circlesGrid.innerHTML = teams.map(team => {
+            const currentPurse = Math.max(0, Number(team.purse) || 0);
+            
+            // Calculate total team budget (current purse + spent)
+            let spent = 0;
+            let slotsFilled = 0;
+            if (team.purchases) {
+              slotsFilled = Object.keys(team.purchases).length;
+              Object.keys(team.purchases).forEach(catId => {
+                const playerName = team.purchases[catId];
+                const priceKey = catId + ':' + playerName;
+                const cat = categories.find(c => c.id === catId);
+                spent += Number(soldPrices[priceKey]) || (cat ? Number(cat.base) : 50) || 0;
+              });
+            }
+            const baselineBudget = Math.max(currentPurse + spent, 500);
+            const rawPct = Math.round((currentPurse / baselineBudget) * 100);
+            const remainingPct = Math.min(100, Math.max(0, isNaN(rawPct) ? 100 : rawPct));
+
+            // SVG circle circumference = 2 * PI * 45 ≈ 283
+            const circumference = 283;
+            const strokeOffset = circumference - (circumference * remainingPct) / 100;
+
+            // Color gradient indicator based on remaining health
+            let strokeColor = '#10b981'; // Green
+            if (remainingPct < 25) {
+              strokeColor = '#ef4444'; // Red
+            } else if (remainingPct < 55) {
+              strokeColor = '#f59e0b'; // Amber
+            }
+
+            const reserve = getSaleReserve(team, null);
+            const availableToBid = Math.max(0, currentPurse - reserve);
+
+            return `
+              <div class="franchise-budget-card">
+                <!-- Circular Fill Animation Gauge -->
+                <div class="budget-circle-wrap">
+                  <svg class="budget-circle-svg" viewBox="0 0 100 100">
+                    <circle class="budget-circle-bg" cx="50" cy="50" r="45" />
+                    <circle class="budget-circle-fill" cx="50" cy="50" r="45"
+                            style="stroke: ${strokeColor}; stroke-dashoffset: ${strokeOffset};" />
+                  </svg>
+                  <div class="budget-circle-pct">
+                    ${remainingPct}%
+                    <span>Remaining</span>
+                  </div>
+                </div>
+
+                <div class="franchise-budget-info">
+                  <div class="franchise-budget-title">${team.name}</div>
+                  <div class="franchise-budget-meta">
+                    <span>ID: ${team.id}</span>
+                    <span>•</span>
+                    <span>Acquired: ${slotsFilled}/${categories.length || '—'}</span>
+                    <span>•</span>
+                    <span style="color: ${team.impactUsed ? '#94a3b8' : 'var(--accent-pink)'};">Impact: ${team.impactUsed ? 'Used' : 'Avail'}</span>
+                  </div>
+                  <div class="franchise-budget-nums">
+                    <div>
+                      <span style="color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase;">Purse:</span>
+                      <strong style="font-family: var(--font-mono); color: var(--accent-green); margin-left: 4px;">৳${currentPurse}</strong>
+                    </div>
+                    <div>
+                      <span style="color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase;">Max Bid:</span>
+                      <strong style="font-family: var(--font-mono); color: #38bdf8; margin-left: 4px;">৳${availableToBid}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
     }
 
     function renderCurrentView() {
@@ -3820,7 +4504,7 @@
                 <div class="cat-admin-card-head">
                   <div>
                     <h4 style="font-size:1.05rem;font-weight:700;">${cat.name}</h4>
-                    <span class="player-category-tag cat-badge-c${colorIdx}">ID: ${cat.id}</span>
+                    <span class="player-category-tag cat-badge-c${colorIdx}">🏷️ Category</span>
                   </div>
                   <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="openEditCategoryModal('${cat.id}')">✏️ Edit</button>
                 </div>
@@ -4273,11 +4957,16 @@
     }
 
     // Category Modal (Add & Edit)
+    function generateCategoryId(name) {
+      if (!name) return 'CAT_' + Date.now().toString(36).toUpperCase();
+      const cleaned = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+      return cleaned || ('CAT_' + Math.floor(Math.random() * 9000 + 1000));
+    }
+
     function openAddCategoryModal() {
       document.getElementById('cat-modal-title').textContent = '➕ Add Category';
       document.getElementById('edit-cat-original-id').value = '';
       document.getElementById('edit-cat-id').value = '';
-      document.getElementById('edit-cat-id').disabled = false;
       document.getElementById('edit-cat-name').value = '';
       document.getElementById('edit-cat-base').value = '50';
       document.getElementById('edit-cat-inc').value = '10';
@@ -4287,10 +4976,9 @@
     function openEditCategoryModal(catId) {
       const cat = (STATE.categories || []).find(c => c.id === catId);
       if (!cat) return;
-      document.getElementById('cat-modal-title').textContent = `✏️ Edit Category (${cat.id})`;
+      document.getElementById('cat-modal-title').textContent = '✏️ Edit Category (' + (cat.name || cat.id) + ')';
       document.getElementById('edit-cat-original-id').value = cat.id;
       document.getElementById('edit-cat-id').value = cat.id;
-      document.getElementById('edit-cat-id').disabled = false;
       document.getElementById('edit-cat-name').value = cat.name || '';
       document.getElementById('edit-cat-base').value = cat.base || 50;
       document.getElementById('edit-cat-inc').value = cat.increment || 10;
@@ -4303,39 +4991,39 @@
 
     function saveCategoryForm() {
       const origId = document.getElementById('edit-cat-original-id').value;
-      const id = document.getElementById('edit-cat-id').value.trim().toUpperCase();
       const name = document.getElementById('edit-cat-name').value.trim();
       const base = Number(document.getElementById('edit-cat-base').value) || 50;
       const inc = Number(document.getElementById('edit-cat-inc').value) || 10;
 
-      if (!id || !name) {
-        showToast("Enter Category ID and Name", "normal");
+      if (!name) {
+        showToast("Please enter a Category Name", "normal");
         return;
       }
+
+      const id = origId || document.getElementById('edit-cat-id').value.trim().toUpperCase() || generateCategoryId(name);
 
       let currentCats = [...(STATE.categories || [])];
 
       if (origId) {
-        // Editing existing category
         const idx = currentCats.findIndex(c => c.id === origId);
         if (idx >= 0) {
           currentCats[idx] = {
             ...currentCats[idx],
-            id: id,
+            id: origId,
             name: name,
             base: base,
             increment: inc
           };
-          showToast(`Category ${name} updated`, 'normal');
+          showToast('Category ' + name + ' updated', 'normal');
         }
       } else {
-        // Adding new category
-        if (currentCats.some(c => c.id === id)) {
-          showToast("Category ID already exists", "normal");
-          return;
+        let uniqueId = id;
+        let counter = 1;
+        while (currentCats.some(c => c.id === uniqueId)) {
+          uniqueId = id + '_' + counter++;
         }
-        currentCats.push({ id, name, base, increment: inc });
-        showToast(`Category ${name} created`, 'normal');
+        currentCats.push({ id: uniqueId, name, base, increment: inc });
+        showToast('Category ' + name + ' created', 'normal');
       }
 
       socket.emit('admin:updateConfig', { categories: currentCats });
@@ -4467,7 +5155,7 @@
       } catch (e) {}
 
       const loader = document.getElementById('app-loading-screen');
-      if (loader) loader.classList.remove('hidden');
+      if (loader) showAppLoader('CONNECTING TO ARENA', 'Authenticating and loading auction state...');
 
       socket.emit('participant:connect', hostId);
       socket.emit('team:login', { teamId, password, role: 'team' });
@@ -4509,7 +5197,7 @@
       } catch (e) {}
 
       const loader = document.getElementById('app-loading-screen');
-      if (loader) loader.classList.remove('hidden');
+      if (loader) showAppLoader('CONNECTING TO ARENA', 'Authenticating and loading auction state...');
 
       if (managerMode === 'login') {
         socket.emit('manager:login', { username, password });
@@ -4533,7 +5221,7 @@
       } catch (e) {}
 
       const loader = document.getElementById('app-loading-screen');
-      if (loader) loader.classList.remove('hidden');
+      if (loader) showAppLoader('CONNECTING TO ARENA', 'Authenticating and loading auction state...');
 
       socket.emit('participant:connect', hostId);
       socket.emit('team:login', { teamId: null, password: '', role: 'viewer' });

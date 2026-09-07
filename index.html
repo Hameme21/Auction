@@ -4,6 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Auction Arena</title>
+  <!-- Instant Session Restore Guard (No Login Screen Flash on Refresh) -->
+  <script>
+    (function() {
+      try {
+        var s = localStorage.getItem('AUCTION_AUTH_SESSION');
+        if (s) {
+          var p = JSON.parse(s);
+          if (p && (p.role === 'admin' || p.role === 'team' || p.role === 'viewer')) {
+            document.documentElement.classList.add('has-session');
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
   
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2450,6 +2464,179 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+  
+    /* Session Persistence & Zero-Flash Rules */
+    html.has-session #screen-login { display: none !important; }
+    html.has-session #screen-arena { display: flex !important; }
+
+    /* Franchise Team Selector on Login Page */
+    .login-teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 4px;
+      margin-top: 6px;
+    }
+    .login-team-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .login-team-card:hover {
+      background: rgba(99, 102, 241, 0.14);
+      border-color: rgba(99, 102, 241, 0.45);
+      transform: translateY(-2px);
+    }
+    .login-team-card.selected {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.28), rgba(79, 70, 229, 0.24));
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.45);
+    }
+    .login-team-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    .login-team-fallback-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    .login-team-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .login-team-code {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Admin Price +/- Stepper Controls */
+    .btn-step-adjust {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.15s ease;
+      color: #fff;
+    }
+    .btn-step-adjust.plus {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35));
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .btn-step-adjust.plus:hover {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(5, 150, 105, 0.55));
+      transform: scale(1.04);
+    }
+    .btn-step-adjust.minus {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.3));
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .btn-step-adjust.minus:hover {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.5));
+      transform: scale(1.04);
+    }
+
+    /* Stage Price Adjustment Live Banner */
+    .stage-adjust-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(147, 51, 234, 0.18));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #c7d2fe;
+      text-align: center;
+      animation: pulseGlow 1.2s infinite alternate ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.2); }
+      100% { box-shadow: 0 0 16px rgba(99, 102, 241, 0.5); }
+    }
+
+    /* Redesigned Team Top Sold Cards in Dashboard */
+    .dash-team-acq-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .dash-team-acq-card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    .dash-team-acq-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .dash-team-acq-players {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .dash-team-player-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+    }
+    .dash-rank-pill {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+    }
+    .dash-rank-pill.rank-1 { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); }
+    .dash-rank-pill.rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+    .dash-rank-pill.rank-3 { background: rgba(180, 83, 9, 0.2); color: #f97316; border: 1px solid rgba(180, 83, 9, 0.4); }
+    .dash-rank-pill.rank-other { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
+
   </style>
 </head>
 <body>
@@ -2521,20 +2708,38 @@
             <label>Host ID</label>
             <div class="input-wrapper">
               <span class="input-icon">🌐</span>
-              <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin" />
+              <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin" oninput="handleHostIdInput(this.value)" />
             </div>
           </div>
 
+          <!-- Auto-populated Franchise Team Cards -->
           <div class="form-group">
-            <label>Franchise Team ID</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🛡️</span>
-              <input type="text" id="login-team-id-input" class="form-control" placeholder="e.g. CSK, MI, KKR" style="text-transform: uppercase;" />
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="margin-bottom: 0;">Select Franchise Team</label>
+              <span id="login-teams-count-badge" style="font-size: 0.74rem; color: var(--accent-indigo); font-weight: 700;">Loading teams...</span>
+            </div>
+            <input type="hidden" id="login-team-id-input" value="" />
+            <div id="login-teams-grid" class="login-teams-grid">
+              <div style="text-align: center; color: var(--text-muted); padding: 1.25rem; font-size: 0.85rem;">
+                Fetching franchises under this Host ID...
+              </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Franchise Password</label>
+          <!-- Selected Franchise Indicator -->
+          <div id="login-selected-team-banner" style="display: none; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 10px 14px; margin-bottom: 1.25rem; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div id="login-selected-logo" class="team-logo-circle" style="width: 38px; height: 38px; font-size: 0.8rem;"></div>
+              <div>
+                <div id="login-selected-name" style="font-weight: 800; font-size: 0.95rem; color: #fff;">Selected Team</div>
+                <div id="login-selected-id" style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">ID: ---</div>
+              </div>
+            </div>
+            <span style="font-size: 0.75rem; background: var(--accent-indigo); color:#fff; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Selected</span>
+          </div>
+
+          <div class="form-group" id="login-password-group" style="display: none;">
+            <label id="login-password-label">Franchise Password</label>
             <div class="input-wrapper">
               <span class="input-icon">🔒</span>
               <input type="password" id="login-team-password" class="form-control" placeholder="••••••••" />
@@ -2542,7 +2747,7 @@
             </div>
           </div>
 
-          <button class="btn-submit-login primary" onclick="submitFranchiseLogin()">
+          <button class="btn-submit-login primary" id="btn-submit-team-login" onclick="submitFranchiseLogin()">
             <span>Enter Bidding Floor</span>
             <span>⚡</span>
           </button>
@@ -2756,7 +2961,7 @@
           </div>
         </div>
 
-        <!-- 2 Column Layout: Remaining Budget on LEFT, Top Solds on RIGHT -->
+        <!-- 2 Column Layout: Left = Budget Visualizer; Right = Every Team's Top Sold Players -->
         <div class="dashboard-columns">
           
           <!-- Column 1 (LEFT): Franchise Budget Visualizer with Animated Fill Circles -->
@@ -2765,27 +2970,37 @@
               <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                 <span>⭕</span> Remaining Budget & Roster Fill
               </h3>
-              <span style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">Animated Circular Visualizer</span>
+              <span style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">Real-Time Purse Health</span>
             </div>
-            <div id="dash-budget-circles-grid" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 520px; overflow-y: auto; padding-right: 4px;">
+            <div id="dash-budget-circles-grid" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 600px; overflow-y: auto; padding-right: 4px;">
               <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
                 No franchises enrolled yet.
               </div>
             </div>
           </div>
 
-          <!-- Column 2 (RIGHT): Top Solds Leaderboard -->
+          <!-- Column 2 (RIGHT): Every Team's Top Sold Players & Acquisitions -->
           <div class="glass-panel" style="padding: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;">
               <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                <span>🏆</span> Top Solds Leaderboard
+                <span>👥</span> Every Team's Top Sold Players
               </h3>
-              <span class="badge-code" id="dash-top-sold-count">0 Recorded</span>
-            </div>
-            <div id="dash-top-solds-list">
-              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
-                No players sold yet in this auction.
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="dash-view-btn-teams" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; background: var(--accent-indigo);" onclick="setDashViewMode('teams')">By Franchise</button>
+                <button id="dash-view-btn-global" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="setDashViewMode('global')">🏆 Global Top 10</button>
               </div>
+            </div>
+
+            <!-- Container for Every Team's Top Solds Breakdown -->
+            <div id="dash-teams-top-solds-container" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 600px; overflow-y: auto; padding-right: 4px;">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                No players acquired yet across franchises.
+              </div>
+            </div>
+
+            <!-- Container for Global Top Solds (Hidden by default, toggled via button) -->
+            <div id="dash-global-top-solds-container" style="display: none; max-height: 600px; overflow-y: auto; padding-right: 4px;">
+              <div id="dash-top-solds-list"></div>
             </div>
           </div>
 
@@ -2860,6 +3075,9 @@
                       </div>
                     </div>
                   </div>
+
+                  <!-- Live Admin Bid Adjustment Text Banner -->
+                  <div id="stage-bid-adjustment-banner" class="stage-adjust-banner" style="display: none;"></div>
                 </div>
               </div>
 
@@ -2913,6 +3131,22 @@
                       </button>
                       <button class="btn-secondary" onclick="adminResetTimer(30)">🔄 30s</button>
                       <button class="btn-secondary" onclick="adminResetTimer(15)">15s</button>
+                    </div>
+
+                    <!-- Auctioneer Bid Increment/Decrement Stepper (+ / -) -->
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
+                      <span style="font-size: 0.82rem; font-weight: 700; color: #c7d2fe;">Adjust Price:</span>
+                      <button type="button" class="btn-step-adjust minus" onclick="adminAdjustBid(-1)" title="Decrease Bid by Step">
+                        <span>➖</span> -Step
+                      </button>
+                      <button type="button" class="btn-step-adjust plus" onclick="adminAdjustBid(1)" title="Increase Bid by Step">
+                        <span>➕</span> +Step
+                      </button>
+                      <div style="display: flex; gap: 4px; margin-left: auto;">
+                        <button type="button" class="btn-step-adjust minus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(-10)">-৳10</button>
+                        <button type="button" class="btn-step-adjust plus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(10)">+৳10</button>
+                        <button type="button" class="btn-step-adjust plus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(50)">+৳50</button>
+                      </div>
                     </div>
 
                     <div class="admin-actions-grid">
@@ -3837,6 +4071,7 @@
           renderMiniStandings();
         }
         populateTeamDropdown(teams || STATE.teams);
+        renderLoginTeamsGrid(teams || STATE.teams);
         showLoginAlert(`Found ${(teams || []).length} franchises under host "${hostId}"`, 'success');
       });
 
@@ -3897,12 +4132,14 @@
 
     function logoutToLoginScreen() {
       clearUserSession();
+      document.documentElement.classList.remove('has-session');
       SESSION.role = 'viewer';
       SESSION.teamId = null;
       SESSION.username = null;
       document.getElementById('screen-arena').style.display = 'none';
       document.getElementById('screen-login').style.display = 'flex';
       hideLoginAlert();
+      renderLoginTeamsGrid(STATE.teams || []);
     }
 
     // Reserve & Balance Formula
@@ -3995,6 +4232,28 @@
     }
 
     
+    let DASH_VIEW_MODE = 'teams'; // 'teams' | 'global'
+
+    function setDashViewMode(mode) {
+      DASH_VIEW_MODE = mode;
+      const btnTeams = document.getElementById('dash-view-btn-teams');
+      const btnGlobal = document.getElementById('dash-view-btn-global');
+      const containerTeams = document.getElementById('dash-teams-top-solds-container');
+      const containerGlobal = document.getElementById('dash-global-top-solds-container');
+      
+      if (mode === 'teams') {
+        if (btnTeams) btnTeams.style.background = 'var(--accent-indigo)';
+        if (btnGlobal) btnGlobal.style.background = 'rgba(255,255,255,0.06)';
+        if (containerTeams) containerTeams.style.display = 'flex';
+        if (containerGlobal) containerGlobal.style.display = 'none';
+      } else {
+        if (btnTeams) btnTeams.style.background = 'rgba(255,255,255,0.06)';
+        if (btnGlobal) btnGlobal.style.background = 'var(--accent-indigo)';
+        if (containerTeams) containerTeams.style.display = 'none';
+        if (containerGlobal) containerGlobal.style.display = 'block';
+      }
+    }
+
     // Franchises Summary Dashboard Renderer
     function renderDashboardView() {
       const teams = STATE.teams || [];
@@ -4007,10 +4266,11 @@
       let totalSoldPlayers = 0;
       let allSoldItems = [];
 
-      teams.forEach(team => {
-        const startingPurse = Math.max(Number(team.purse) || 0, 500);
-        let teamSpent = 0;
+      // Map team acquisitions: teamId -> array of sold players
+      const teamAcquisitions = {};
+      teams.forEach(t => { teamAcquisitions[t.id] = []; });
 
+      teams.forEach(team => {
         if (team.purchases) {
           Object.keys(team.purchases).forEach(catId => {
             const playerName = team.purchases[catId];
@@ -4018,7 +4278,6 @@
             const cat = categories.find(c => c.id === catId);
             const price = Number(soldPrices[priceKey]) || (cat ? Number(cat.base) : 50) || 0;
             totalSpent += price;
-            teamSpent += price;
             totalSoldPlayers++;
 
             // Find player photo
@@ -4027,15 +4286,20 @@
             const foundPlayer = catList.find(p => p.name === playerName);
             if (foundPlayer) playerImg = foundPlayer.image || '';
 
-            allSoldItems.push({
+            const item = {
               name: playerName,
+              categoryId: catId,
               categoryName: cat ? cat.name : catId,
               teamId: team.id,
               teamName: team.name,
               teamLogo: team.logo || '',
               price: price,
               image: playerImg
-            });
+            };
+
+            allSoldItems.push(item);
+            if (!teamAcquisitions[team.id]) teamAcquisitions[team.id] = [];
+            teamAcquisitions[team.id].push(item);
           });
         }
       });
@@ -4063,42 +4327,7 @@
       if (elAvg) elAvg.textContent = '৳' + avgAcquisition.toLocaleString();
       if (elCount) elCount.textContent = teams.length;
 
-      // 2. Render Top Solds Leaderboard (Sorted by highest price)
-      const topSoldsContainer = document.getElementById('dash-top-solds-list');
-      const topSoldCountBadge = document.getElementById('dash-top-sold-count');
-      if (topSoldCountBadge) topSoldCountBadge.textContent = allSoldItems.length + ' Sold';
-
-      allSoldItems.sort((a, b) => b.price - a.price);
-
-      if (topSoldsContainer) {
-        if (!allSoldItems.length) {
-          topSoldsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No players sold yet in this auction. Once players are acquired, they will appear here ranked by highest price.</div>';
-        } else {
-          topSoldsContainer.innerHTML = allSoldItems.slice(0, 10).map((item, idx) => {
-            const rank = idx + 1;
-            const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-            return `
-              <div class="top-sold-row">
-                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                  <div class="top-sold-rank ${rankClass}">#${rank}</div>
-                  <img src="${item.image || ''}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.12);" onerror="handleImageFallback(this)" />
-                  <div style="min-width: 0;">
-                    <div style="font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.name}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted);">
-                      <span>🏷️ ${item.categoryName}</span> • <span style="color: #38bdf8; font-weight: 600;">${item.teamName}</span>
-                    </div>
-                  </div>
-                </div>
-                <div style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 900; color: var(--accent-green); white-space: nowrap;">
-                  ৳${item.price.toLocaleString()}
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-
-      // 3. Render Remaining Budget with Animated Circle Gauge
+      // 2. Render Left Column: Remaining Budget Visualizers with Animated Circular Fill
       const circlesGrid = document.getElementById('dash-budget-circles-grid');
       if (circlesGrid) {
         if (!teams.length) {
@@ -4107,7 +4336,6 @@
           circlesGrid.innerHTML = teams.map(team => {
             const currentPurse = Math.max(0, Number(team.purse) || 0);
             
-            // Calculate total team budget (current purse + spent)
             let spent = 0;
             let slotsFilled = 0;
             if (team.purchases) {
@@ -4123,11 +4351,9 @@
             const rawPct = Math.round((currentPurse / baselineBudget) * 100);
             const remainingPct = Math.min(100, Math.max(0, isNaN(rawPct) ? 100 : rawPct));
 
-            // SVG circle circumference = 2 * PI * 45 ≈ 283
             const circumference = 283;
             const strokeOffset = circumference - (circumference * remainingPct) / 100;
 
-            // Color gradient indicator based on remaining health
             let strokeColor = '#10b981'; // Green
             if (remainingPct < 25) {
               strokeColor = '#ef4444'; // Red
@@ -4140,38 +4366,126 @@
 
             return `
               <div class="franchise-budget-card">
-                <!-- Circular Fill Animation Gauge -->
                 <div class="budget-circle-wrap">
                   <svg class="budget-circle-svg" viewBox="0 0 100 100">
-                    <circle class="budget-circle-bg" cx="50" cy="50" r="45" />
-                    <circle class="budget-circle-fill" cx="50" cy="50" r="45"
-                            style="stroke: ${strokeColor}; stroke-dashoffset: ${strokeOffset};" />
+                    <circle class="budget-circle-bg" cx="50" cy="50" r="45"></circle>
+                    <circle class="budget-circle-bar" cx="50" cy="50" r="45"
+                      style="stroke: ${strokeColor}; stroke-dashoffset: ${strokeOffset};">
+                    </circle>
                   </svg>
-                  <div class="budget-circle-pct">
-                    ${remainingPct}%
-                    <span>Remaining</span>
+                  <div class="budget-circle-content">
+                    <span class="budget-circle-pct" style="color: ${strokeColor};">${remainingPct}%</span>
+                    <span class="budget-circle-sub">Purse</span>
                   </div>
                 </div>
 
                 <div class="franchise-budget-info">
-                  <div class="franchise-budget-title">${team.name}</div>
+                  <div class="franchise-budget-title">
+                    ${team.logo ? `<img class="team-logo-img" src="${team.logo}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;" onerror="this.remove()" />` : ''}
+                    <span>${team.name}</span>
+                  </div>
                   <div class="franchise-budget-meta">
-                    <span>ID: ${team.id}</span>
-                    <span>•</span>
-                    <span>Acquired: ${slotsFilled}/${categories.length || '—'}</span>
-                    <span>•</span>
-                    <span style="color: ${team.impactUsed ? '#94a3b8' : 'var(--accent-pink)'};">Impact: ${team.impactUsed ? 'Used' : 'Avail'}</span>
+                    ID: ${team.id} • Slots: ${slotsFilled} / ${categories.length || 0}
                   </div>
                   <div class="franchise-budget-nums">
-                    <div>
-                      <span style="color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase;">Purse:</span>
-                      <strong style="font-family: var(--font-mono); color: var(--accent-green); margin-left: 4px;">৳${currentPurse}</strong>
-                    </div>
-                    <div>
-                      <span style="color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase;">Max Bid:</span>
-                      <strong style="font-family: var(--font-mono); color: #38bdf8; margin-left: 4px;">৳${availableToBid}</strong>
+                    <span>Purse: <strong style="color:var(--accent-green);font-family:var(--font-mono);">৳${currentPurse.toLocaleString()}</strong></span>
+                    <span>Max Bid: <strong style="color:#38bdf8;font-family:var(--font-mono);">৳${availableToBid.toLocaleString()}</strong></span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. Render Right Column: Every Team's Top Sold Players Breakdown
+      const teamsTopSoldsContainer = document.getElementById('dash-teams-top-solds-container');
+      if (teamsTopSoldsContainer) {
+        if (!teams.length) {
+          teamsTopSoldsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No franchises enrolled yet.</div>';
+        } else {
+          teamsTopSoldsContainer.innerHTML = teams.map(team => {
+            const acquisitions = teamAcquisitions[team.id] || [];
+            acquisitions.sort((a, b) => b.price - a.price);
+
+            let teamTotalSpent = 0;
+            acquisitions.forEach(a => { teamTotalSpent += a.price; });
+
+            const playersListHtml = acquisitions.length ? acquisitions.map((item, idx) => {
+              const rank = idx + 1;
+              const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+              return `
+                <div class="dash-team-player-row">
+                  <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                    <span class="dash-rank-pill ${rankClass}">#${rank}</span>
+                    <img src="${item.image || ''}" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);" onerror="handleImageFallback(this)" />
+                    <div style="min-width: 0;">
+                      <div style="font-weight: 700; font-size: 0.86rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">🏷️ ${item.categoryName}</div>
                     </div>
                   </div>
+                  <div style="font-family: var(--font-mono); font-size: 0.92rem; font-weight: 800; color: var(--accent-green); white-space: nowrap;">
+                    ৳${item.price.toLocaleString()}
+                  </div>
+                </div>
+              `;
+            }).join('') : `
+              <div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; padding: 6px 0;">
+                No players acquired yet • ৳${team.purse || 500} purse intact
+              </div>
+            `;
+
+            return `
+              <div class="dash-team-acq-card">
+                <div class="dash-team-acq-header">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    ${team.logo ? `<img src="${team.logo}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);" onerror="this.remove()" />` : `<div class="team-logo-circle" style="width:32px;height:32px;font-size:0.75rem;">${team.id.slice(0,3)}</div>`}
+                    <div>
+                      <div style="font-weight: 800; font-size: 0.95rem; color: #fff;">${team.name}</div>
+                      <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">
+                        ${acquisitions.length} Players Acquired • Spent ৳${teamTotalSpent.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Purse Left</div>
+                    <div style="font-family: var(--font-mono); font-weight: 800; font-size: 0.95rem; color: var(--accent-green);">৳${team.purse || 0}</div>
+                  </div>
+                </div>
+                <div class="dash-team-acq-players">
+                  ${playersListHtml}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 4. Render Global Top 10 Leaderboard
+      const topSoldsContainer = document.getElementById('dash-top-solds-list');
+      allSoldItems.sort((a, b) => b.price - a.price);
+
+      if (topSoldsContainer) {
+        if (!allSoldItems.length) {
+          topSoldsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No players sold yet in this auction. Once players are acquired, they will appear here ranked by highest price.</div>';
+        } else {
+          topSoldsContainer.innerHTML = allSoldItems.slice(0, 10).map((item, idx) => {
+            const rank = idx + 1;
+            const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+            return `
+              <div class="top-sold-row" style="margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                  <div class="top-sold-rank ${rankClass}">#${rank}</div>
+                  <img src="${item.image || ''}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.12);" onerror="handleImageFallback(this)" />
+                  <div style="min-width: 0;">
+                    <div style="font-weight: 800; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.name}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">
+                      <span>🏷️ ${item.categoryName}</span> • <span style="color: #38bdf8; font-weight: 600;">${item.teamName}</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 1.1rem; font-weight: 900; color: var(--accent-green); white-space: nowrap;">
+                  ৳${item.price.toLocaleString()}
                 </div>
               </div>
             `;
@@ -4181,6 +4495,7 @@
     }
 
     function renderCurrentView() {
+      renderDashboardView();
       renderMiniStandings();
       renderActivePlayerStage(STATE.currentActivePlayer);
       renderTeamsGrid();
@@ -4366,6 +4681,10 @@
       STATE.activeBids[key] = Number(bidData.price);
       STATE.activeBidders[key] = bidData.highBidderId || bidData.teamId;
 
+      if (bidData.isAdjustment && bidData.adjustmentText) {
+        showBidAdjustmentBanner(bidData.adjustmentText);
+      }
+
       if (STATE.currentActivePlayer && STATE.currentActivePlayer.name === bidData.name) {
         STATE.currentActivePlayer.currentPrice = bidData.price;
         renderActivePlayerStage(STATE.currentActivePlayer);
@@ -4500,7 +4819,64 @@
       }
     }
 
-    function adminResetTimer(seconds) { socket.emit('admin:timer_control', { paused: false, time: seconds }); }
+    
+    // Admin +/- Bid Adjustment Logic
+    function adminAdjustBid(stepMultiplier) {
+      if (!STATE.currentActivePlayer || SESSION.role !== 'admin') return;
+      const player = STATE.currentActivePlayer;
+      const catObj = (STATE.categories || []).find(c => c.id === player.category);
+      const inc = catObj ? (Number(catObj.increment) || 10) : 10;
+      const delta = inc * stepMultiplier;
+      executeBidAdjustment(delta);
+    }
+
+    function adminAdjustBidCustom(amount) {
+      if (!STATE.currentActivePlayer || SESSION.role !== 'admin') return;
+      executeBidAdjustment(amount);
+    }
+
+    function executeBidAdjustment(delta) {
+      const player = STATE.currentActivePlayer;
+      const key = `${player.category}:${player.name}`;
+      const currentPrice = Number(STATE.activeBids && STATE.activeBids[key]) || Number(player.currentPrice) || Number(player.base) || 0;
+      const newPrice = Math.max(0, currentPrice + delta);
+      const actionText = delta >= 0 ? 'increased' : 'decreased';
+
+      // Immediate local UI update
+      if (!STATE.activeBids) STATE.activeBids = {};
+      STATE.activeBids[key] = newPrice;
+      player.currentPrice = newPrice;
+      const priceElem = document.getElementById('stage-current-bid');
+      if (priceElem) priceElem.textContent = newPrice;
+
+      showBidAdjustmentBanner(`📢 Admin ${actionText} bid to ৳${newPrice} (${delta >= 0 ? '+' : ''}৳${delta})`);
+
+      // Broadcast to server
+      socket.emit('admin:adjust_bid', {
+        category: player.category,
+        name: player.name,
+        price: newPrice,
+        delta: delta,
+        action: actionText
+      });
+    }
+
+    function showBidAdjustmentBanner(text) {
+      const banner = document.getElementById('stage-bid-adjustment-banner');
+      if (!banner) return;
+      banner.textContent = text;
+      banner.style.display = 'block';
+      setTimeout(() => {
+        if (banner) banner.style.display = 'none';
+      }, 5000);
+    }
+
+    function adminResetTimer(seconds) {
+      seconds = Number(seconds) || 30;
+      TIMER_STATE = { paused: false, time: seconds };
+      renderTimer(seconds, false);
+      socket.emit('admin:timer_control', { paused: false, time: seconds });
+    }
     function adminMarkSold(isDirect = false) {
       if (!STATE.currentActivePlayer) return;
       const player = STATE.currentActivePlayer;
@@ -5605,6 +5981,85 @@
       return SESSION.hostId || 'admin';
     }
 
+    
+    // Franchise Team Selection on Login Page
+    let hostInputDebounceTimer = null;
+    let selectedLoginTeamId = null;
+
+    function handleHostIdInput(hostId) {
+      if (hostInputDebounceTimer) clearTimeout(hostInputDebounceTimer);
+      hostInputDebounceTimer = setTimeout(() => {
+        const cleanHost = (hostId || 'admin').trim();
+        SESSION.hostId = cleanHost;
+        if (socket && socket.connected) {
+          socket.emit('participant:connect', cleanHost);
+        } else {
+          // If socket not connected yet, render from local state
+          renderLoginTeamsGrid(STATE.teams || []);
+        }
+      }, 250);
+    }
+
+    function renderLoginTeamsGrid(teams) {
+      const grid = document.getElementById('login-teams-grid');
+      const badge = document.getElementById('login-teams-count-badge');
+      if (!grid) return;
+
+      const teamList = teams && teams.length ? teams : (STATE.teams || []);
+
+      if (!teamList.length) {
+        if (badge) badge.textContent = '0 Teams Found';
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.25rem 0.5rem; font-size: 0.82rem;">No franchises enrolled yet under this Host ID.<br/>Please enter as Manager or verify Host ID.</div>';
+        return;
+      }
+
+      if (badge) badge.textContent = `${teamList.length} Franchises Available`;
+
+      grid.innerHTML = teamList.map(team => {
+        const isSelected = (selectedLoginTeamId === team.id);
+        const logoHtml = team.logo 
+          ? `<img class="login-team-logo" src="${team.logo}" alt="${team.name}" onerror="this.remove()" />` 
+          : `<div class="login-team-fallback-logo">${team.id.slice(0, 3)}</div>`;
+
+        return `
+          <div class="login-team-card ${isSelected ? 'selected' : ''}" onclick="selectLoginTeam('${team.id}')">
+            ${logoHtml}
+            <div class="login-team-name" title="${team.name}">${team.name}</div>
+            <div class="login-team-code">${team.id}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectLoginTeam(teamId) {
+      selectedLoginTeamId = teamId;
+      document.getElementById('login-team-id-input').value = teamId;
+
+      const team = (STATE.teams || []).find(t => t.id === teamId);
+      const banner = document.getElementById('login-selected-team-banner');
+      const passGroup = document.getElementById('login-password-group');
+      const passInput = document.getElementById('login-team-password');
+
+      if (team) {
+        document.getElementById('login-selected-name').textContent = team.name;
+        document.getElementById('login-selected-id').textContent = `ID: ${team.id} | Purse: ৳${team.purse || 500}`;
+        
+        const logoEl = document.getElementById('login-selected-logo');
+        if (team.logo) {
+          logoEl.innerHTML = `<img class="team-logo-img" src="${team.logo}" onerror="this.remove()" />`;
+        } else {
+          logoEl.textContent = team.id.slice(0, 3);
+        }
+
+        if (banner) banner.style.display = 'flex';
+        if (passGroup) passGroup.style.display = 'block';
+        if (passInput) passInput.focus();
+      }
+
+      // Re-render selection highlight
+      renderLoginTeamsGrid(STATE.teams);
+    }
+
     function submitFranchiseLogin() {
       const hostId = (document.getElementById('login-team-host').value || 'admin').trim();
       const teamId = (document.getElementById('login-team-id-input').value || '').trim().toUpperCase();
@@ -5813,6 +6268,32 @@
 
     // Startup Initialization
     window.addEventListener('DOMContentLoaded', () => {
+      // Immediate Session Restoration (Never show login screen if session exists)
+      try {
+        const savedSession = localStorage.getItem('AUCTION_AUTH_SESSION');
+        if (savedSession) {
+          const parsed = JSON.parse(savedSession);
+          if (parsed && (parsed.role === 'admin' || parsed.role === 'team' || parsed.role === 'viewer')) {
+            SESSION.role = parsed.role;
+            SESSION.teamId = parsed.teamId || null;
+            SESSION.username = parsed.username || null;
+            SESSION.hostId = parsed.hostId || 'admin';
+            SESSION.activeView = parsed.activeView || 'view-arena';
+            
+            document.getElementById('screen-login').style.display = 'none';
+            document.getElementById('screen-arena').style.display = 'flex';
+            document.documentElement.classList.add('has-session');
+            applyRolePermissions();
+            switchView(SESSION.activeView);
+          }
+        }
+      } catch (e) {
+        console.warn('Session restoration error', e);
+      }
+
+      // Initial team grid render on login screen
+      renderLoginTeamsGrid(STATE.teams || []);
+
       hideAppLoader();
       initSocket();
       window.addEventListener('click', () => SOUNDS.init(), { once: true });
@@ -5821,3 +6302,4 @@
   </script>
 </body>
 </html>
+

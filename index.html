@@ -2756,6 +2756,42 @@
           </div>
         </div>
 
+        <!-- 2 Column Layout: Remaining Budget on LEFT, Top Solds on RIGHT -->
+        <div class="dashboard-columns">
+          
+          <!-- Column 1 (LEFT): Franchise Budget Visualizer with Animated Fill Circles -->
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>⭕</span> Remaining Budget & Roster Fill
+              </h3>
+              <span style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">Animated Circular Visualizer</span>
+            </div>
+            <div id="dash-budget-circles-grid" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 520px; overflow-y: auto; padding-right: 4px;">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                No franchises enrolled yet.
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2 (RIGHT): Top Solds Leaderboard -->
+          <div class="glass-panel" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <span>🏆</span> Top Solds Leaderboard
+              </h3>
+              <span class="badge-code" id="dash-top-sold-count">0 Recorded</span>
+            </div>
+            <div id="dash-top-solds-list">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
+                No players sold yet in this auction.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- VIEW 1: LIVE ARENA (MAIN STAGE) -->
       <div id="view-arena" class="view-container active">
         <div class="arena-grid">
@@ -2914,11 +2950,17 @@
 
             <!-- Empty Stage Display & Code Shuffle Revealer -->
             <div class="empty-stage-state" id="empty-stage-card">
+              <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 6px 14px; border-radius: 999px; margin-bottom: 1rem; font-size: 0.8rem; color: #10b981; font-weight: 700;">
+                <span class="pulse-dot online"></span> LIVE ARENA READY
+              </div>
               <div class="empty-stage-icon">🏟️</div>
-              <h3 id="empty-stage-heading" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Auction Stage is Clear</h3>
-              <p id="empty-stage-desc" style="color: var(--text-muted); font-size: 0.92rem; max-width: 440px; margin: 0 auto 1.5rem auto;">
-                Waiting for the League Manager to shuffle codes or reveal the next player.
+              <h3 id="empty-stage-heading" style="font-size: 1.45rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Live Auction Stage</h3>
+              <p id="empty-stage-desc" style="color: var(--text-muted); font-size: 0.92rem; max-width: 460px; margin: 0 auto 1.25rem auto;">
+                Stage is open and synchronized. Draw a lottery code or select a contender to begin live floor bidding.
               </p>
+
+              <!-- Recent Acquisition Highlight Banner -->
+              <div id="arena-recent-sale-banner" style="display: none; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 10px 16px; margin: 0 auto 1.25rem auto; max-width: 500px; font-size: 0.85rem; color: #c7d2fe;"></div>
 
               <!-- Live Drawn Code Reveal Banner (Visible to all: Teams, Viewers, and Admin) -->
               <div id="stage-drawn-code-box" class="slot-machine-cabinet" style="display: none;">
@@ -2953,6 +2995,14 @@
                     🔄 Reset Codes
                   </button>
                 </div>
+              </div>
+
+              <!-- Non-admin Waiting Notice -->
+              <div id="viewer-waiting-notice" style="display: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 18px; max-width: 440px; margin: 1rem auto 0 auto; font-size: 0.85rem; color: var(--text-muted);">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; color: #fff; margin-bottom: 4px;">
+                  <span>⚡</span> Live Bidding Floor Synchronized
+                </div>
+                The bidding console will automatically activate when the auctioneer presents a contender.
               </div>
             </div>
 
@@ -3018,44 +3068,6 @@
             </div>
 
           </aside>
-
-        </div>
-      </div>
-
-      
-
-        <!-- 2 Column Layout: Top Solds Leaderboard & Budget Visualizer Grid -->
-        <div class="dashboard-columns">
-          
-          <!-- Column 1: Top Solds Leaderboard -->
-          <div class="glass-panel" style="padding: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                <span>🏆</span> Top Solds Leaderboard
-              </h3>
-              <span class="badge-code" id="dash-top-sold-count">0 Recorded</span>
-            </div>
-            <div id="dash-top-solds-list">
-              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
-                No players sold yet in this auction.
-              </div>
-            </div>
-          </div>
-
-          <!-- Column 2: Franchise Budget Visualizer with Animated Fill Circles -->
-          <div class="glass-panel" style="padding: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-              <h3 style="font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                <span>⭕</span> Remaining Budget & Roster Fill
-              </h3>
-              <span style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">Animated Circular Visualizer</span>
-            </div>
-            <div id="dash-budget-circles-grid" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 520px; overflow-y: auto; padding-right: 4px;">
-              <div style="text-align: center; color: var(--text-muted); padding: 2rem 1rem;">
-                No franchises enrolled yet.
-              </div>
-            </div>
-          </div>
 
         </div>
       </div>
@@ -3815,8 +3827,17 @@
 
       // Team Discovery Response
       socket.on('init:teams_available', ({ hostId, teams }) => {
-        populateTeamDropdown(teams);
-        showLoginAlert(`Found ${teams.length} franchises under host "${hostId}"`, 'success');
+        if (teams && Array.isArray(teams) && teams.length > 0) {
+          STATE.teams = teams;
+          try {
+            localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(teams));
+          } catch (e) {}
+          renderTeamsGrid();
+          renderDashboardView();
+          renderMiniStandings();
+        }
+        populateTeamDropdown(teams || STATE.teams);
+        showLoginAlert(`Found ${(teams || []).length} franchises under host "${hostId}"`, 'success');
       });
 
       // Admin Login Success
@@ -3925,6 +3946,8 @@
       if (SESSION.role === 'admin') {
         roleText.textContent = `Admin (${SESSION.username || 'Manager'})`;
         if (adminLaunchpad) adminLaunchpad.style.display = 'block';
+        const viewerWait = document.getElementById('viewer-waiting-notice');
+        if (viewerWait) viewerWait.style.display = 'none';
         if (adminScheduleBar) adminScheduleBar.style.display = 'flex';
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'flex';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'block';
@@ -3934,6 +3957,8 @@
         const team = getMyTeam();
         roleText.textContent = team ? team.name : `Franchise (${SESSION.teamId})`;
         if (adminLaunchpad) adminLaunchpad.style.display = 'none';
+        const viewerWait = document.getElementById('viewer-waiting-notice');
+        if (viewerWait) viewerWait.style.display = 'block';
         if (adminScheduleBar) adminScheduleBar.style.display = 'none';
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
@@ -3942,6 +3967,8 @@
       } else {
         roleText.textContent = 'Spectator Mode';
         if (adminLaunchpad) adminLaunchpad.style.display = 'none';
+        const viewerWait = document.getElementById('viewer-waiting-notice');
+        if (viewerWait) viewerWait.style.display = 'block';
         if (adminScheduleBar) adminScheduleBar.style.display = 'none';
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
@@ -4171,6 +4198,7 @@
       if (!player) {
         activeStage.style.display = 'none';
         emptyStage.style.display = 'block';
+        updateEmptyStageBanner();
         return;
       }
 
@@ -4674,6 +4702,33 @@
     }
 
     // Mini Standings List
+    function populateTeamDropdown(teams) {
+      const directSelect = document.getElementById('admin-direct-team-select');
+      if (directSelect) {
+        const teamList = (teams && teams.length) ? teams : (STATE.teams || []);
+        directSelect.innerHTML = teamList.map(t => `<option value="${t.id}">${t.name} (${t.id})</option>`).join('');
+      }
+    }
+
+    function updateEmptyStageBanner() {
+      const banner = document.getElementById('arena-recent-sale-banner');
+      if (!banner) return;
+      const soldPrices = STATE.soldPrices || {};
+      const keys = Object.keys(soldPrices);
+      if (!keys.length) {
+        banner.style.display = 'none';
+        return;
+      }
+      const lastKey = keys[keys.length - 1];
+      const parts = lastKey.split(':');
+      const catId = parts[0];
+      const playerName = parts.slice(1).join(':');
+      const price = soldPrices[lastKey];
+      const buyer = (STATE.teams || []).find(t => t.purchases && t.purchases[catId] === playerName);
+      banner.innerHTML = `🏆 <strong>Last Sold:</strong> <span style="color:#fff;font-weight:700;">${playerName}</span> to <span style="color:#38bdf8;font-weight:700;">${buyer ? buyer.name : 'Unknown Team'}</span> for <span style="color:var(--accent-green);font-weight:800;font-family:var(--font-mono);">৳${Number(price).toLocaleString()}</span>`;
+      banner.style.display = 'block';
+    }
+
     function renderMiniStandings() {
       const list = document.getElementById('mini-standings-list');
       const teams = STATE.teams || [];
@@ -4715,7 +4770,19 @@
       const categories = STATE.categories || [];
 
       if (!teams.length) {
-        grid.innerHTML = '<div style="color:var(--text-muted);padding:2rem;">No franchise teams created yet. League Manager can add teams in Console.</div>';
+        grid.innerHTML = `
+          <div class="glass-panel" style="text-align:center; padding:3rem 1.5rem; max-width:600px; margin:2rem auto; grid-column: 1 / -1;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🛡️</div>
+            <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:0.5rem;">No Franchises Enrolled Yet</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">
+              Enrolled franchises will appear here with purse balances, roster slots, and bidding capacity.
+            </p>
+            <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+              <button class="btn-primary" onclick="openAddTeamModal()" style="padding:10px 22px;">➕ Add First Franchise</button>
+              <button class="btn-secondary" onclick="seedDefaultFranchises()" style="padding:10px 18px;">⚡ Load 4 Sample Franchises</button>
+            </div>
+          </div>
+        `;
         return;
       }
 
@@ -4748,6 +4815,7 @@
             <button class="btn-primary" style="padding:4px 10px;font-size:0.75rem;background:linear-gradient(135deg,#6366f1,#4f46e5);" onclick="openEditTeamModal('${team.id}')">✏️ Edit Franchise</button>
             <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetTeam('${team.id}')">Reset Team</button>
             <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetImpact('${team.id}')">Reset Impact</button>
+            <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" onclick="adminDeleteTeam('${team.id}')">🗑️ Delete</button>
           </div>
         ` : '';
 
@@ -5306,8 +5374,62 @@
         showToast(`Franchise ${name} added`, 'normal');
       }
 
-      socket.emit('admin:updateConfig', { teams: currentTeams });
+      // Immediately update local state & UI
+      STATE.teams = currentTeams;
+      try {
+        localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(currentTeams));
+      } catch (e) {}
+
+      renderTeamsGrid();
+      renderDashboardView();
+      renderMiniStandings();
+      populateTeamDropdown(currentTeams);
+      updatePurseDisplays();
+
+      if (socket && socket.connected) {
+        socket.emit('admin:updateConfig', { teams: currentTeams });
+      }
       closeTeamModal();
+    }
+
+    function adminDeleteTeam(teamId) {
+      if (!confirm(`Are you sure you want to remove franchise ${teamId}?`)) return;
+      let currentTeams = (STATE.teams || []).filter(t => t.id !== teamId);
+      STATE.teams = currentTeams;
+      try {
+        localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(currentTeams));
+      } catch (e) {}
+      renderTeamsGrid();
+      renderDashboardView();
+      renderMiniStandings();
+      populateTeamDropdown(currentTeams);
+      updatePurseDisplays();
+      if (socket && socket.connected) {
+        socket.emit('admin:updateConfig', { teams: currentTeams });
+      }
+      showToast(`Franchise ${teamId} removed`, 'normal');
+    }
+
+    function seedDefaultFranchises() {
+      const presets = [
+        { id: 'CSK', name: 'Chennai Super Kings', purse: 500, password: '123', logo: '', purchases: {}, impactUsed: false, impactActive: false, directSignUsed: false, rtmUsed: false },
+        { id: 'MI', name: 'Mumbai Indians', purse: 500, password: '123', logo: '', purchases: {}, impactUsed: false, impactActive: false, directSignUsed: false, rtmUsed: false },
+        { id: 'RCB', name: 'Royal Challengers Bengaluru', purse: 500, password: '123', logo: '', purchases: {}, impactUsed: false, impactActive: false, directSignUsed: false, rtmUsed: false },
+        { id: 'KKR', name: 'Kolkata Knight Riders', purse: 500, password: '123', logo: '', purchases: {}, impactUsed: false, impactActive: false, directSignUsed: false, rtmUsed: false }
+      ];
+      STATE.teams = presets;
+      try {
+        localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(presets));
+      } catch (e) {}
+      renderTeamsGrid();
+      renderDashboardView();
+      renderMiniStandings();
+      populateTeamDropdown(presets);
+      updatePurseDisplays();
+      if (socket && socket.connected) {
+        socket.emit('admin:updateConfig', { teams: presets });
+      }
+      showToast('Loaded 4 default tournament franchises', 'normal');
     }
 
     // Category Modal (Add & Edit)

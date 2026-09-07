@@ -84,7 +84,7 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
 
     /* =========================================================
-       SCREEN 1: DEDICATED HIGH-END LOGIN / GATEWAY PAGE
+       SCREEN 1: DEDICATED HIGH-END LOGIN / GATEWAY PAGE (PROFESSIONAL GRADIENT LOOK)
        ========================================================= */
     #screen-login {
       min-height: 100vh;
@@ -92,10 +92,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1.5rem;
+      padding: 2.5rem 1.5rem;
       position: relative;
       z-index: 10;
       animation: fadeIn 0.4s ease;
+      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.18) 0%, rgba(147, 51, 234, 0.12) 35%, rgba(6, 182, 212, 0.05) 65%, transparent 100%);
     }
 
     .login-topbar {
@@ -114,35 +115,36 @@
     .login-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       text-decoration: none;
     }
     .login-brand-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #6366f1, #a855f7);
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 1.4rem;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+      font-size: 1.5rem;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.25);
     }
     .login-brand-text h1 {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 900;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 40%, #c7d2fe);
+      background: linear-gradient(135deg, #ffffff 20%, #c7d2fe 60%, #e0e7ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       line-height: 1.1;
     }
     .login-brand-text span {
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      font-size: 0.74rem;
+      color: #94a3b8;
       font-family: var(--font-mono);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
@@ -151,32 +153,35 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--card-border);
-      padding: 6px 14px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 7px 16px;
       border-radius: 9999px;
       font-size: 0.78rem;
       font-family: var(--font-mono);
-      color: var(--text-muted);
+      color: #cbd5e1;
       cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       transition: var(--transition);
     }
     .server-status-pill:hover {
-      border-color: rgba(99, 102, 241, 0.4);
+      border-color: rgba(99, 102, 241, 0.6);
       color: #fff;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+      transform: translateY(-1px);
     }
 
-    /* Main Login Card */
+    /* Main Login Card with Professional Gradient */
     .login-hero-card {
       width: 100%;
-      max-width: 580px;
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius-xl);
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      max-width: 600px;
+      background: linear-gradient(165deg, rgba(23, 37, 84, 0.75) 0%, rgba(15, 23, 42, 0.92) 40%, rgba(30, 16, 60, 0.88) 100%);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 28px;
+      box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(99, 102, 241, 0.18), inset 0 1px 2px rgba(255, 255, 255, 0.25);
       overflow: hidden;
       margin-top: 3.5rem;
       position: relative;
@@ -186,76 +191,87 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple), var(--accent-cyan), var(--accent-green));
+      height: 5px;
+      background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 30%, #ec4899 65%, #10b981 100%);
+      box-shadow: 0 2px 14px rgba(139, 92, 246, 0.6);
     }
 
     .login-header-banner {
-      padding: 2.2rem 2.2rem 1.2rem;
+      padding: 2.5rem 2.2rem 1.4rem;
       text-align: center;
+      position: relative;
     }
     .login-badge-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 14px;
-      background: rgba(99, 102, 241, 0.14);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      color: #c7d2fe;
+      gap: 7px;
+      padding: 5px 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.25));
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #e0e7ff;
       border-radius: 9999px;
       font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 0.85rem;
+      box-shadow: 0 0 18px rgba(99, 102, 241, 0.25);
+      margin-bottom: 1rem;
     }
     .login-header-banner h2 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.45rem;
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 25%, #e2e8f0 60%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
     }
     .login-header-banner p {
-      color: var(--text-muted);
-      font-size: 0.92rem;
+      color: #94a3b8;
+      font-size: 0.94rem;
+      max-width: 440px;
+      margin: 0 auto;
+      line-height: 1.45;
     }
 
     /* Login Navigation Tabs */
     .login-portal-tabs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
+      gap: 8px;
       padding: 6px;
-      background: rgba(0, 0, 0, 0.4);
-      margin: 0 2rem 1.5rem;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(3, 7, 18, 0.65);
+      margin: 0 2.2rem 1.75rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
     }
     .login-tab-btn {
       background: transparent;
-      border: none;
-      color: var(--text-muted);
+      border: 1px solid transparent;
+      color: #94a3b8;
       font-family: var(--font-main);
       font-weight: 700;
-      font-size: 0.85rem;
-      padding: 10px 8px;
-      border-radius: 10px;
+      font-size: 0.88rem;
+      padding: 12px 10px;
+      border-radius: 14px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       transition: var(--transition);
     }
-    .login-tab-btn span.tab-icon { font-size: 1.2rem; }
+    .login-tab-btn span.tab-icon { font-size: 1.35rem; }
     .login-tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
     }
     .login-tab-btn.active {
-      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
     }
 
     .login-portal-body {
@@ -1198,7 +1214,7 @@
       color: var(--text-dim);
     }
 
-    /* Catalog Table */
+    /* Catalog Table & Player Cards Grid */
     table.data-table {
       width: 100%;
       border-collapse: collapse;
@@ -1218,6 +1234,160 @@
       padding: 10px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       vertical-align: middle;
+    }
+
+    /* Player Cards Grid */
+    .players-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .player-pool-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .player-pool-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+    }
+    .player-pool-card.cat-border-c0 { border-top: 4px solid #6366f1; }
+    .player-pool-card.cat-border-c1 { border-top: 4px solid #10b981; }
+    .player-pool-card.cat-border-c2 { border-top: 4px solid #f59e0b; }
+    .player-pool-card.cat-border-c3 { border-top: 4px solid #ec4899; }
+    .player-pool-card.cat-border-c4 { border-top: 4px solid #06b6d4; }
+    .player-pool-card.cat-border-c5 { border-top: 4px solid #8b5cf6; }
+
+    .player-pool-card.is-sold {
+      opacity: 0.88;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.5) 100%);
+    }
+    .player-pool-card.is-unsold {
+      opacity: 0.78;
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .player-card-top {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .player-avatar-wrap {
+      position: relative;
+      width: 68px;
+      height: 68px;
+      flex-shrink: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    .player-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .player-pool-card:hover .player-avatar-img {
+      transform: scale(1.06);
+    }
+
+    .player-card-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .player-card-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .player-category-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* Distinctive Category Badge Palettes */
+    .cat-badge-c0 { background: rgba(99, 102, 241, 0.16); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+    .cat-badge-c1 { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .cat-badge-c2 { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .cat-badge-c3 { background: rgba(236, 72, 153, 0.16); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+    .cat-badge-c4 { background: rgba(6, 182, 212, 0.16); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.4); }
+    .cat-badge-c5 { background: rgba(139, 92, 246, 0.16); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4); }
+
+    .player-pricing-box {
+      background: rgba(3, 7, 18, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .pricing-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pricing-lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+    .pricing-val {
+      font-family: var(--font-mono);
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .pricing-val.base { color: #cbd5e1; }
+    .pricing-val.increment { color: #38bdf8; display: flex; align-items: center; gap: 3px; }
+    .pricing-val.active-bid { color: #10b981; }
+
+    .player-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .player-card-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .player-card-actions {
+      display: flex;
+      gap: 6px;
     }
 
     /* Fixtures */
@@ -1321,10 +1491,193 @@
     .toast.impact { border-color: rgba(192, 38, 211, 0.5); background: linear-gradient(135deg, rgba(30, 27, 75, 0.95), rgba(88, 28, 135, 0.85)); }
     .toast.rtm { border-color: rgba(239, 68, 68, 0.5); background: linear-gradient(135deg, rgba(69, 10, 10, 0.95), rgba(124, 45, 18, 0.85)); }
 
+    /* =========================================================
+       HAMMER SWING & SOLD CELEBRATION OVERLAY
+       ========================================================= */
+    .hammer-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.94) 0%, rgba(3, 7, 18, 0.98) 100%);
+      backdrop-filter: blur(16px);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .hammer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .hammer-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .hammer-graphic-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .hammer-graphic {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 35px rgba(245, 158, 11, 0.6));
+      transform-origin: 80% 85%;
+      transform: rotate(-45deg);
+    }
+    .hammer-overlay.active .hammer-graphic {
+      animation: hammerSwingStrike 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes hammerSwingStrike {
+      0% {
+        transform: rotate(-65deg) scale(0.85);
+      }
+      35% {
+        transform: rotate(32deg) scale(1.18);
+      }
+      50% {
+        transform: rotate(-10deg) scale(1.02);
+      }
+      70% {
+        transform: rotate(12deg) scale(1.05);
+      }
+      85% {
+        transform: rotate(-3deg) scale(1);
+      }
+      100% {
+        transform: rotate(0deg) scale(1);
+      }
+    }
+    .hammer-impact-flash {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.4) 50%, transparent 75%);
+      bottom: 10px;
+      right: 25px;
+      opacity: 0;
+      transform: scale(0.3);
+      pointer-events: none;
+    }
+    .hammer-overlay.active .hammer-impact-flash {
+      animation: hammerFlashShockwave 0.8s 0.35s ease-out forwards;
+    }
+    @keyframes hammerFlashShockwave {
+      0% {
+        opacity: 1;
+        transform: scale(0.4);
+      }
+      50% {
+        opacity: 0.85;
+        transform: scale(1.7);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(2.4);
+      }
+    }
+    .sold-stamp-banner {
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+      border: 4px solid #ef4444;
+      padding: 0.4rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 50px rgba(239, 68, 68, 0.5), inset 0 0 30px rgba(239, 68, 68, 0.2);
+      text-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+      transform: rotate(-8deg) scale(0);
+      opacity: 0;
+    }
+    .hammer-overlay.active .sold-stamp-banner {
+      animation: stampSlam 0.5s 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+    }
+    @keyframes stampSlam {
+      0% {
+        transform: rotate(-25deg) scale(2.5);
+        opacity: 0;
+      }
+      70% {
+        transform: rotate(-6deg) scale(0.92);
+        opacity: 1;
+      }
+      100% {
+        transform: rotate(-8deg) scale(1);
+        opacity: 1;
+      }
+    }
+    .sold-player-card {
+      margin-top: 1.8rem;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.2);
+      border-radius: 20px;
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .hammer-overlay.active .sold-player-card {
+      animation: soldCardPop 0.4s 0.45s ease-out forwards;
+    }
+    @keyframes soldCardPop {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .sold-player-card .sold-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .sold-player-card .sold-team-meta {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sold-player-card .sold-team-badge {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .sold-player-card .sold-price-badge {
+      font-size: 1.6rem;
+      font-weight: 900;
+      font-family: var(--font-mono);
+      color: #10b981;
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      margin-top: 4px;
+    }
+
     @media (max-width: 640px) {
       header.app-header { flex-direction: column; align-items: stretch; }
       .login-topbar { position: relative; top: 0; left: 0; right: 0; margin-bottom: 1.5rem; }
       .login-hero-card { margin-top: 0; }
+      .sold-stamp-banner { font-size: 2.2rem; padding: 0.3rem 1.2rem; }
+      .sold-player-card { padding: 1rem 1.5rem; }
+      .sold-player-card .sold-name { font-size: 1.3rem; }
+      .hammer-graphic-wrap { width: 160px; height: 160px; }
+      .hammer-graphic { width: 130px; height: 130px; }
     }
   </style>
 </head>
@@ -1522,9 +1875,10 @@
           </span>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-          <button class="btn-secondary" style="flex: 1;" onclick="setServerUrlToCurrentOrigin()">Use Current Origin</button>
-          <button class="btn-secondary" style="flex: 1;" onclick="setServerUrlToDefaultPort()">Default (3000)</button>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+          <button class="btn-primary" style="flex: 1; min-width: 140px; font-size: 0.8rem;" onclick="setServerUrlToRender()">Render Cloud</button>
+          <button class="btn-secondary" style="flex: 1; min-width: 130px; font-size: 0.8rem;" onclick="setServerUrlToCurrentOrigin()">Current Origin</button>
+          <button class="btn-secondary" style="flex: 1; min-width: 110px; font-size: 0.8rem;" onclick="setServerUrlToDefaultPort()">Localhost (3000)</button>
         </div>
       </div>
       <div class="modal-footer">
@@ -1869,8 +2223,18 @@
               <h2 style="font-size: 1.5rem; font-weight: 800;">Players Pool & Categories</h2>
               <p style="color: var(--text-muted); font-size: 0.88rem;">Search players, inspect bases, and track auction ownership.</p>
             </div>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <input type="text" id="catalog-search" class="form-control no-icon" style="width: 240px; padding: 8px 12px;" placeholder="🔍 Search player..." oninput="renderCatalogTable()" />
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <!-- View Mode Toggle (Cards vs Table) -->
+              <div style="display: flex; background: rgba(0,0,0,0.4); padding: 3px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <button id="btn-catalog-view-cards" class="btn-secondary" style="padding: 6px 12px; font-size: 0.78rem; background: var(--accent-indigo); border-radius: 8px;" onclick="setCatalogDisplayMode('cards')">
+                  🎴 Cards
+                </button>
+                <button id="btn-catalog-view-table" class="btn-secondary" style="padding: 6px 12px; font-size: 0.78rem; background: transparent; border: none; border-radius: 8px;" onclick="setCatalogDisplayMode('table')">
+                  📋 Table
+                </button>
+              </div>
+
+              <input type="text" id="catalog-search" class="form-control no-icon" style="width: 220px; padding: 8px 12px;" placeholder="🔍 Search player..." oninput="renderCatalogTable()" />
               <select id="catalog-status-filter" class="form-control no-icon" style="width: auto; padding: 8px 12px;" onchange="renderCatalogTable()">
                 <option value="all">All Statuses</option>
                 <option value="available">Available Only</option>
@@ -1882,13 +2246,18 @@
 
           <div id="catalog-category-pills" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem;"></div>
 
-          <div style="overflow-x: auto;">
+          <!-- Cards Layout Container -->
+          <div id="catalog-cards-container" class="players-cards-grid"></div>
+
+          <!-- Traditional Table Layout Container -->
+          <div id="catalog-table-container" style="overflow-x: auto; display: none;">
             <table class="data-table">
               <thead>
                 <tr>
                   <th>Player</th>
                   <th>Category</th>
                   <th>Base</th>
+                  <th>Increment</th>
                   <th>Status</th>
                   <th>Acquired By</th>
                   <th>Price Paid</th>
@@ -2071,6 +2440,29 @@
   <!-- Toast Notification Stack -->
   <div id="toast-container"></div>
 
+  <!-- Fullscreen Hammer Strike & Sold Celebration Overlay -->
+  <div id="hammer-overlay" class="hammer-overlay">
+    <div class="hammer-box">
+      <div class="hammer-graphic-wrap">
+        <div class="hammer-impact-flash"></div>
+        <img id="hammer-img" 
+             src="hammer.png" 
+             class="hammer-graphic" 
+             alt="Auction Gavel" 
+             onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><path d=\'M20 70 L35 85 L85 35 L70 20 Z\' fill=\'%23f59e0b\' stroke=\'%23fbbf24\' stroke-width=\'2\'/><rect x=\'15\' y=\'65\' width=\'70\' height=\'12\' rx=\'6\' transform=\'rotate(45 50 71)\' fill=\'%23b45309\'/><path d=\'M60 25 L80 5 L95 20 L75 40 Z\' fill=\'%23d97706\'/></svg>';" />
+      </div>
+      <div class="sold-stamp-banner">SOLD!</div>
+      <div id="sold-player-card" class="sold-player-card">
+        <div id="sold-player-name" class="sold-name">Player Name</div>
+        <div class="sold-team-meta">
+          <span>Acquired by</span>
+          <span id="sold-team-name" class="sold-team-badge">Team Name</span>
+        </div>
+        <div id="sold-price" class="sold-price-badge">৳0</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /**
      * ADVANCED CLIENT CORE & SOUND SYNTHESIZER
@@ -2125,6 +2517,21 @@
       }
       playGavel() {
         if (!this.enabled) return;
+        // Attempt to play hammer.wav file if available
+        try {
+          const hammerAudio = new Audio('hammer.wav');
+          const playPromise = hammerAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Graceful fallback to synthesized gavel strike if hammer.wav is missing/blocked
+              this.synthesizeGavel();
+            });
+          }
+        } catch (e) {
+          this.synthesizeGavel();
+        }
+      }
+      synthesizeGavel() {
         this.init();
         if (!this.ctx) return;
         const strike = (delay) => {
@@ -2225,14 +2632,16 @@
     }
 
     // Server Detection & Reconnection
+    const DEFAULT_SERVER_URL = 'https://auction-socket-39c2.onrender.com';
+
     function getStoredServerUrl() {
       const saved = localStorage.getItem('AUCTION_SERVER_URL');
       if (saved) return saved;
-      // In production deployment on same origin:
-      if (window.location && window.location.origin && !window.location.origin.startsWith('file:')) {
+      // In production deployment on same origin (if served from express backend):
+      if (window.location && window.location.origin && !window.location.origin.startsWith('file:') && !window.location.origin.includes('localhost')) {
         return window.location.origin;
       }
-      return 'http://localhost:3000';
+      return DEFAULT_SERVER_URL;
     }
 
     function initSocket(customUrl) {
@@ -2346,6 +2755,10 @@
         SOUNDS.playGavel();
         const teamObj = (STATE.teams || []).find(t => t.id === payload.teamId);
         const teamName = teamObj ? teamObj.name : payload.teamId;
+        
+        // Trigger hammer swinging visual & audio celebration
+        triggerHammerCelebration(payload.name, teamName, payload.price);
+
         showToast(`🔨 SOLD! ${payload.name} acquired by ${teamName} for ৳${payload.price}!`, 'sale');
         renderActivePlayerStage(null);
         renderCurrentView();
@@ -3040,28 +3453,74 @@
       }).join('');
     }
 
-    // Catalog Table
+    // Catalog Display Controller (Cards vs Table)
+    let catalogDisplayMode = 'cards';
+
+    function setCatalogDisplayMode(mode) {
+      catalogDisplayMode = mode;
+      const cardsBtn = document.getElementById('btn-catalog-view-cards');
+      const tableBtn = document.getElementById('btn-catalog-view-table');
+      const cardsContainer = document.getElementById('catalog-cards-container');
+      const tableContainer = document.getElementById('catalog-table-container');
+
+      if (mode === 'cards') {
+        if (cardsBtn) { cardsBtn.style.background = 'var(--accent-indigo)'; cardsBtn.style.border = 'none'; }
+        if (tableBtn) { tableBtn.style.background = 'transparent'; }
+        if (cardsContainer) cardsContainer.style.display = 'grid';
+        if (tableContainer) tableContainer.style.display = 'none';
+      } else {
+        if (tableBtn) { tableBtn.style.background = 'var(--accent-indigo)'; tableBtn.style.border = 'none'; }
+        if (cardsBtn) { cardsBtn.style.background = 'transparent'; }
+        if (cardsContainer) cardsContainer.style.display = 'none';
+        if (tableContainer) tableContainer.style.display = 'block';
+      }
+      renderCatalogTable();
+    }
+
+    // Helper: category color index mapping
+    function getCategoryColorIndex(categoryId, categories) {
+      const idx = (categories || []).findIndex(c => c.id === categoryId);
+      return idx >= 0 ? (idx % 6) : 0;
+    }
+
+    // Catalog Table & Cards Renderer
     function renderCatalogTable() {
       const search = (document.getElementById('catalog-search').value || '').toLowerCase();
       const statusFilter = document.getElementById('catalog-status-filter').value;
       const catFilter = SESSION.activeCategoryFilter;
       const tbody = document.getElementById('catalog-tbody');
+      const cardsContainer = document.getElementById('catalog-cards-container');
       const pillsContainer = document.getElementById('catalog-category-pills');
 
       const categories = STATE.categories || [];
 
-      pillsContainer.innerHTML = `
-        <span class="btn-secondary" style="padding:4px 10px;font-size:0.75rem;${catFilter === 'all' ? 'background:var(--accent-indigo);' : ''}" onclick="setCategoryFilter('all')">All</span>
-        ${categories.map(c => `
-          <span class="btn-secondary" style="padding:4px 10px;font-size:0.75rem;${catFilter === c.id ? 'background:var(--accent-indigo);' : ''}" onclick="setCategoryFilter('${c.id}')">${c.name}</span>
-        `).join('')}
-      `;
+      if (pillsContainer) {
+        pillsContainer.innerHTML = `
+          <button class="btn-secondary" style="padding:5px 12px;font-size:0.75rem;border-radius:20px;${catFilter === 'all' ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent;' : ''}" onclick="setCategoryFilter('all')">All Categories</button>
+          ${categories.map((c, i) => {
+            const colorIdx = i % 6;
+            const isSelected = catFilter === c.id;
+            return `
+              <button class="btn-secondary" style="padding:5px 12px;font-size:0.75rem;border-radius:20px;display:inline-flex;align-items:center;gap:5px;${isSelected ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent;' : ''}" onclick="setCategoryFilter('${c.id}')">
+                <span class="cat-badge-c${colorIdx}" style="padding:1px 6px;border-radius:4px;font-size:0.68rem;">+৳${c.increment || 10}</span>
+                <span>${c.name}</span>
+              </button>
+            `;
+          }).join('')}
+        `;
+      }
 
       let allPlayers = [];
       categories.forEach(cat => {
         const catPlayers = (STATE.playersSnapshot && STATE.playersSnapshot[cat.id]) || [];
         catPlayers.forEach(p => {
-          allPlayers.push({ ...p, categoryId: cat.id, categoryName: cat.name, base: cat.base, increment: cat.increment });
+          allPlayers.push({ 
+            ...p, 
+            categoryId: cat.id, 
+            categoryName: cat.name, 
+            base: Number(cat.base) || 0, 
+            increment: Number(cat.increment) || 10 
+          });
         });
       });
 
@@ -3080,56 +3539,148 @@
         return true;
       });
 
+      // No results state
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">No matching players found.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No matching players found.</td></tr>`;
+        if (cardsContainer) cardsContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem 1rem;background:rgba(0,0,0,0.2);border-radius:16px;">🔍 No matching players found in this category or search filter.</div>`;
         return;
       }
 
-      tbody.innerHTML = filtered.map(p => {
-        const key = `${p.categoryId}:${p.name}`;
-        let buyerTeam = null;
-        (STATE.teams || []).forEach(t => {
-          if (t.purchases && t.purchases[p.categoryId] === p.name) buyerTeam = t;
-        });
+      // 1. Render Table Rows
+      if (tbody) {
+        tbody.innerHTML = filtered.map(p => {
+          const key = `${p.categoryId}:${p.name}`;
+          let buyerTeam = null;
+          (STATE.teams || []).forEach(t => {
+            if (t.purchases && t.purchases[p.categoryId] === p.name) buyerTeam = t;
+          });
 
-        const isUnsold = !!(STATE.unsoldPlayers && STATE.unsoldPlayers[key]);
-        const pricePaid = STATE.soldPrices && STATE.soldPrices[key];
-        const isDirect = !!(STATE.directSigns && STATE.directSigns[key]);
-        const isRTM = !!(STATE.rtmEvents && STATE.rtmEvents[key]);
+          const isUnsold = !!(STATE.unsoldPlayers && STATE.unsoldPlayers[key]);
+          const currentBid = STATE.activeBids && STATE.activeBids[key];
+          const pricePaid = STATE.soldPrices && STATE.soldPrices[key];
+          const isDirect = !!(STATE.directSigns && STATE.directSigns[key]);
+          const isRTM = !!(STATE.rtmEvents && STATE.rtmEvents[key]);
+          const colorIdx = getCategoryColorIndex(p.categoryId, categories);
 
-        let statusBadge = '<span class="badge-status" style="color:var(--accent-green);">Available</span>';
-        if (buyerTeam) {
-          statusBadge = `<span class="badge-status" style="color:#38bdf8;">Sold ${isDirect ? '(Direct)' : isRTM ? '(RTM)' : ''}</span>`;
-        } else if (isUnsold) {
-          statusBadge = '<span class="badge-status" style="color:var(--accent-red);">Unsold</span>';
-        }
+          let statusBadge = '<span class="badge-status" style="color:var(--accent-green);">Available</span>';
+          if (buyerTeam) {
+            statusBadge = `<span class="badge-status" style="color:#38bdf8;">Sold ${isDirect ? '(Direct)' : isRTM ? '(RTM)' : ''}</span>`;
+          } else if (isUnsold) {
+            statusBadge = '<span class="badge-status" style="color:var(--accent-red);">Unsold</span>';
+          }
 
-        const adminCell = SESSION.role === 'admin' ? `
-          <td>
-            <div style="display:flex;gap:4px;">
-              <button class="btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminStagePlayer('${p.categoryId}', '${p.name}')">Stage</button>
-              <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${p.categoryId}', '${p.name}')">Reset</button>
-            </div>
-          </td>
-        ` : '';
-
-        return `
-          <tr>
+          const adminCell = SESSION.role === 'admin' ? `
             <td>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <img src="${p.image || ''}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;" onerror="handleImageFallback(this)" />
-                <strong>${p.name}</strong>
+              <div style="display:flex;gap:4px;">
+                <button class="btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminStagePlayer('${p.categoryId}', '${p.name}')">Stage</button>
+                <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${p.categoryId}', '${p.name}')">Reset</button>
               </div>
             </td>
-            <td><span class="badge-category">${p.categoryName}</span></td>
-            <td style="font-family:var(--font-mono);">৳${p.base}</td>
-            <td>${statusBadge}</td>
-            <td>${buyerTeam ? buyerTeam.name : '—'}</td>
-            <td style="font-family:var(--font-mono);">${pricePaid ? `৳${pricePaid}` : '—'}</td>
-            ${adminCell}
-          </tr>
-        `;
-      }).join('');
+          ` : '';
+
+          return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <img src="${p.image || ''}" style="width:34px;height:34px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="handleImageFallback(this)" />
+                  <strong>${p.name}</strong>
+                </div>
+              </td>
+              <td><span class="player-category-tag cat-badge-c${colorIdx}">${p.categoryName}</span></td>
+              <td style="font-family:var(--font-mono);font-weight:700;">৳${p.base}</td>
+              <td><span style="font-family:var(--font-mono);color:#38bdf8;font-weight:700;">+৳${p.increment}</span></td>
+              <td>${statusBadge}</td>
+              <td>${buyerTeam ? buyerTeam.name : '—'}</td>
+              <td style="font-family:var(--font-mono);font-weight:800;color:${pricePaid ? '#10b981' : currentBid ? '#38bdf8' : 'inherit'};">
+                ${pricePaid ? `৳${pricePaid}` : currentBid ? `৳${currentBid} (Live)` : '—'}
+              </td>
+              ${adminCell}
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. Render Rich Player Cards Grid
+      if (cardsContainer) {
+        cardsContainer.innerHTML = filtered.map(p => {
+          const key = `${p.categoryId}:${p.name}`;
+          let buyerTeam = null;
+          (STATE.teams || []).forEach(t => {
+            if (t.purchases && t.purchases[p.categoryId] === p.name) buyerTeam = t;
+          });
+
+          const isUnsold = !!(STATE.unsoldPlayers && STATE.unsoldPlayers[key]);
+          const currentBid = STATE.activeBids && STATE.activeBids[key];
+          const pricePaid = STATE.soldPrices && STATE.soldPrices[key];
+          const isDirect = !!(STATE.directSigns && STATE.directSigns[key]);
+          const isRTM = !!(STATE.rtmEvents && STATE.rtmEvents[key]);
+          const colorIdx = getCategoryColorIndex(p.categoryId, categories);
+
+          const cardStateClass = buyerTeam ? 'is-sold' : isUnsold ? 'is-unsold' : '';
+
+          let statusTag = '<span style="color:#10b981;display:flex;align-items:center;gap:4px;">🟢 Available</span>';
+          if (buyerTeam) {
+            statusTag = `<span style="color:#38bdf8;display:flex;align-items:center;gap:4px;">🏆 Sold to ${buyerTeam.name} ${isDirect ? '(Direct)' : isRTM ? '(RTM)' : ''}</span>`;
+          } else if (isUnsold) {
+            statusTag = '<span style="color:#ef4444;display:flex;align-items:center;gap:4px;">❌ Unsold</span>';
+          }
+
+          // Active or Final Bidding Amount
+          let displayBiddingAmount = '৳' + p.base;
+          let biddingLabel = 'Base Price';
+          if (pricePaid) {
+            displayBiddingAmount = '৳' + pricePaid;
+            biddingLabel = 'Sold Price';
+          } else if (currentBid) {
+            displayBiddingAmount = '৳' + currentBid;
+            biddingLabel = 'Current Highest Bid';
+          }
+
+          const adminActionButtons = SESSION.role === 'admin' ? `
+            <div class="player-card-actions">
+              <button class="btn-primary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminStagePlayer('${p.categoryId}', '${p.name}')">Stage</button>
+              <button class="btn-secondary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${p.categoryId}', '${p.name}')">Reset</button>
+            </div>
+          ` : '';
+
+          return `
+            <div class="player-pool-card cat-border-c${colorIdx} ${cardStateClass}">
+              <div class="player-card-top">
+                <div class="player-avatar-wrap">
+                  <img src="${p.image || ''}" class="player-avatar-img" alt="${p.name}" onerror="handleImageFallback(this)" />
+                </div>
+                <div class="player-card-meta">
+                  <h4 class="player-card-name" title="${p.name}">${p.name}</h4>
+                  <span class="player-category-tag cat-badge-c${colorIdx}">
+                    🏷️ ${p.categoryName}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Pricing & Bid Increments Details -->
+              <div class="player-pricing-box">
+                <div class="pricing-item">
+                  <span class="pricing-lbl">${biddingLabel}</span>
+                  <span class="pricing-val ${pricePaid ? 'active-bid' : 'base'}">${displayBiddingAmount}</span>
+                </div>
+                <div class="pricing-item">
+                  <span class="pricing-lbl">Bid Increment</span>
+                  <span class="pricing-val increment">
+                    <span>⚡</span> +৳${p.increment}
+                  </span>
+                </div>
+              </div>
+
+              <div class="player-card-footer">
+                <div class="player-card-status">
+                  ${statusTag}
+                </div>
+                ${adminActionButtons}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function setCategoryFilter(catId) {
@@ -3496,6 +4047,9 @@
     function closeServerConfigModal() {
       document.getElementById('server-config-modal').classList.remove('open');
     }
+    function setServerUrlToRender() {
+      document.getElementById('server-url-input').value = 'https://auction-socket-39c2.onrender.com';
+    }
     function setServerUrlToCurrentOrigin() {
       if (window.location && window.location.origin) {
         document.getElementById('server-url-input').value = window.location.origin;
@@ -3520,6 +4074,36 @@
       SOUNDS.enabled = !SOUNDS.enabled;
       document.getElementById('arena-sound-btn').textContent = SOUNDS.enabled ? '🔊' : '🔇';
       showToast(SOUNDS.enabled ? "Sound Synthesizer Active" : "Sound Muted", "normal");
+    }
+
+    // Hammer Swing & Sold Celebration Controller
+    let hammerTimeout = null;
+    function triggerHammerCelebration(playerName, teamName, price) {
+      const overlay = document.getElementById('hammer-overlay');
+      const nameEl = document.getElementById('sold-player-name');
+      const teamEl = document.getElementById('sold-team-name');
+      const priceEl = document.getElementById('sold-price');
+      const hammerImg = document.getElementById('hammer-img');
+
+      if (!overlay) return;
+
+      if (nameEl) nameEl.textContent = playerName || 'Player';
+      if (teamEl) teamEl.textContent = teamName || 'Team';
+      if (priceEl) priceEl.textContent = '৳' + Number(price || 0).toLocaleString();
+
+      // Reset animation
+      if (hammerImg) {
+        hammerImg.style.animation = 'none';
+        void hammerImg.offsetWidth; // Trigger reflow
+        hammerImg.style.animation = '';
+      }
+
+      overlay.classList.add('active');
+
+      if (hammerTimeout) clearTimeout(hammerTimeout);
+      hammerTimeout = setTimeout(() => {
+        overlay.classList.remove('active');
+      }, 3400);
     }
 
     function showToast(msg, type = 'normal') {

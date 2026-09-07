@@ -3268,11 +3268,14 @@
 
     function getStoredServerUrl() {
       const saved = localStorage.getItem('AUCTION_SERVER_URL');
-      if (saved) return saved;
-      // In production deployment on same origin (if served from express backend):
-      if (window.location && window.location.origin && !window.location.origin.startsWith('file:') && !window.location.origin.includes('localhost')) {
+      if (saved && saved.trim()) return saved.trim();
+
+      // If frontend is served directly by the backend itself on Render, use same origin
+      if (window.location && window.location.origin && window.location.origin.includes('onrender.com')) {
         return window.location.origin;
       }
+
+      // Default: Always connect to the live Render cloud backend
       return DEFAULT_SERVER_URL;
     }
 
@@ -3321,10 +3324,14 @@
       updateConnectionStatus('connecting', 'Connecting...');
 
       try {
+        console.log('[Socket] Connecting to live server:', targetUrl);
         socket = io(targetUrl, {
-          reconnectionAttempts: 10,
-          timeout: 10000,
-          transports: ['websocket', 'polling']
+          reconnectionAttempts: 25,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          timeout: 20000,
+          transports: ['polling', 'websocket'],
+          upgrade: true
         });
         bindSocketEvents();
       } catch (err) {
@@ -3395,8 +3402,9 @@
         updateConnectionStatus('offline', 'Disconnected');
       });
 
-      socket.on('connect_error', () => {
-        updateConnectionStatus('offline', 'Offline');
+      socket.on('connect_error', (err) => {
+        console.warn('[Socket] Connection attempt failed:', err ? err.message : err);
+        updateConnectionStatus('offline', 'Offline (Retrying...)');
         const loader = document.getElementById('app-loading-screen');
         if (loader) hideAppLoader();
       });
@@ -5345,3 +5353,4 @@
   </script>
 </body>
 </html>
+

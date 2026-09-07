@@ -2722,9 +2722,9 @@
             <div style="display: flex; gap: 8px;">
               <div class="input-wrapper" style="flex: 1;">
                 <span class="input-icon">🌐</span>
-                <input type="text" id="login-team-host" class="form-control" value="" placeholder="Enter Host ID (e.g. bpl, ipl, admin)" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyHostId();}" oninput="handleHostIdInput(this.value)" autocomplete="off" />
+                <input type="text" id="login-team-host" class="form-control" value="" placeholder="Enter Host ID (e.g. bpl, ipl, admin)" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyHostId(undefined, true);}" oninput="handleHostIdInput(this.value)" autocomplete="off" />
               </div>
-              <button type="button" class="btn-primary" style="padding: 0 16px; font-size: 0.85rem; white-space: nowrap;" onclick="verifyHostId()">
+              <button type="button" class="btn-primary" style="padding: 0 16px; font-size: 0.85rem; white-space: nowrap;" onclick="verifyHostId(undefined, true)">
                 Verify Host 🔍
               </button>
             </div>
@@ -6127,8 +6127,12 @@
     let currentVerifiedHost = null;
 
     function applyVerifiedHostData({ hostId, teams, state }) {
-      currentVerifiedHost = hostId;
-      SESSION.hostId = hostId;
+      const input = document.getElementById('login-team-host');
+      const currentInput = input ? input.value.trim() : '';
+      const displayHost = (currentInput && currentInput.toLowerCase() === (hostId || '').toLowerCase()) ? currentInput : hostId;
+
+      currentVerifiedHost = displayHost;
+      SESSION.hostId = displayHost;
       const status = document.getElementById('host-verify-status');
       const teamsSection = document.getElementById('login-teams-section');
 
@@ -6142,7 +6146,7 @@
 
       if (status) {
         const count = (teams || []).length;
-        status.innerHTML = `✅ <span style="color:var(--accent-green);font-weight:700;">Host "${hostId}" verified!</span> ${count} franchise${count === 1 ? '' : 's'} enrolled.`;
+        status.innerHTML = `✅ <span style="color:var(--accent-green);font-weight:700;">Host "${displayHost}" verified!</span> ${count} franchise${count === 1 ? '' : 's'} enrolled.`;
       }
       if (teamsSection) teamsSection.style.display = 'block';
 
@@ -6152,26 +6156,29 @@
       renderDashboardView();
       renderMiniStandings();
       hideLoginAlert();
-
-      // Synchronize socket room
-      if (socket && socket.connected) {
-        socket.emit('participant:connect', hostId);
-      }
     }
 
     function handleHostNotFound(hostId) {
+      const input = document.getElementById('login-team-host');
+      const currentInput = input ? input.value.trim() : '';
+      // If user typed something else in the meantime, ignore old stale not-found responses
+      if (currentInput && hostId && currentInput.toLowerCase() !== hostId.toLowerCase()) {
+        return;
+      }
+
+      const displayHost = currentInput || hostId;
       currentVerifiedHost = null;
       const status = document.getElementById('host-verify-status');
       const teamsSection = document.getElementById('login-teams-section');
 
       if (status) {
-        status.innerHTML = `❌ <span style="color:var(--accent-red);font-weight:700;">Host "${hostId}" not found.</span> Verify Host ID or register as new Manager.`;
+        status.innerHTML = `❌ <span style="color:var(--accent-red);font-weight:700;">Host "${displayHost}" not found.</span> Verify Host ID or register as new Manager.`;
       }
       if (teamsSection) teamsSection.style.display = 'none';
-      showLoginAlert(`Host "${hostId}" is not registered. Please check Host ID or register as new Manager.`, 'error');
+      showLoginAlert(`Host "${displayHost}" is not registered. Please check Host ID or register as new Manager.`, 'error');
     }
 
-    async function verifyHostId(hostOverride) {
+    async function verifyHostId(hostOverride, isExplicit = false) {
       const input = document.getElementById('login-team-host');
       const status = document.getElementById('host-verify-status');
       const teamsSection = document.getElementById('login-teams-section');
@@ -6181,7 +6188,7 @@
       if (!cleanHost) {
         if (status) status.innerHTML = 'Enter Host ID and verify to load franchises.';
         if (teamsSection) teamsSection.style.display = 'none';
-        showLoginAlert("Please enter a Host ID", "error");
+        if (isExplicit) showLoginAlert("Please enter a Host ID", "error");
         return;
       }
 
@@ -6193,42 +6200,33 @@
         status.innerHTML = '⚡ <span style="color:var(--accent-indigo);font-weight:600;">Verifying Host ID...</span>';
       }
 
-      // 1. Instant HTTP validation (fastest path: ~30-100ms directly from server in-memory cache)
+      // 1. Direct real-time WebSocket discovery (authoritative, works across all deployed backend versions)
+      SESSION.hostId = cleanHost;
+      if (socket && socket.connected) {
+        socket.emit('participant:connect', cleanHost);
+      } else {
+        initSocket();
+      }
+
+      // 2. High-speed HTTP accelerator (only consumes response if valid JSON, never falsely triggers not-found on 404 route)
       const baseUrl = getStoredServerUrl();
-      let httpHandled = false;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
         const res = await fetch(`${baseUrl}/api/verify-host/${encodeURIComponent(cleanHost)}`, {
           signal: controller.signal
         });
         clearTimeout(timeoutId);
 
-        if (res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('application/json')) {
           const data = await res.json();
           if (data && data.ok) {
-            httpHandled = true;
             applyVerifiedHostData(data);
-            return;
           }
-        } else if (res.status === 404) {
-          httpHandled = true;
-          const data = await res.json().catch(() => ({}));
-          handleHostNotFound(data.hostId || cleanHost);
-          return;
         }
       } catch (err) {
-        // Fallback to socket emit below if fetch fails
-      }
-
-      // 2. WebSocket Fallback
-      if (!httpHandled) {
-        SESSION.hostId = cleanHost;
-        if (socket && socket.connected) {
-          socket.emit('participant:connect', cleanHost);
-        } else {
-          initSocket();
-        }
+        // Fallback handled seamlessly by the WebSocket above
       }
     }
 
@@ -6244,8 +6242,8 @@
         return;
       }
       hostInputDebounceTimer = setTimeout(() => {
-        verifyHostId(clean);
-      }, 400);
+        verifyHostId(clean, false);
+      }, 500);
     }
 
     function renderLoginTeamsGrid(teams) {

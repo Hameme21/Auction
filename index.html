@@ -679,48 +679,60 @@
       }
     }
 
-    /* Animated Circle Budget Gauge */
+    /* Animated Circle Budget Gauge (Fixed Alignment) */
     .budget-circle-wrap {
       position: relative;
-      width: 105px;
-      height: 105px;
+      width: 78px;
+      height: 78px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .budget-circle-svg {
-      width: 100%;
-      height: 100%;
+      width: 78px;
+      height: 78px;
       transform: rotate(-90deg);
     }
     .budget-circle-bg {
       fill: none;
       stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 8;
+      stroke-width: 7;
     }
-    .budget-circle-fill {
+    .budget-circle-bar, .budget-circle-fill {
       fill: none;
-      stroke-width: 8;
+      stroke-width: 7;
       stroke-linecap: round;
       stroke-dasharray: 283;
       stroke-dashoffset: 0;
       transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .budget-circle-pct {
+    .budget-circle-content {
       position: absolute;
-      font-family: var(--font-mono);
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #fff;
-      text-align: center;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
     }
-    .budget-circle-pct span {
-      display: block;
+    .budget-circle-pct {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .budget-circle-sub {
       font-size: 0.58rem;
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+      line-height: 1.1;
     }
 
     .franchise-budget-card {
@@ -2704,53 +2716,61 @@
 
         <!-- PORTAL 1: FRANCHISE TEAM -->
         <div id="portal-team">
+          <!-- Step 1: Host ID Entry & Verification -->
           <div class="form-group">
-            <label>Host ID</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🌐</span>
-              <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin" oninput="handleHostIdInput(this.value)" />
+            <label>Host ID (League Domain)</label>
+            <div style="display: flex; gap: 8px;">
+              <div class="input-wrapper" style="flex: 1;">
+                <span class="input-icon">🌐</span>
+                <input type="text" id="login-team-host" class="form-control" value="admin" placeholder="e.g. admin, bpl, ipl" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyHostId();}" />
+              </div>
+              <button type="button" class="btn-primary" style="padding: 0 16px; font-size: 0.85rem; white-space: nowrap;" onclick="verifyHostId()">
+                Verify Host 🔍
+              </button>
+            </div>
+            <div id="host-verify-status" style="font-size: 0.78rem; margin-top: 5px; color: var(--text-muted);">
+              Enter Host ID and verify to load franchises.
             </div>
           </div>
 
-          <!-- Auto-populated Franchise Team Cards -->
-          <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label style="margin-bottom: 0;">Select Franchise Team</label>
-              <span id="login-teams-count-badge" style="font-size: 0.74rem; color: var(--accent-indigo); font-weight: 700;">Loading teams...</span>
+          <!-- Step 2: Auto-populated Franchise Team Cards (Revealed after Host Verification) -->
+          <div id="login-teams-section" style="display: none;">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="margin-bottom: 0;">Select Your Franchise</label>
+                <span id="login-teams-count-badge" style="font-size: 0.74rem; color: var(--accent-indigo); font-weight: 700;">0 Teams Available</span>
+              </div>
+              <input type="hidden" id="login-team-id-input" value="" />
+              <div id="login-teams-grid" class="login-teams-grid"></div>
             </div>
-            <input type="hidden" id="login-team-id-input" value="" />
-            <div id="login-teams-grid" class="login-teams-grid">
-              <div style="text-align: center; color: var(--text-muted); padding: 1.25rem; font-size: 0.85rem;">
-                Fetching franchises under this Host ID...
+
+            <!-- Selected Franchise Confirmation Banner -->
+            <div id="login-selected-team-banner" style="display: none; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 10px 14px; margin-bottom: 1.25rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div id="login-selected-logo" class="team-logo-circle" style="width: 38px; height: 38px; font-size: 0.8rem;"></div>
+                <div>
+                  <div id="login-selected-name" style="font-weight: 800; font-size: 0.95rem; color: #fff;">Selected Team</div>
+                  <div id="login-selected-id" style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">ID: ---</div>
+                </div>
+              </div>
+              <span style="font-size: 0.75rem; background: var(--accent-indigo); color:#fff; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Selected</span>
+            </div>
+
+            <!-- Step 3: Password Entry -->
+            <div class="form-group" id="login-password-group" style="display: none;">
+              <label id="login-password-label">Franchise Password</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="login-team-password" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();submitFranchiseLogin();}" />
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-team-password', this)">👁️</button>
               </div>
             </div>
-          </div>
 
-          <!-- Selected Franchise Indicator -->
-          <div id="login-selected-team-banner" style="display: none; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 10px 14px; margin-bottom: 1.25rem; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div id="login-selected-logo" class="team-logo-circle" style="width: 38px; height: 38px; font-size: 0.8rem;"></div>
-              <div>
-                <div id="login-selected-name" style="font-weight: 800; font-size: 0.95rem; color: #fff;">Selected Team</div>
-                <div id="login-selected-id" style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">ID: ---</div>
-              </div>
-            </div>
-            <span style="font-size: 0.75rem; background: var(--accent-indigo); color:#fff; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Selected</span>
+            <button class="btn-submit-login primary" id="btn-submit-team-login" onclick="submitFranchiseLogin()">
+              <span>Enter Bidding Floor</span>
+              <span>⚡</span>
+            </button>
           </div>
-
-          <div class="form-group" id="login-password-group" style="display: none;">
-            <label id="login-password-label">Franchise Password</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="login-team-password" class="form-control" placeholder="••••••••" />
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-team-password', this)">👁️</button>
-            </div>
-          </div>
-
-          <button class="btn-submit-login primary" id="btn-submit-team-login" onclick="submitFranchiseLogin()">
-            <span>Enter Bidding Floor</span>
-            <span>⚡</span>
-          </button>
         </div>
 
         <!-- PORTAL 2: LEAGUE MANAGER (ADMIN) -->
@@ -3142,14 +3162,29 @@
                       <button type="button" class="btn-step-adjust plus" onclick="adminAdjustBid(1)" title="Increase Bid by Step">
                         <span>➕</span> +Step
                       </button>
-                      <div style="display: flex; gap: 4px; margin-left: auto;">
-                        <button type="button" class="btn-step-adjust minus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(-10)">-৳10</button>
-                        <button type="button" class="btn-step-adjust plus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(10)">+৳10</button>
-                        <button type="button" class="btn-step-adjust plus" style="padding: 4px 8px; font-size: 0.75rem;" onclick="adminAdjustBidCustom(50)">+৳50</button>
-                      </div>
                     </div>
 
-                    <div class="admin-actions-grid">
+                    
+                    <!-- Time's Up Auctioneer Resolution Console -->
+                    <div id="admin-times-up-box" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 12px 16px; margin-bottom: 0.85rem;">
+                      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 800; font-size: 0.9rem; color: #fca5a5;">⏱️ Time's Up (No Live Bids)</span>
+                        <span style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono);">Auctioneer Discretion</span>
+                      </div>
+                      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                        Adjust price with +/- buttons, award directly to a franchise, or mark Unsold.
+                      </p>
+                      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <select id="admin-award-franchise-select" class="form-control no-icon" style="max-width: 180px; padding: 6px 10px; font-size: 0.82rem;"></select>
+                        <button type="button" class="btn-primary" style="background: var(--accent-green); padding: 7px 14px; font-size: 0.82rem;" onclick="adminAwardToSelectedFranchise()">
+                          🔨 Sell to Franchise
+                        </button>
+                        <button type="button" class="btn-danger" style="padding: 7px 14px; font-size: 0.82rem;" onclick="adminMarkUnsold()">
+                          ❌ Mark Unsold
+                        </button>
+                      </div>
+                    </div>
+<div class="admin-actions-grid">
                       <button class="btn-primary" style="background: var(--accent-green);" onclick="adminMarkSold(false)">
                         🔨 Mark SOLD to Top Bidder
                       </button>
@@ -3653,6 +3688,26 @@
         osc.start(now);
         osc.stop(now + 0.16);
       }
+            playRevealChime() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 fanfare
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          const startTime = now + idx * 0.07;
+          osc.frequency.setValueAtTime(freq, startTime);
+          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.38);
+        });
+      }
       playGavel() {
         if (!this.enabled) return;
         // Attempt to play hammer.wav file if available
@@ -4060,19 +4115,39 @@
       });
 
       // Team Discovery Response
-      socket.on('init:teams_available', ({ hostId, teams }) => {
-        if (teams && Array.isArray(teams) && teams.length > 0) {
+      socket.on('init:teams_available', ({ hostId, teams, notFound, state }) => {
+        const status = document.getElementById('host-verify-status');
+        const teamsSection = document.getElementById('login-teams-section');
+
+        if (notFound) {
+          currentVerifiedHost = null;
+          if (status) status.innerHTML = `❌ <span style="color:var(--accent-red);font-weight:700;">Host "${hostId}" not found.</span> Verify Host ID or register as new Manager.`;
+          if (teamsSection) teamsSection.style.display = 'none';
+          showLoginAlert(`Host "${hostId}" is not registered. Please check Host ID or register.`, 'error');
+          return;
+        }
+
+        currentVerifiedHost = hostId;
+        SESSION.hostId = hostId;
+        if (state) Object.assign(STATE, state);
+        if (teams && Array.isArray(teams)) {
           STATE.teams = teams;
           try {
             localStorage.setItem('AUCTION_TEAMS_STORE', JSON.stringify(teams));
           } catch (e) {}
-          renderTeamsGrid();
-          renderDashboardView();
-          renderMiniStandings();
         }
-        populateTeamDropdown(teams || STATE.teams);
-        renderLoginTeamsGrid(teams || STATE.teams);
-        showLoginAlert(`Found ${(teams || []).length} franchises under host "${hostId}"`, 'success');
+
+        if (status) {
+          status.innerHTML = `✅ <span style="color:var(--accent-green);font-weight:700;">Host "${hostId}" verified!</span> ${(teams || []).length} franchises enrolled.`;
+        }
+        if (teamsSection) teamsSection.style.display = 'block';
+
+        populateTeamDropdown(STATE.teams);
+        renderLoginTeamsGrid(STATE.teams);
+        renderTeamsGrid();
+        renderDashboardView();
+        renderMiniStandings();
+        hideLoginAlert();
       });
 
       // Admin Login Success
@@ -4375,7 +4450,7 @@
                   </svg>
                   <div class="budget-circle-content">
                     <span class="budget-circle-pct" style="color: ${strokeColor};">${remainingPct}%</span>
-                    <span class="budget-circle-sub">Purse</span>
+                    <span class="budget-circle-sub">PURSE</span>
                   </div>
                 </div>
 
@@ -4899,6 +4974,29 @@
       });
     }
 
+    
+    function adminAwardToSelectedFranchise() {
+      if (!STATE.currentActivePlayer || SESSION.role !== 'admin') return;
+      const select = document.getElementById('admin-award-franchise-select') || document.getElementById('admin-direct-team-select');
+      const teamId = select ? select.value : null;
+      if (!teamId) {
+        showToast("Please select a franchise to award the player to", "normal");
+        return;
+      }
+      const player = STATE.currentActivePlayer;
+      const key = `${player.category}:${player.name}`;
+      const currentPrice = Number(STATE.activeBids && STATE.activeBids[key]) || Number(player.currentPrice) || Number(player.base) || 0;
+
+      socket.emit('player:sold', {
+        category: player.category,
+        name: player.name,
+        price: currentPrice,
+        teamId: teamId,
+        isDirect: true
+      });
+      showToast(`Awarded ${player.name} to franchise ${teamId} @ ৳${currentPrice}`, 'sale');
+    }
+
     function adminDirectSign() {
       if (!STATE.currentActivePlayer) return;
       const select = document.getElementById('admin-direct-team-select');
@@ -5028,7 +5126,7 @@
             void codeText.offsetWidth; // Trigger GPU reflow
             codeText.classList.add('winner-lock');
           }
-          SOUNDS.playGavel();
+          SOUNDS.playRevealChime();
 
           setTimeout(() => {
             if (overlay) overlay.style.display = 'none';
@@ -5071,9 +5169,27 @@
       } else if (seconds <= 0) {
         caption.textContent = "TIME'S UP";
         caption.style.color = 'var(--accent-red)';
+        
+        // Show Time's Up Auctioneer Console if active player has no bids
+        if (STATE.currentActivePlayer && SESSION.role === 'admin') {
+          const p = STATE.currentActivePlayer;
+          const key = `${p.category}:${p.name}`;
+          const highBidder = STATE.activeBidders ? STATE.activeBidders[key] : null;
+          const timesUpBox = document.getElementById('admin-times-up-box');
+          if (timesUpBox) {
+            timesUpBox.style.display = (!highBidder || highBidder === 'ADMIN') ? 'block' : 'none';
+            // Populate award franchise select
+            const awardSelect = document.getElementById('admin-award-franchise-select');
+            if (awardSelect) {
+              awardSelect.innerHTML = (STATE.teams || []).map(t => `<option value="${t.id}">${t.name} (${t.id})</option>`).join('');
+            }
+          }
+        }
       } else {
         caption.textContent = 'LIVE SYNC';
         caption.style.color = 'var(--accent-green)';
+        const timesUpBox = document.getElementById('admin-times-up-box');
+        if (timesUpBox) timesUpBox.style.display = 'none';
       }
     }
 
@@ -5986,6 +6102,34 @@
     let hostInputDebounceTimer = null;
     let selectedLoginTeamId = null;
 
+    
+    let currentVerifiedHost = null;
+
+    function verifyHostId() {
+      const input = document.getElementById('login-team-host');
+      const status = document.getElementById('host-verify-status');
+      const teamsSection = document.getElementById('login-teams-section');
+      const hostId = input ? (input.value || 'admin').trim().toLowerCase() : 'admin';
+
+      if (!hostId) {
+        showLoginAlert("Please enter a valid Host ID", "error");
+        return;
+      }
+
+      if (status) {
+        status.innerHTML = '⏳ <span style="color:var(--accent-amber);">Verifying Host ID with server...</span>';
+      }
+
+      SESSION.hostId = hostId;
+      if (socket && socket.connected) {
+        socket.emit('participant:connect', hostId);
+      } else {
+        // Fallback check against cached store
+        if (status) status.innerHTML = '⚠️ Connecting to server...';
+        initSocket();
+      }
+    }
+
     function handleHostIdInput(hostId) {
       if (hostInputDebounceTimer) clearTimeout(hostInputDebounceTimer);
       hostInputDebounceTimer = setTimeout(() => {
@@ -6291,8 +6435,8 @@
         console.warn('Session restoration error', e);
       }
 
-      // Initial team grid render on login screen
-      renderLoginTeamsGrid(STATE.teams || []);
+      // Automatically verify initial host
+      verifyHostId();
 
       hideAppLoader();
       initSocket();
@@ -6302,4 +6446,3 @@
   </script>
 </body>
 </html>
-

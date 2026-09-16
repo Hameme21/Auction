@@ -1646,7 +1646,7 @@
               <span>Across all registered franchises</span>
             </div>
             <div class="w-full bg-slate-950/60 border border-white/10 h-2 rounded-full mt-space-sm overflow-hidden flex">
-              <div class="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full w-3/4"></div>
+              <div id="kpi-bar-turnover" class="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -1661,7 +1661,7 @@
             <div class="kpi-val font-stat-counter-xl text-stat-counter-xl bg-gradient-to-r from-indigo-200 via-sky-200 to-teal-200 bg-clip-text text-transparent font-extrabold" id="kpi-players-sold">0</div>
             <div class="kpi-sub text-xs text-on-surface-variant" id="kpi-sold-sub">0 available / 0 unsold</div>
             <div class="w-full bg-slate-950/60 border border-white/10 h-2 rounded-full mt-space-sm overflow-hidden">
-              <div class="bg-gradient-to-r from-indigo-500 to-sky-400 h-full rounded-full w-1/2"></div>
+              <div id="kpi-bar-drafted" class="bg-gradient-to-r from-indigo-500 to-sky-400 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -1676,7 +1676,7 @@
             <div class="kpi-val font-stat-counter-xl text-stat-counter-xl bg-gradient-to-r from-amber-300 via-yellow-200 to-orange-400 bg-clip-text text-transparent font-extrabold" id="kpi-avg-bid">৳0</div>
             <div class="kpi-sub text-xs text-on-surface-variant">Per acquired contender</div>
             <div class="w-full bg-slate-950/60 border border-white/10 h-2 rounded-full mt-space-sm overflow-hidden">
-              <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full w-2/3"></div>
+              <div id="kpi-bar-avg" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -1692,7 +1692,7 @@
             <div class="kpi-val font-stat-counter-xl text-stat-counter-xl bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent font-extrabold" id="kpi-teams-count">0</div>
             <div class="kpi-sub text-xs text-on-surface-variant">Active competing syndicates</div>
             <div class="w-full bg-slate-950/60 border border-white/10 h-2 rounded-full mt-space-sm overflow-hidden">
-              <div class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full w-full"></div>
+              <div id="kpi-bar-franchises" class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -2300,7 +2300,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary text-xs" onclick="closeCategoryModal()">Cancel</button>
-        <button class="btn-primary text-xs" onclick="saveCategoryModal()">Save Category</button>
+        <button class="btn-primary text-xs" onclick="saveCategoryForm()">Save Category</button>
       </div>
     </div>
   </div>
@@ -2339,7 +2339,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary text-xs" onclick="closeTeamModal()">Cancel</button>
-        <button class="btn-primary text-xs" onclick="saveTeamModal()">Save Franchise</button>
+        <button class="btn-primary text-xs" onclick="saveTeamForm()">Save Franchise</button>
       </div>
     </div>
   </div>
@@ -2367,7 +2367,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary text-xs" onclick="closeAddPlayerModal()">Cancel</button>
-        <button class="btn-primary text-xs" onclick="submitAddPlayerModal()">Add Contender</button>
+        <button class="btn-primary text-xs" onclick="saveNewPlayerToPool()">Add Contender</button>
       </div>
     </div>
   </div>
@@ -2377,7 +2377,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Add Match Fixture</h3>
-        <button class="btn-icon text-lg px-2 py-1 text-on-surface-variant hover:text-on-surface" onclick="closeMatchModal()">✕</button>
+        <button class="btn-icon text-lg px-2 py-1 text-on-surface-variant hover:text-on-surface" onclick="closeAddMatchModal()">✕</button>
       </div>
       <div class="modal-body space-y-4">
         <div>
@@ -2407,7 +2407,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary text-xs" onclick="closeMatchModal()">Cancel</button>
-        <button class="btn-primary text-xs" onclick="saveMatchModal()">Save Fixture</button>
+        <button class="btn-primary text-xs" onclick="saveNewMatchFixture()">Save Fixture</button>
       </div>
     </div>
   </div>
@@ -2428,7 +2428,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary text-xs" onclick="closeImpactModal()">Cancel</button>
-        <button class="btn-primary text-xs" onclick="saveImpactModal()">Save Config</button>
+        <button class="btn-primary text-xs" onclick="saveImpactPurseAmount()">Save Config</button>
       </div>
     </div>
   </div>
@@ -3263,6 +3263,39 @@
       if (elAvg) elAvg.textContent = '৳' + avgAcquisition.toLocaleString();
       if (elCount) elCount.textContent = teams.length;
 
+      // Synchronize All 4 KPI Progress Bars dynamically
+      const totalInitialPurse = teams.reduce((acc, t) => {
+        let teamSpent = 0;
+        if (t.purchases) {
+          Object.keys(t.purchases).forEach(cid => {
+            const pk = cid + ':' + t.purchases[cid];
+            const cat = categories.find(c => c.id === cid);
+            teamSpent += Number(soldPrices[pk]) || (cat ? Number(cat.base) : 50) || 0;
+          });
+        }
+        return acc + (Math.max(0, Number(t.purse) || 0) + teamSpent);
+      }, 0) || (teams.length * 500) || 1;
+
+      const turnoverPct = Math.min(100, Math.round((totalSpent / totalInitialPurse) * 100));
+      const barTurnover = document.getElementById('kpi-bar-turnover');
+      if (barTurnover) barTurnover.style.width = turnoverPct + '%';
+
+      const draftedPct = totalPoolCount > 0 ? Math.min(100, Math.round((totalSoldPlayers / totalPoolCount) * 100)) : 0;
+      const barDrafted = document.getElementById('kpi-bar-drafted');
+      if (barDrafted) barDrafted.style.width = draftedPct + '%';
+
+      const maxSoldPrice = allSoldItems.length ? Math.max(...allSoldItems.map(i => i.price)) : 100;
+      const avgPct = maxSoldPrice > 0 ? Math.min(100, Math.round((avgAcquisition / maxSoldPrice) * 100)) : 0;
+      const barAvg = document.getElementById('kpi-bar-avg');
+      if (barAvg) barAvg.style.width = avgPct + '%';
+
+      const totalPossibleSlots = (teams.length * (categories.length || 1)) || 1;
+      let totalSlotsFilled = 0;
+      teams.forEach(t => { if (t.purchases) totalSlotsFilled += Object.keys(t.purchases).length; });
+      const slotPct = Math.min(100, Math.round((totalSlotsFilled / totalPossibleSlots) * 100));
+      const barFranchises = document.getElementById('kpi-bar-franchises');
+      if (barFranchises) barFranchises.style.width = slotPct + '%';
+
       // 2. Render Left Column: Remaining Budget Visualizers with Animated Circular Fill
       const circlesGrid = document.getElementById('dash-budget-circles-grid');
       if (circlesGrid) {
@@ -3339,6 +3372,9 @@
                   <div class="franchise-budget-nums">
                     <span>Purse: <strong style="color:var(--accent-green);font-family:var(--font-mono);">৳${currentPurse.toLocaleString()}</strong></span>
                     <span>Max Bid: <strong style="color:#38bdf8;font-family:var(--font-mono);">৳${availableToBid.toLocaleString()}</strong></span>
+                  </div>
+                  <div class="w-full bg-slate-950/60 border border-white/10 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500" style="width: ${remainingPct}%; background: ${strokeColor};"></div>
                   </div>
                 </div>
               </div>
@@ -4667,8 +4703,12 @@
       const schedule = STATE.schedule || { teamNumbers: {}, matches: [] };
       schedule.matches = schedule.matches || [];
       schedule.matches.push({ title, teamA, teamB, time, venue, status: 'Upcoming' });
-
-      socket.emit('schedule:save', schedule);
+      STATE.schedule = schedule;
+      renderScheduleView();
+      if (socket && socket.connected) {
+        socket.emit('schedule:save', schedule);
+      }
+      showToast(`Fixture "${title}" added`, 'normal');
       closeAddMatchModal();
     }
 
@@ -4758,6 +4798,19 @@
       document.getElementById('edit-team-logo').value = team.logo || '';
       document.getElementById('team-edit-modal').classList.add('open');
     }
+
+    
+    // Modal Action Aliases (Guarantees 100% resolution for all modal buttons)
+    window.saveTeamModal = function() { saveTeamForm(); };
+    window.closeTeamModal = function() { document.getElementById('team-edit-modal').classList.remove('open'); };
+    window.submitAddPlayerModal = function() { saveNewPlayerToPool(); };
+    window.closeAddPlayerModal = function() { document.getElementById('player-add-modal').classList.remove('open'); };
+    window.saveCategoryModal = function() { saveCategoryForm(); };
+    window.closeCategoryModal = function() { document.getElementById('category-edit-modal').classList.remove('open'); };
+    window.closeMatchModal = function() { closeAddMatchModal(); };
+    window.saveMatchModal = function() { saveNewMatchFixture(); };
+    window.saveImpactModal = function() { saveImpactPurseAmount(); };
+    window.closeImpactModal = function() { document.getElementById('impact-config-modal').classList.remove('open'); };
 
     function closeTeamModal() {
       document.getElementById('team-edit-modal').classList.remove('open');
@@ -4954,7 +5007,13 @@
         showToast('Category ' + name + ' created', 'normal');
       }
 
-      socket.emit('admin:updateConfig', { categories: currentCats });
+      STATE.categories = currentCats;
+      renderCatalogTable();
+      renderTeamsGrid();
+      renderDashboardView();
+      if (socket && socket.connected) {
+        socket.emit('admin:updateConfig', { categories: currentCats });
+      }
       closeCategoryModal();
     }
 
@@ -4973,7 +5032,13 @@
 
     function saveImpactPurseAmount() {
       const amt = Number(document.getElementById('edit-impact-amount').value) || 0;
-      socket.emit('admin:updateConfig', { impactAmount: amt });
+      if (!STATE.config) STATE.config = {};
+      STATE.config.impactAmount = amt;
+      const inp = document.getElementById('admin-cfg-impact-input');
+      if (inp) inp.value = amt;
+      if (socket && socket.connected) {
+        socket.emit('admin:updateConfig', { impactAmount: amt });
+      }
       showToast(`Impact bonus set to ৳${amt}`, 'normal');
       closeImpactModal();
     }
@@ -5006,10 +5071,25 @@
         return;
       }
 
-      const currentPlayers = [...((STATE.playersSnapshot && STATE.playersSnapshot[cat]) || [])];
-      currentPlayers.push({ name, image: img });
+      if (!STATE.playersSnapshot) STATE.playersSnapshot = {};
+      const currentPlayers = [...(STATE.playersSnapshot[cat] || [])];
+      
+      // Prevent duplicate player names in the same category
+      if (currentPlayers.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        showToast("Contender already exists in this category", "normal");
+        return;
+      }
 
-      socket.emit('players:save', { category: cat, players: currentPlayers });
+      currentPlayers.push({ name, image: img });
+      STATE.playersSnapshot[cat] = currentPlayers;
+
+      // Re-render immediately
+      renderCatalogTable();
+      renderDashboardView();
+
+      if (socket && socket.connected) {
+        socket.emit('players:save', { category: cat, players: currentPlayers });
+      }
       showToast(`Player ${name} added to ${cat}`, 'normal');
       closeAddPlayerModal();
     }

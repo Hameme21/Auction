@@ -74,6 +74,19 @@
             "outline": "#86948a",
             "outline-variant": "#3c4a42"
           },
+          fontSize: {
+            "display-hero": ["clamp(2.1rem, 5.2vw, 3.9rem)", { lineHeight: "1.03", letterSpacing: "-0.035em" }],
+            "headline-lg": ["clamp(1.65rem, 3.4vw, 2.5rem)", { lineHeight: "1.08", letterSpacing: "-0.025em" }],
+            "headline-md": ["clamp(1.2rem, 2.1vw, 1.6rem)", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+            "headline-sm": ["1.02rem", { lineHeight: "1.35", letterSpacing: "-0.01em" }],
+            "body-lg": ["1.03rem", { lineHeight: "1.65" }],
+            "body-md": ["0.94rem", { lineHeight: "1.6" }],
+            "body-sm": ["0.84rem", { lineHeight: "1.55" }],
+            "stat-counter-xl": ["clamp(1.9rem, 3.6vw, 2.85rem)", { lineHeight: "1.05", letterSpacing: "-0.02em" }],
+            "stat-counter-md": ["1.12rem", { lineHeight: "1.2" }],
+            "label-md": ["0.78rem", { lineHeight: "1.4", letterSpacing: "0.04em" }],
+            "label-sm": ["0.69rem", { lineHeight: "1.4", letterSpacing: "0.06em" }]
+          },
           fontFamily: {
             "display-hero": ["Outfit", "sans-serif"],
             "headline-lg": ["Outfit", "sans-serif"],
@@ -1110,6 +1123,495 @@
       .app-header .sidebar-brand-group { gap: 0.5rem; }
       .app-header .header-actions { gap: 0.5rem; }
     }
+
+    /* =========================================================
+       APEX ARENA — UI REPAIR & POLISH LAYER
+       Everything below fixes components that were referenced by the
+       markup / JS but had no styling at all, normalises spacing, and
+       adds the motion system.
+       ========================================================= */
+
+    :root {
+      --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --dur-fast: 140ms;
+      --dur-base: 240ms;
+      --dur-slow: 420ms;
+      --header-h: 4.75rem;
+    }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body { text-rendering: optimizeLegibility; }
+
+    /* Prevent the login screen flashing before the session restores */
+    html.has-session #screen-login { display: none !important; }
+
+    /* ---------- Header / shell geometry (was inconsistent) ---------- */
+    .app-header > div, .header-inner { height: var(--header-h); }
+    .app-main {
+      padding-top: calc(var(--header-h) + 1.75rem);
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    #screen-arena { min-height: 100vh; }
+
+    /* Nav tabs are now reachable on every breakpoint */
+    .nav-tabs {
+      gap: 0.35rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      min-width: 0;
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab-btn { white-space: nowrap; flex: 0 0 auto; }
+    .nav-tab-btn:focus-visible,
+    .btn-primary:focus-visible,
+    .btn-secondary:focus-visible,
+    .btn-danger:focus-visible,
+    .btn-bid:focus-visible,
+    .btn-icon:focus-visible,
+    .form-control:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 1023px) {
+      :root { --header-h: auto; }
+      .app-header > div, .header-inner {
+        height: auto;
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+      }
+      .nav-tabs {
+        order: 3;
+        width: 100%;
+        padding-bottom: 0.15rem;
+        border-top: 1px solid var(--glass-border-subtle);
+        padding-top: 0.55rem;
+      }
+      .app-main { padding-top: 9.75rem; }
+      .sidebar-brand-group { gap: 0.5rem; }
+      .header-actions { gap: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .app-main { padding-top: 10.25rem; }
+      .header-actions .badge-role { display: none; }
+    }
+
+    /* ---------- Purse pill (was fighting inline styles) ---------- */
+    .purse-pill { display: none; }
+    .purse-pill.is-visible { display: inline-flex; }
+    @media (max-width: 767px) { .purse-pill.is-visible { display: none; } }
+
+    /* ---------- Role badge (class existed, styling did not) ---------- */
+    .badge-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: var(--glass-blur-sm);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      white-space: nowrap;
+      transition: border-color var(--dur-base) var(--ease-out-soft), background var(--dur-base) var(--ease-out-soft);
+    }
+    .badge-role::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+      flex: 0 0 auto;
+    }
+    .badge-role.admin { color: #4edea3; border-color: rgba(78, 222, 163, 0.45); background: rgba(16, 185, 129, 0.14); }
+    .badge-role.team { color: #c0c1ff; border-color: rgba(192, 193, 255, 0.45); background: rgba(99, 102, 241, 0.16); }
+    .badge-role.viewer,
+    .badge-role.spectator { color: #ffb95f; border-color: rgba(255, 185, 95, 0.4); background: rgba(245, 158, 11, 0.14); }
+    .badge-role > span { color: inherit !important; }
+
+    .connection-badge { white-space: nowrap; }
+    .server-status-pill { transition: border-color var(--dur-base) var(--ease-out-soft), transform var(--dur-base) var(--ease-out-soft); }
+    .server-status-pill:hover { transform: translateY(-1px); }
+
+    /* ---------- Icon + logout buttons ---------- */
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+      line-height: 1;
+      transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out-soft);
+    }
+    .btn-icon:hover { background: rgba(255, 255, 255, 0.13); border-color: var(--glass-border-bright); transform: translateY(-1px); }
+    .btn-icon:active { transform: scale(0.94); }
+    .btn-logout { transition: all var(--dur-base) var(--ease-out-soft); white-space: nowrap; }
+    .btn-logout:hover { transform: translateY(-1px); }
+    .btn-timer-toggle.is-paused { border-color: rgba(78, 222, 163, 0.5); color: #4edea3; }
+
+    /* ---------- Login portal tabs ---------- */
+    .login-tab-btn { cursor: pointer; transition: all var(--dur-base) var(--ease-out-soft); }
+    .login-tab-btn:hover { transform: translateY(-1px); }
+    .login-tab-btn.active { transform: translateY(-1px); }
+
+    /* ---------- Login feedback banner (had NO styling at all) ---------- */
+    .login-alert {
+      display: block;
+      width: 100%;
+      max-width: 36rem;
+      margin: 0 auto;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      backdrop-filter: var(--glass-blur-sm);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      animation: alertIn var(--dur-base) var(--ease-out-soft);
+    }
+    .login-alert.error { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.45); color: #ffb4ab; }
+    .login-alert.success { background: rgba(16, 185, 129, 0.14); border-color: rgba(78, 222, 163, 0.45); color: #7bfbc2; }
+    @keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .login-telemetry { min-width: 0; }
+    .terminal-status { min-width: 0; }
+
+    /* ---------- MODALS: .open was never defined, so no modal opened ---------- */
+    .modal-backdrop.open { display: flex; }
+    .modal-backdrop.open .modal-dialog { animation: modalIn var(--dur-slow) var(--ease-spring); }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.965); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-dialog { max-height: calc(100vh - 3rem); display: flex; flex-direction: column; }
+    .modal-body { overflow-y: auto; }
+    .modal-header h3 { margin: 0; }
+    .modal-footer { flex-wrap: wrap; }
+    @media (max-width: 520px) {
+      .modal-backdrop { padding: 0.85rem; align-items: flex-end; }
+      .modal-dialog { border-radius: 20px 20px 14px 14px; }
+      .modal-footer > button { flex: 1 1 auto; }
+    }
+
+    /* ---------- HAMMER OVERLAY: .active was never defined ---------- */
+    .hammer-overlay.active { display: flex; animation: fadeIn var(--dur-base) ease-out; }
+    .hammer-animation-container { animation: soldPop 520ms var(--ease-spring); padding: 1rem; }
+    @keyframes soldPop {
+      0% { opacity: 0; transform: scale(0.72); }
+      60% { opacity: 1; transform: scale(1.06); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .sold-team-badge { display: inline-block; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sold-price-badge { white-space: nowrap; }
+
+    /* ---------- Loading screen ---------- */
+    #app-loading-screen { transition: opacity var(--dur-base) ease; }
+    .loading-text, .loading-subtext { text-align: center; padding: 0 1rem; }
+
+    /* ---------- TOASTS (were rendering as stacked blocks) ---------- */
+    .toast-container { max-width: min(380px, calc(100vw - 2rem)); pointer-events: none; }
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      line-height: 1.45;
+      pointer-events: auto;
+      word-break: break-word;
+    }
+    .toast.sale { border-left-color: #f59e0b; }
+    .toast.error { border-left-color: #ef4444; }
+    .toast.impact { border-left-color: #06b6d4; }
+    .toast.rtm { border-left-color: #a855f7; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(24px) scale(0.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    @media (max-width: 520px) {
+      .toast-container { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+    }
+
+    /* ---------- ARENA: stage, portrait, metrics, timer ---------- */
+    .arena-summary { min-width: 0; }
+    .badge-code, .badge-category { white-space: nowrap; }
+
+    .portrait-box { width: 100%; max-width: 15rem; }
+    .portrait-box > div:first-child { width: 100%; }
+    .portrait-img { display: block; background: rgba(6, 14, 32, 0.9); }
+    .player-details { min-width: 0; }
+    .player-metrics > div { min-width: 0; }
+    .player-metrics span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #stage-player-name { word-break: break-word; }
+
+    .timer-container { padding: 0.25rem; }
+    .timer-ring-wrapper { flex: 0 0 auto; }
+    .timer-text-center { inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+    .timer-status-caption { transition: color var(--dur-base) ease; margin-top: 0.15rem; }
+    #timer-number { font-variant-numeric: tabular-nums; }
+
+    .stage-adjust-banner { animation: alertIn var(--dur-base) var(--ease-out-soft); }
+    .floor-actions-area { min-width: 0; }
+    .bid-buttons-grid { min-width: 0; }
+    .bid-stream { min-height: 0; }
+    .feed-title { min-width: 0; gap: 0.5rem; flex-wrap: wrap; }
+    .feed-title > * { min-width: 0; }
+    .empty-stage-icon { line-height: 1; filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6)); }
+
+    .custom-bid-row { flex-wrap: wrap; }
+    .custom-bid-row .form-control { min-width: 9rem; }
+    @media (max-width: 480px) {
+      .bid-buttons-grid { grid-template-columns: 1fr; }
+      .custom-bid-row > button { width: 100%; }
+    }
+
+    /* ---------- LOTTERY REEL (the spin animation had no keyframes) ---------- */
+    .shuffle-overlay { border-radius: inherit; text-align: center; padding: 1.25rem; }
+    .shuffle-code-display { letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
+    .slot-drum-strip { display: flex; align-items: center; justify-content: center; width: 100%; }
+    .slot-drum-strip.spinning { animation: reelSpin 0.16s linear infinite; }
+    @keyframes reelSpin {
+      0% { transform: translateY(-18%); filter: blur(1.1px); opacity: 0.75; }
+      50% { transform: translateY(0); filter: blur(0.4px); opacity: 1; }
+      100% { transform: translateY(18%); filter: blur(1.1px); opacity: 0.75; }
+    }
+    .lottery-preview-card { min-width: 0; }
+
+    /* ---------- DASHBOARD: global "Top Buys" list had NO styling ---------- */
+    .top-sold-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      background: rgba(8, 16, 36, 0.65);
+      backdrop-filter: var(--glass-blur-sm);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color var(--dur-base) ease, transform var(--dur-base) var(--ease-out-soft), background var(--dur-base) ease;
+    }
+    .top-sold-row:hover {
+      border-color: rgba(78, 222, 163, 0.45);
+      background: rgba(14, 25, 52, 0.82);
+      transform: translateY(-1px);
+    }
+    .top-sold-rank {
+      display: inline-flex;
+      width: 2.1rem;
+      height: 2.1rem;
+      flex: 0 0 2.1rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      font: 800 0.74rem var(--font-mono);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--glass-border-subtle);
+      color: var(--text-muted);
+    }
+    .rank-other { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
+    .dash-team-player-row:first-child { border-top: none; }
+    .franchise-budget-nums { grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); }
+
+    /* ---------- CATALOG: category divider broke the card grid ---------- */
+    .category-group-header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin: 0.85rem 0 0.15rem;
+      min-width: 0;
+    }
+    .category-group-header:first-child { margin-top: 0; }
+    .category-group-title { flex: 0 0 auto; min-width: 0; }
+    .category-group-line {
+      flex: 1 1 auto;
+      height: 1px;
+      background: linear-gradient(90deg, var(--glass-border-bright), transparent);
+    }
+    .category-group-count {
+      flex: 0 0 auto;
+      font: 700 0.7rem var(--font-mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .player-pool-card.is-sold { opacity: 0.88; }
+    .player-pool-card.is-sold::after,
+    .player-pool-card.is-unsold::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+    .player-pool-card { position: relative; }
+    .player-pool-card.is-sold::after { background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 55%); }
+    .player-pool-card.is-unsold::after { background: linear-gradient(135deg, rgba(239, 68, 68, 0.09), transparent 55%); }
+    .player-card-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; justify-content: flex-end; }
+    .player-card-footer { flex-wrap: wrap; row-gap: 0.5rem; }
+    .player-card-status { min-width: 0; }
+    .player-category-tag { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Catalog table stops overflowing on small screens */
+    #catalog-table-container { border-radius: 14px; }
+    .data-table { min-width: 720px; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ---------- FIXTURES (class referenced by JS, never styled) ---------- */
+    .fixture-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0.95rem 1.1rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      background: rgba(8, 16, 36, 0.65);
+      backdrop-filter: var(--glass-blur-sm);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color var(--dur-base) ease, transform var(--dur-base) var(--ease-out-soft);
+    }
+    .fixture-item:hover { border-color: rgba(78, 222, 163, 0.4); transform: translateY(-1px); }
+    .fixture-vs {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+      font: 800 0.68rem var(--font-mono);
+      letter-spacing: 0.1em;
+      color: #ffb95f;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    /* ---------- KPI text hooks ---------- */
+    .kpi-lbl { display: block; line-height: 1.3; }
+    .kpi-val { font-variant-numeric: tabular-nums; word-break: break-word; }
+    .kpi-sub { line-height: 1.45; }
+    .dashboard-kpi-grid .kpi-card::after { inset: auto 1.25rem 0; }
+
+    /* ---------- MOTION SYSTEM ---------- */
+    .view-container { animation: none; }
+    .view-container.active {
+      display: block;
+      animation: viewIn var(--dur-slow) var(--ease-out-soft) both;
+    }
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Staggered entrance for rendered collections */
+    .dashboard-kpi-grid .kpi-card,
+    .franchise-budget-card,
+    .dash-team-acq-card,
+    .unified-purchase-row,
+    .top-sold-row,
+    .team-card,
+    .player-pool-card,
+    .fixture-item,
+    .login-team-card {
+      animation: cardIn var(--dur-slow) var(--ease-out-soft) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .dashboard-kpi-grid .kpi-card:nth-child(2),
+    .franchise-budget-card:nth-child(2), .dash-team-acq-card:nth-child(2),
+    .unified-purchase-row:nth-child(2), .top-sold-row:nth-child(2),
+    .team-card:nth-child(2), .player-pool-card:nth-child(2),
+    .fixture-item:nth-child(2), .login-team-card:nth-child(2) { animation-delay: 45ms; }
+    .dashboard-kpi-grid .kpi-card:nth-child(3),
+    .franchise-budget-card:nth-child(3), .dash-team-acq-card:nth-child(3),
+    .unified-purchase-row:nth-child(3), .top-sold-row:nth-child(3),
+    .team-card:nth-child(3), .player-pool-card:nth-child(3),
+    .fixture-item:nth-child(3), .login-team-card:nth-child(3) { animation-delay: 90ms; }
+    .dashboard-kpi-grid .kpi-card:nth-child(4),
+    .franchise-budget-card:nth-child(4), .dash-team-acq-card:nth-child(4),
+    .unified-purchase-row:nth-child(4), .top-sold-row:nth-child(4),
+    .team-card:nth-child(4), .player-pool-card:nth-child(4),
+    .fixture-item:nth-child(4), .login-team-card:nth-child(4) { animation-delay: 135ms; }
+    .franchise-budget-card:nth-child(n+5), .dash-team-acq-card:nth-child(n+5),
+    .unified-purchase-row:nth-child(n+5), .top-sold-row:nth-child(n+5),
+    .team-card:nth-child(n+5), .player-pool-card:nth-child(n+5),
+    .fixture-item:nth-child(n+5), .login-team-card:nth-child(n+5) { animation-delay: 175ms; }
+
+    /* Value-change flash so live numbers read as live */
+    .value-flash { animation: valueFlash 620ms var(--ease-out-soft); }
+    @keyframes valueFlash {
+      0% { transform: scale(1); filter: brightness(1); }
+      35% { transform: scale(1.09); filter: brightness(1.45); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .bid-item { transition: border-color var(--dur-base) ease, background var(--dur-base) ease, transform var(--dur-base) var(--ease-out-soft); }
+    .bid-item:hover { transform: translateX(-2px); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn-primary, .btn-secondary, .btn-danger, .btn-bid, .login-team-card, .nav-tab-btn {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary:active, .btn-danger:active { transform: translateY(0) scale(0.985); }
+    .btn-secondary:active { transform: translateY(0) scale(0.985); }
+    .btn-bid:active:not(:disabled) { transform: translateY(0) scale(0.985); }
+    .btn-primary:disabled, .btn-secondary:disabled, .btn-danger:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+      filter: grayscale(0.3);
+    }
+
+    /* Select arrow + consistent control height */
+    select.form-control {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%), linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+      background-position: calc(100% - 15px) center, calc(100% - 10px) center;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 2rem;
+    }
+    input[type="number"].form-control { font-variant-numeric: tabular-nums; }
+    .form-control:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Reduce jitter on the heavy ambient/aurora animations for users who ask */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .ambient-glow-node { animation: none; }
+      #active-player-stage, #empty-stage-card { animation: none; }
+    }
+
+    /* ---------- Small-screen spacing cleanup ---------- */
+    @media (max-width: 767px) {
+      .stage-card { padding: 1.1rem; }
+      .arena-grid, .dashboard-columns, .teams-grid { gap: 1rem; }
+      .dashboard-kpi-grid .kpi-card { min-height: 0; }
+      .modal-header, .modal-body, .modal-footer { padding-left: 1.05rem; padding-right: 1.05rem; }
+      .unified-purchase-row { gap: 0.6rem; padding: 0.7rem; }
+      .franchise-budget-card { min-height: 0; }
+    }
+
   </style>
 </head>
 
@@ -1127,8 +1629,8 @@
   <!-- Fullscreen Global Loading Screen -->
   <div id="app-loading-screen" style="display: none;" class="fixed inset-0 z-[300] bg-background/95 backdrop-blur-2xl flex flex-col items-center justify-center gap-4">
     <div class="w-14 h-14 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-    <div class="font-headline-sm text-headline-sm text-on-surface font-extrabold uppercase tracking-wider">CONNECTING TO ARENA</div>
-    <div class="font-body-sm text-body-sm text-on-surface-variant">Synchronizing Live Auction State...</div>
+    <div class="loading-text font-headline-sm text-headline-sm text-on-surface font-extrabold uppercase tracking-wider">CONNECTING TO ARENA</div>
+    <div class="loading-subtext font-body-sm text-body-sm text-on-surface-variant">Synchronizing Live Auction State...</div>
   </div>
 
   <!-- =========================================================
@@ -1319,7 +1821,7 @@
                 <p class="text-xs text-on-surface-variant">Use at least 8 characters. This password protects your auction controls.</p>
               </div>
 
-              <button class="w-full mt-space-md py-space-sm px-space-md rounded-xl bg-gradient-to-r from-primary via-primary-container to-surface-tint hover:brightness-110 text-on-primary font-label-md text-label-md uppercase tracking-wider font-bold shadow-[0_0_24px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-space-xs cursor-pointer active:scale-[0.98] border border-primary-fixed/40" id="btn-mgr-submit" type="submit">
+              <button class="w-full mt-space-md py-space-sm px-space-md rounded-xl bg-gradient-to-r from-primary via-primary-container to-primary-fixed hover:brightness-110 text-on-primary font-label-md text-label-md uppercase tracking-wider font-bold shadow-[0_0_24px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-space-xs cursor-pointer active:scale-[0.98] border border-primary-fixed/40" id="btn-mgr-submit" type="submit">
                 <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
                 <span>Authenticate as Manager</span>
               </button>
@@ -1516,28 +2018,28 @@
   <!-- =========================================================
        SCREEN 2: LIVE ARENA & DASHBOARD (STITCH SCREEN 1 & 3 & 4)
        ========================================================= -->
-  <div id="screen-arena" class="min-h-screen flex flex-col">
+  <div id="screen-arena" class="min-h-screen flex-col" style="display: none;">
     
     <!-- Top Navigation Header (Apex Arena Broadcast Bar) -->
     <header id="app-header" class="app-header fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/80 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-      <div class="h-20 w-full px-margin-mobile md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
+      <div class="header-inner w-full px-margin-mobile md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
         
         <div class="sidebar-brand-group flex items-center gap-space-lg shrink-0">
           <div class="login-brand flex items-center gap-space-sm cursor-pointer" onclick="switchView('view-arena')">
             <div class="login-brand-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="34" height="34" class="shrink-0 drop-shadow-[0_0_12px_rgba(78,222,163,0.5)]">
   <defs>
-    <linearGradient id="apexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="apexGradHdr" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#10B981" />
       <stop offset="50%" stop-color="#6366F1" />
       <stop offset="100%" stop-color="#F59E0B" />
     </linearGradient>
-    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="shieldGradHdr" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#1E1B4B" />
       <stop offset="100%" stop-color="#0F172A" />
     </linearGradient>
   </defs>
-  <polygon points="60,6 108,24 96,86 60,114 24,86 12,24" fill="url(#shieldGrad)" stroke="url(#apexGrad)" stroke-width="3.5" />
-  <path d="M42,34 L78,34 L66,54 L84,54 L46,90 L54,62 L36,62 Z" fill="url(#apexGrad)" />
+  <polygon points="60,6 108,24 96,86 60,114 24,86 12,24" fill="url(#shieldGradHdr)" stroke="url(#apexGradHdr)" stroke-width="3.5" />
+  <path d="M42,34 L78,34 L66,54 L84,54 L46,90 L54,62 L36,62 Z" fill="url(#apexGradHdr)" />
   <circle cx="60" cy="22" r="4" fill="#10B981" />
 </svg></div>
             <div class="login-brand-text flex flex-col leading-tight">
@@ -1557,7 +2059,7 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <nav class="nav-tabs hidden lg:flex items-center gap-space-xs shrink-0">
+        <nav class="nav-tabs flex items-center gap-space-xs shrink-0">
           <button class="nav-tab-btn nav-btn-dashboard px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-dashboard')">Dashboard</button>
           <button class="nav-tab-btn nav-btn-arena active px-space-md py-space-xs uppercase tracking-wider transition-all rounded-lg" onclick="switchView('view-arena')">Live Arena</button>
           <button class="nav-tab-btn nav-btn-franchises px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-franchises')">Franchises</button>
@@ -1569,7 +2071,7 @@
         <div class="header-actions flex items-center gap-space-md shrink-0">
           
           <!-- Team Purse Pill -->
-          <div class="purse-pill hidden md:flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-high/80 border border-white/10" id="arena-purse-pill" style="display: none;">
+          <div class="purse-pill items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-high/80 border border-white/10" id="arena-purse-pill">
             <span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold">Purse:</span>
             <span class="font-stat-counter-md text-stat-counter-md text-on-surface font-bold">৳<span id="arena-purse-val">0</span></span>
             <span class="text-outline font-light mx-space-2xs">|</span>
@@ -1600,7 +2102,7 @@
     </header>
 
     <!-- Main Content Views -->
-    <main class="app-main pt-24 px-margin-mobile md:px-margin-tablet lg:px-margin-desktop pb-space-2xl">
+    <main class="app-main px-margin-mobile md:px-margin-tablet lg:px-margin-desktop pb-space-2xl">
 
       <!-- =========================================================
            VIEW: DASHBOARD (MANAGER COMMAND CENTER - STITCH SCREEN 3)
@@ -1956,7 +2458,7 @@
 
                     <div class="flex flex-wrap gap-space-sm items-center justify-between">
                       <button class="btn-primary" id="btn-team-impact" onclick="activateTeamImpact()">
-                        <span>⚡</span> Activate Impact (+৳<span id="team-impact-amount-lbl">0</span>)
+                        <span>⚡</span> <span id="team-impact-text">Activate Impact</span> (+৳<span id="team-impact-amount-lbl">0</span>)
                       </button>
                       <button class="btn-secondary" id="btn-team-rtm-invoke" style="display: none;" onclick="promptRTMInvoke()">
                         <span>🛡️</span> Exercise Right to Match (RTM)
@@ -2218,7 +2720,7 @@
           <div id="catalog-category-pills" class="flex flex-wrap gap-space-xs mb-space-lg p-1.5 rounded-2xl bg-surface-container-lowest/50 border border-white/10"></div>
 
           <!-- Cards Layout Container -->
-          <div id="catalog-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md"></div>
+          <div id="catalog-cards-container" class="catalog-cards-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md"></div>
 
           <!-- Traditional Table Layout Container -->
           <div id="catalog-table-container" style="overflow-x: auto; display: none;" class="mt-space-md">
@@ -2662,6 +3164,20 @@
     let socket = null;
     let bidHistory = [];
 
+    // Escape helpers — names go into innerHTML and into inline onclick
+    // attributes, so an apostrophe (e.g. "O'Brien") used to break both.
+    function escHtml(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function escArg(v) {
+      return String(v == null ? '' : v)
+        .replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\r?\n/g, ' ');
+    }
+
     // Fallback Image SVG
     function handleImageFallback(imgElem) {
       imgElem.onerror = null;
@@ -2719,7 +3235,8 @@
 
     function initSocket(customUrl) {
       const targetUrl = customUrl || getStoredServerUrl();
-      document.getElementById('server-url-input').value = targetUrl;
+      const urlInput = document.getElementById('server-url-input');
+      if (urlInput) urlInput.value = targetUrl;
 
       if (socket) {
         socket.removeAllListeners();
@@ -2752,10 +3269,10 @@
       const arenaText = document.getElementById('arena-conn-text');
 
       const isOnline = (status === 'online');
-      loginDot.className = 'pulse-dot ' + (isOnline ? 'online' : 'offline');
-      loginText.textContent = label;
-      arenaDot.className = 'pulse-dot ' + (isOnline ? 'online' : 'offline');
-      arenaText.textContent = label;
+      if (loginDot) loginDot.className = 'pulse-dot ' + (isOnline ? 'online' : 'offline');
+      if (loginText) loginText.textContent = label;
+      if (arenaDot) arenaDot.className = 'pulse-dot ' + (isOnline ? 'online' : 'offline');
+      if (arenaText) arenaText.textContent = label;
     }
 
     // Socket Contract Binding
@@ -2811,6 +3328,18 @@
 
       socket.on('disconnect', () => {
         updateConnectionStatus('offline', 'Disconnected');
+      });
+
+      // Server-side feedback channel. The backend emits `admin:toast` for
+      // every validation refusal and confirmation; without this handler
+      // those messages were dropped and actions appeared to do nothing.
+      socket.on('admin:toast', (data) => {
+        if (!data) return;
+        const msg = (typeof data === 'string') ? data : data.msg;
+        if (!msg) return;
+        let type = (typeof data === 'object' && data.type) ? data.type : 'normal';
+        if (type === 'normal' && /^\s*(❌|⚠️|✋)/.test(msg)) type = 'error';
+        showToast(msg, type);
       });
 
       socket.on('connect_error', (err) => {
@@ -2888,6 +3417,12 @@
 
       // Timer Sync
       socket.on('timer:sync', (timer) => {
+        if (!timer) return;
+        // A jump upward means the auctioneer started a fresh round,
+        // so re-baseline the ring before overwriting TIMER_STATE.
+        if (Number(timer.time) > Number(TIMER_STATE && TIMER_STATE.time || 0)) {
+          TIMER_MAX = Number(timer.time);
+        }
         TIMER_STATE = timer;
         renderTimer(timer.time, timer.paused);
       });
@@ -2964,7 +3499,8 @@
       // RTM Cleared
       socket.on('rtm:cleared', () => {
         STATE.rtmState = null;
-        document.getElementById('rtm-dialogue-wrapper').style.display = 'none';
+        const w = document.getElementById('rtm-dialogue-wrapper');
+        if (w) w.style.display = 'none';
       });
 
       // Lottery Shuffle Animation
@@ -2987,7 +3523,7 @@
             timesUpBox.style.display = 'block';
             const awardSelect = document.getElementById('admin-award-franchise-select');
             if (awardSelect) {
-              awardSelect.innerHTML = (STATE.teams || []).map(t => `<option value="${t.id}">${t.name} (${t.id})</option>`).join('');
+              awardSelect.innerHTML = (STATE.teams || []).map(t => `<option value="${escHtml(t.id)}">${escHtml(t.name)} (${escHtml(t.id)})</option>`).join('');
             }
           }
         }
@@ -3115,8 +3651,8 @@
       const headerPurse = document.getElementById('arena-purse-pill');
       const hostLabel = document.getElementById('header-league-host');
 
-      hostLabel.textContent = `HOST: ${(SESSION.hostId || 'ADMIN').toUpperCase()}`;
-      roleBadge.className = 'badge-role ' + SESSION.role;
+      if (hostLabel) hostLabel.textContent = `HOST: ${(SESSION.hostId || 'ADMIN').toUpperCase()}`;
+      if (roleBadge) roleBadge.className = 'badge-role ' + SESSION.role;
 
       if (SESSION.role === 'admin') {
         roleText.textContent = `Admin (${SESSION.username || 'Manager'})`;
@@ -3127,7 +3663,7 @@
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'flex';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'block';
         if (thAdmin) thAdmin.style.display = 'table-cell';
-        headerPurse.style.display = 'none';
+        if (headerPurse) headerPurse.classList.remove('is-visible');
       } else if (SESSION.role === 'team') {
         const team = getMyTeam();
         roleText.textContent = team ? team.name : `Franchise (${SESSION.teamId})`;
@@ -3138,7 +3674,7 @@
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
         if (thAdmin) thAdmin.style.display = 'none';
-        headerPurse.style.display = 'inline-flex';
+        if (headerPurse) headerPurse.classList.add('is-visible');
       } else {
         roleText.textContent = 'Spectator Mode';
         if (adminLaunchpad) adminLaunchpad.style.display = 'none';
@@ -3148,7 +3684,7 @@
         if (adminFranchiseActions) adminFranchiseActions.style.display = 'none';
         if (adminCategoryPanel) adminCategoryPanel.style.display = 'none';
         if (thAdmin) thAdmin.style.display = 'none';
-        headerPurse.style.display = 'none';
+        if (headerPurse) headerPurse.classList.remove('is-visible');
       }
 
       renderFloorControls();
@@ -3257,11 +3793,11 @@
       const elAvg = document.getElementById('kpi-avg-bid');
       const elCount = document.getElementById('kpi-teams-count');
 
-      if (elSpent) elSpent.textContent = '৳' + totalSpent.toLocaleString();
-      if (elSold) elSold.textContent = totalSoldPlayers;
+      setValue('kpi-total-spent', '৳' + totalSpent.toLocaleString());
+      setValue('kpi-players-sold', totalSoldPlayers);
       if (elSoldSub) elSoldSub.textContent = availableCount + ' pool / ' + unsoldLength + ' unsold';
-      if (elAvg) elAvg.textContent = '৳' + avgAcquisition.toLocaleString();
-      if (elCount) elCount.textContent = teams.length;
+      setValue('kpi-avg-bid', '৳' + avgAcquisition.toLocaleString());
+      setValue('kpi-teams-count', teams.length);
 
       // Synchronize All 4 KPI Progress Bars dynamically
       const totalInitialPurse = teams.reduce((acc, t) => {
@@ -3405,8 +3941,8 @@
                     <span class="dash-rank-pill ${rankClass}">#${rank}</span>
                     <img src="${item.image || ''}" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);" onerror="handleImageFallback(this)" />
                     <div style="min-width: 0;">
-                      <div style="font-weight: 700; font-size: 0.86rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
-                      <div style="font-size: 0.7rem; color: var(--text-muted);">🏷️ ${item.categoryName}</div>
+                      <div style="font-weight: 700; font-size: 0.86rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escHtml(item.name)}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">🏷️ ${escHtml(item.categoryName)}</div>
                     </div>
                   </div>
                   <div style="font-family: var(--font-mono); font-size: 0.92rem; font-weight: 800; color: var(--accent-green); white-space: nowrap;">
@@ -3426,7 +3962,7 @@
                   <div style="display: flex; align-items: center; gap: 8px;">
                     ${team.logo ? `<img src="${team.logo}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.15);" onerror="this.remove()" />` : `<div class="team-logo-circle" style="width:32px;height:32px;font-size:0.75rem;">${team.id.slice(0,3)}</div>`}
                     <div>
-                      <div style="font-weight: 800; font-size: 0.95rem; color: #fff;">${team.name}</div>
+                      <div style="font-weight: 800; font-size: 0.95rem; color: #fff; word-break: break-word;">${escHtml(team.name)}</div>
                       <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">
                         ${acquisitions.length} Players Acquired • Spent ৳${teamTotalSpent.toLocaleString()}
                       </div>
@@ -3462,8 +3998,8 @@
                 ${item.teamLogo ? `<img src="${item.teamLogo}" alt="${item.teamName}" onerror="this.remove()">` : item.teamId.slice(0, 3)}
               </div>
               <div style="min-width:0;">
-                <div class="purchase-player">${index + 1}. ${item.name}</div>
-                <div class="purchase-meta">${item.teamName} · ${item.categoryName}</div>
+                <div class="purchase-player">${index + 1}. ${escHtml(item.name)}</div>
+                <div class="purchase-meta">${escHtml(item.teamName)} · ${escHtml(item.categoryName)}</div>
               </div>
               <div class="purchase-price">৳${item.price.toLocaleString()}</div>
             </div>
@@ -3484,9 +4020,9 @@
                   <div class="top-sold-rank ${rankClass}">#${rank}</div>
                   <img src="${item.image || ''}" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.12);" onerror="handleImageFallback(this)" />
                   <div style="min-width: 0;">
-                    <div style="font-weight: 800; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${item.name}</div>
+                    <div style="font-weight: 800; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${escHtml(item.name)}</div>
                     <div style="font-size: 0.72rem; color: var(--text-muted);">
-                      <span>🏷️ ${item.categoryName}</span> • <span style="color: #38bdf8; font-weight: 600;">${item.teamName}</span>
+                      <span>🏷️ ${escHtml(item.categoryName)}</span> • <span style="color: #38bdf8; font-weight: 600;">${escHtml(item.teamName)}</span>
                     </div>
                   </div>
                 </div>
@@ -3554,7 +4090,7 @@
       const currentPrice = STATE.activeBids && STATE.activeBids[key] !== undefined 
         ? STATE.activeBids[key] 
         : (player.currentPrice || player.base || (catObj ? catObj.base : 0));
-      document.getElementById('stage-current-bid').textContent = currentPrice;
+      setValue('stage-current-bid', Number(currentPrice || 0).toLocaleString());
 
       const bidderId = STATE.activeBidders ? STATE.activeBidders[key] : null;
       const bidderElem = document.getElementById('stage-high-bidder-name');
@@ -3613,13 +4149,19 @@
         btn1.disabled = !isBiddingActive || alreadyHighBidder || alreadyHasCategory || (nextBid1 > available);
         btn2.disabled = !isBiddingActive || alreadyHighBidder || alreadyHasCategory || (nextBid2 > available);
 
-        const bonus = Number(STATE.config.impactAmount) || 0;
-        document.getElementById('team-impact-amount-lbl').textContent = bonus;
+        const bonus = Number((STATE.config || {}).impactAmount) || 0;
+        const impactLbl = document.getElementById('team-impact-amount-lbl');
+        if (impactLbl) impactLbl.textContent = bonus;
         const impactBtn = document.getElementById('btn-team-impact');
+        const impactTextEl = document.getElementById('team-impact-text');
         if (bonus > 0 && team && !team.impactUsed) {
           impactBtn.style.display = 'inline-flex';
-          impactBtn.disabled = team.impactActive;
-          if (team.impactActive) impactBtn.textContent = '⚡ Impact Boost Active';
+          impactBtn.disabled = !!team.impactActive;
+          // Never replace the button's innerHTML here: it holds the
+          // #team-impact-amount-lbl span that the next render reads back.
+          if (impactTextEl) {
+            impactTextEl.textContent = team.impactActive ? 'Impact Boost Active' : 'Activate Impact';
+          }
         } else {
           impactBtn.style.display = 'none';
         }
@@ -3715,7 +4257,7 @@
       const item = document.createElement('div');
       item.className = 'bid-item' + (bidData.teamId === SESSION.teamId ? ' high' : '');
       item.innerHTML = `
-        <span style="font-weight:600;">${teamName}</span>
+        <span style="font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(teamName)}</span>
         <span style="font-family:var(--font-mono);font-weight:700;color:#38bdf8;">৳${bidData.price}</span>
       `;
       if (stream.children.length > 0 && stream.children[0].innerText.includes('No bids recorded')) {
@@ -3879,6 +4421,7 @@
 
     function adminResetTimer(seconds) {
       seconds = Number(seconds) || 30;
+      TIMER_MAX = seconds;
       TIMER_STATE = { paused: false, time: seconds };
       renderTimer(seconds, false);
       socket.emit('admin:timer_control', { paused: false, time: seconds });
@@ -4124,7 +4667,10 @@
     }
 
     // Timer Graphic
+    let TIMER_MAX = 30;
     function renderTimer(seconds, paused) {
+      seconds = Number(seconds) || 0;
+      if (seconds > TIMER_MAX) TIMER_MAX = seconds;  // track the real round length
       updateTimerToggleButton(paused, seconds);
       const numElem = document.getElementById('timer-number');
       const circle = document.getElementById('timer-circle');
@@ -4133,7 +4679,8 @@
       if (!numElem || !circle) return;
 
       numElem.textContent = seconds;
-      const offset = 283 - (283 * (Math.max(0, Math.min(30, seconds)) / 30));
+      const span = TIMER_MAX > 0 ? TIMER_MAX : 30;
+      const offset = 283 - (283 * (Math.max(0, Math.min(span, seconds)) / span));
       circle.style.strokeDashoffset = offset;
 
       circle.className = 'timer-circle-progress';
@@ -4160,7 +4707,7 @@
             // Populate award franchise select
             const awardSelect = document.getElementById('admin-award-franchise-select');
             if (awardSelect) {
-              awardSelect.innerHTML = (STATE.teams || []).map(t => `<option value="${t.id}">${t.name} (${t.id})</option>`).join('');
+              awardSelect.innerHTML = (STATE.teams || []).map(t => `<option value="${escHtml(t.id)}">${escHtml(t.name)} (${escHtml(t.id)})</option>`).join('');
             }
           }
         }
@@ -4180,7 +4727,7 @@
       const directSelect = document.getElementById('admin-direct-team-select');
       if (directSelect) {
         const teamList = (teams && teams.length) ? teams : (STATE.teams || []);
-        directSelect.innerHTML = teamList.map(t => `<option value="${t.id}">${t.name} (${t.id})</option>`).join('');
+        directSelect.innerHTML = teamList.map(t => `<option value="${escHtml(t.id)}">${escHtml(t.name)} (${escHtml(t.id)})</option>`).join('');
       }
     }
 
@@ -4206,7 +4753,8 @@
     function renderMiniStandings() {
       const list = document.getElementById('mini-standings-list');
       const teams = STATE.teams || [];
-      document.getElementById('team-count-lbl').textContent = `${teams.length} Teams`;
+      const teamCountLbl = document.getElementById('team-count-lbl');
+      if (teamCountLbl) teamCountLbl.textContent = `${teams.length} Franchise${teams.length === 1 ? '' : 's'} Active`;
 
       if (!teams.length) {
         list.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;">No franchises enrolled yet.</div>';
@@ -4218,7 +4766,7 @@
         const totalCats = (STATE.categories || []).length;
         return `
           <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:8px;font-size:0.82rem;">
-            <span style="font-weight:600;">${t.name}</span>
+            <span style="font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(t.name)}</span>
             <div style="font-family:var(--font-mono);font-size:0.8rem;">
               <span style="color:var(--accent-green);font-weight:700;">৳${t.purse}</span>
               <span style="color:var(--text-muted);font-size:0.72rem;margin-left:4px;">(${slotCount}/${totalCats})</span>
@@ -4231,7 +4779,7 @@
       document.getElementById('lottery-queue-count').textContent = `${q.length} in queue`;
       const qPreview = document.getElementById('lottery-queue-preview');
       if (q.length > 0) {
-        qPreview.innerHTML = q.slice(0, 5).map(p => `<div>• [${p.code || p.category}] ${p.name} (৳${p.base})</div>`).join('');
+        qPreview.innerHTML = q.slice(0, 5).map(p => `<div style="padding:2px 0;">• [${escHtml(p.code || p.category)}] ${escHtml(p.name)} (৳${escHtml(p.base)})</div>`).join('');
       } else {
         qPreview.textContent = 'Queue empty. Admin can shuffle pool.';
       }
@@ -4286,10 +4834,10 @@
 
         const adminActions = SESSION.role === 'admin' ? `
           <div style="display:flex;gap:0.5rem;margin-top:1rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;">
-            <button class="btn-primary" style="padding:4px 10px;font-size:0.75rem;background:linear-gradient(135deg,#6366f1,#4f46e5);" onclick="openEditTeamModal('${team.id}')">✏️ Edit Franchise</button>
-            <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetTeam('${team.id}')">Reset Team</button>
-            <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetImpact('${team.id}')">Reset Impact</button>
-            <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" onclick="adminDeleteTeam('${team.id}')">🗑️ Delete</button>
+            <button class="btn-primary" style="padding:4px 10px;font-size:0.75rem;background:linear-gradient(135deg,#6366f1,#4f46e5);" onclick="openEditTeamModal('${escArg(team.id)}')">✏️ Edit Franchise</button>
+            <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetTeam('${escArg(team.id)}')">Reset Team</button>
+            <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetImpact('${escArg(team.id)}')">Reset Impact</button>
+            <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" onclick="adminDeleteTeam('${escArg(team.id)}')">🗑️ Delete</button>
           </div>
         ` : '';
 
@@ -4300,8 +4848,8 @@
                 ${team.logo ? `<img class="team-logo-img" src="${team.logo}" onerror="this.remove()" />` : team.id.slice(0, 3)}
               </div>
               <div>
-                <h3 style="font-size: 1.1rem; font-weight: 700;">${team.name}</h3>
-                <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">ID: ${team.id} | Impact: ${team.impactUsed ? 'Used' : 'Avail'}</span>
+                <h3 style="font-size: 1.05rem; font-weight: 700; word-break: break-word;">${escHtml(team.name)}</h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">ID: ${escHtml(team.id)} | Impact: ${team.impactUsed ? 'Used' : 'Avail'}</span>
               </div>
             </div>
 
@@ -4379,12 +4927,12 @@
               <div class="cat-admin-card cat-border-c${colorIdx}">
                 <div class="cat-admin-card-head">
                   <div>
-                    <h4 style="font-size:1.05rem;font-weight:700;">${cat.name}</h4>
+                    <h4 style="font-size:1rem;font-weight:700;word-break:break-word;">${escHtml(cat.name)}</h4>
                     <span class="player-category-tag cat-badge-c${colorIdx}">🏷️ Category</span>
                   </div>
                   <div style="display:flex;gap:4px;">
-                    <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="openEditCategoryModal('${cat.id}')">✏️ Edit</button>
-                    <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" onclick="adminDeleteCategory('${cat.id}')">🗑️</button>
+                    <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="openEditCategoryModal('${escArg(cat.id)}')">✏️ Edit</button>
+                    <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" onclick="adminDeleteCategory('${escArg(cat.id)}')">🗑️</button>
                   </div>
                 </div>
                 <div class="cat-admin-stats">
@@ -4410,9 +4958,9 @@
             const colorIdx = i % 6;
             const isSelected = catFilter === c.id;
             return `
-              <button class="btn-secondary" style="padding:5px 12px;font-size:0.75rem;border-radius:20px;display:inline-flex;align-items:center;gap:5px;${isSelected ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent;' : ''}" onclick="setCategoryFilter('${c.id}')">
+              <button class="btn-secondary" style="padding:5px 12px;font-size:0.75rem;border-radius:20px;display:inline-flex;align-items:center;gap:5px;${isSelected ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-color:transparent;' : ''}" onclick="setCategoryFilter('${escArg(c.id)}')">
                 <span class="cat-badge-c${colorIdx}" style="padding:1px 6px;border-radius:4px;font-size:0.68rem;">+৳${c.increment || 10}</span>
-                <span>${c.name}</span>
+                <span>${escHtml(c.name)}</span>
               </button>
             `;
           }).join('')}
@@ -4481,9 +5029,9 @@
           const adminCell = SESSION.role === 'admin' ? `
             <td>
               <div style="display:flex;gap:4px;">
-                <button class="btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminStagePlayer('${p.categoryId}', '${p.name}')">Stage</button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${p.categoryId}', '${p.name}')">Reset</button>
-                <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" title="Delete player permanently from database & storage" onclick="adminDeleteSinglePlayer('${p.categoryId}', '${p.name}')">🗑️</button>
+                <button class="btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminStagePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">Stage</button>
+                <button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">Reset</button>
+                <button class="btn-danger" style="padding:4px 8px;font-size:0.75rem;" title="Delete player permanently from database & storage" onclick="adminDeleteSinglePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">🗑️</button>
               </div>
             </td>
           ` : '';
@@ -4492,8 +5040,8 @@
             <tr>
               <td>
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <img src="${p.image || ''}" style="width:34px;height:34px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="handleImageFallback(this)" />
-                  <strong>${p.name}</strong>
+                  <img src="${escHtml(p.image || '')}" style="width:34px;height:34px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="handleImageFallback(this)" />
+                  <strong>${escHtml(p.name)}</strong>
                 </div>
               </td>
               <td><span class="player-category-tag cat-badge-c${colorIdx}">${p.categoryName}</span></td>
@@ -4567,9 +5115,9 @@
 
           const adminActionButtons = SESSION.role === 'admin' ? `
             <div class="player-card-actions">
-              <button class="btn-primary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminStagePlayer('${p.categoryId}', '${p.name}')">Stage</button>
-              <button class="btn-secondary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${p.categoryId}', '${p.name}')">Reset</button>
-              <button class="btn-danger" style="padding:5px 8px;font-size:0.75rem;" title="Delete player permanently from database & storage" onclick="adminDeleteSinglePlayer('${p.categoryId}', '${p.name}')">🗑️</button>
+              <button class="btn-primary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminStagePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">Stage</button>
+              <button class="btn-secondary" style="padding:5px 10px;font-size:0.75rem;" onclick="adminResetSinglePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">Reset</button>
+              <button class="btn-danger" style="padding:5px 8px;font-size:0.75rem;" title="Delete player permanently from database & storage" onclick="adminDeleteSinglePlayer('${escArg(p.categoryId)}', '${escArg(p.name)}')">🗑️</button>
             </div>
           ` : '';
 
@@ -4577,10 +5125,10 @@
             <div class="player-pool-card cat-border-c${colorIdx} ${cardStateClass}">
               <div class="player-card-top">
                 <div class="player-avatar-wrap">
-                  <img src="${p.image || ''}" class="player-avatar-img" alt="${p.name}" onerror="handleImageFallback(this)" />
+                  <img src="${escHtml(p.image || '')}" class="player-avatar-img" alt="${escHtml(p.name)}" onerror="handleImageFallback(this)" />
                 </div>
                 <div class="player-card-meta">
-                  <h4 class="player-card-name" title="${p.name}">${p.name}</h4>
+                  <h4 class="player-card-name" title="${escHtml(p.name)}">${escHtml(p.name)}</h4>
                   <span class="player-category-tag cat-badge-c${colorIdx}">
                     🏷️ ${p.categoryName}
                   </span>
@@ -4657,17 +5205,17 @@
           <div class="fixture-item">
             <div>
               <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">
-                ${m.title || `Match #${idx + 1}`} • ${m.venue || 'Stadium'}
+                ${escHtml(m.title || ('Match #' + (idx + 1)))} • ${escHtml(m.venue || 'Stadium')}
               </div>
-              <div style="display:flex;align-items:center;gap:1rem;font-weight:700;">
-                <span>${m.teamA}</span>
+              <div style="display:flex;align-items:center;gap:0.75rem;font-weight:700;flex-wrap:wrap;">
+                <span>${escHtml(m.teamA)}</span>
                 <span class="fixture-vs">VS</span>
-                <span>${m.teamB}</span>
+                <span>${escHtml(m.teamB)}</span>
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:var(--font-mono);font-size:0.85rem;color:#c7d2fe;">${m.time || 'TBD'}</div>
-              <div style="font-size:0.75rem;color:var(--accent-green);font-weight:700;">${m.status || 'Upcoming'}</div>
+              <div style="font-family:var(--font-mono);font-size:0.85rem;color:#c7d2fe;">${escHtml(m.time || 'TBD')}</div>
+              <div style="font-size:0.75rem;color:var(--accent-green);font-weight:700;">${escHtml(m.status || 'Upcoming')}</div>
             </div>
           </div>
         `;
@@ -4678,7 +5226,7 @@
       const selA = document.getElementById('match-team-a-select');
       const selB = document.getElementById('match-team-b-select');
       const teams = STATE.teams || [];
-      const opts = teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+      const opts = teams.map(t => `<option value="${escHtml(t.name)}">${escHtml(t.name)}</option>`).join('');
       selA.innerHTML = opts;
       selB.innerHTML = opts;
       document.getElementById('match-modal').classList.add('open');
@@ -4750,10 +5298,10 @@
       const cats = STATE.categories || [];
 
       if (directSelect) {
-        directSelect.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        directSelect.innerHTML = teams.map(t => `<option value="${escHtml(t.id)}">${escHtml(t.name)}</option>`).join('');
       }
       if (addPlayerCat) {
-        addPlayerCat.innerHTML = cats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        addPlayerCat.innerHTML = cats.map(c => `<option value="${escHtml(c.id)}">${escHtml(c.name)}</option>`).join('');
       }
 
       const impactInput = document.getElementById('admin-cfg-impact-input');
@@ -4763,7 +5311,9 @@
     }
 
     function saveImpactConfig() {
-      const amt = Number(document.getElementById('admin-cfg-impact-input').value) || 0;
+      const el = document.getElementById('admin-cfg-impact-input');
+      if (!el) return saveImpactPurseAmount();
+      const amt = Number(el.value) || 0;
       socket.emit('admin:updateConfig', { impactAmount: amt });
       showToast(`Impact bonus set to ৳${amt}`, 'normal');
     }
@@ -5051,7 +5601,7 @@
         showToast("Please create a category first", "normal");
         return;
       }
-      sel.innerHTML = cats.map(c => `<option value="${c.id}">${c.name} (${c.id})</option>`).join('');
+      sel.innerHTML = cats.map(c => `<option value="${escHtml(c.id)}">${escHtml(c.name)} (${escHtml(c.id)})</option>`).join('');
       document.getElementById('modal-player-name-input').value = '';
       document.getElementById('modal-player-img-input').value = '';
       document.getElementById('player-add-modal').classList.add('open');
@@ -5169,10 +5719,23 @@
           const cat = STATE.currentActivePlayer ? STATE.currentActivePlayer.category : null;
           const reserve = getSaleReserve(team, cat);
           const available = Math.max(0, Number(team.purse) - reserve);
-          document.getElementById('arena-purse-val').textContent = team.purse;
-          document.getElementById('arena-avail-val').textContent = available;
+          setValue('arena-purse-val', Number(team.purse || 0).toLocaleString());
+          setValue('arena-avail-val', available.toLocaleString());
         }
       }
+    }
+
+    // Writes a value and pulses it when it actually changed, so live
+    // figures read as live instead of silently swapping.
+    function setValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const next = String(value);
+      if (el.textContent === next) return;
+      el.textContent = next;
+      el.classList.remove('value-flash');
+      void el.offsetWidth;
+      el.classList.add('value-flash');
     }
 
     // =========================================================
@@ -5387,10 +5950,10 @@
           : `<div class="login-team-fallback-logo">${team.id.slice(0, 3)}</div>`;
 
         return `
-          <div class="login-team-card ${isSelected ? 'selected' : ''}" onclick="selectLoginTeam('${team.id}')">
+          <div class="login-team-card ${isSelected ? 'selected' : ''}" onclick="selectLoginTeam('${escArg(team.id)}')">
             ${logoHtml}
-            <div class="login-team-name" title="${team.name}">${team.name}</div>
-            <div class="login-team-code">${team.id}</div>
+            <div class="login-team-name" title="${escHtml(team.name)}">${escHtml(team.name)}</div>
+            <div class="login-team-code">${escHtml(team.id)}</div>
           </div>
         `;
       }).join('');
@@ -5550,12 +6113,14 @@
 
     function showLoginAlert(msg, type) {
       const el = document.getElementById('login-alert-banner');
+      if (!el) return;
       el.textContent = msg;
-      el.className = `login-alert ${type}`;
+      el.className = `login-alert ${type || 'info'}`;
       el.style.display = 'block';
     }
     function hideLoginAlert() {
-      document.getElementById('login-alert-banner').style.display = 'none';
+      const el = document.getElementById('login-alert-banner');
+      if (el) el.style.display = 'none';
     }
 
     function togglePasswordVisibility(inputId, btn) {
@@ -5688,6 +6253,24 @@
       if (!document.documentElement.classList.contains('has-session')) {
         switchLoginPortal('manager');
       }
+
+      // Apply the initial active state of the segmented toggles, which
+      // previously stayed unstyled until the user clicked one.
+      setDashViewMode('teams');
+      setCatalogDisplayMode('cards');
+      renderTimer(TIMER_STATE.time, TIMER_STATE.paused);
+
+      // Modals: click the backdrop or press Escape to dismiss.
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('mousedown', (e) => {
+          if (e.target === backdrop) backdrop.classList.remove('open');
+        });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const open = document.querySelector('.modal-backdrop.open');
+        if (open) open.classList.remove('open');
+      });
 
       hideAppLoader();
       initSocket();

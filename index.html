@@ -1864,6 +1864,264 @@
     }
     .auth-quick-btn:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--glass-border-bright); }
 
+
+    /* =========================================================
+       FRANCHISE PADDLE MONITOR  (.pm-*)
+       ========================================================= */
+    .paddle-monitor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+      gap: 0.65rem;
+    }
+    .pm-empty { text-align: center; color: var(--text-muted); padding: 2.5rem 1rem; font-size: 0.85rem; }
+
+    .pm-card {
+      position: relative;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(8, 16, 36, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 0.85rem;
+      overflow: hidden;
+      transition: border-color 220ms ease, transform 220ms var(--ease-out-soft), background 220ms ease;
+      animation: cardIn var(--dur-slow) var(--ease-out-soft) both;
+    }
+    .pm-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--pm-accent, #6366f1)0a, transparent 55%);
+      pointer-events: none;
+    }
+    .pm-card:hover { transform: translateY(-2px); border-color: var(--glass-border-bright); }
+    .pm-card-leading {
+      border-color: rgba(245, 158, 11, 0.55) !important;
+      background: rgba(12, 22, 46, 0.8) !important;
+      box-shadow: 0 0 22px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .pm-lead-bar {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .pm-card-top { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+    .pm-logo-wrap { flex: 0 0 36px; width: 36px; height: 36px; position: relative; }
+    .pm-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--glass-border-bright); }
+    .pm-logo-fallback {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font: 800 0.62rem var(--font-mono);
+      border: 1.5px solid var(--glass-border-bright);
+      letter-spacing: 0.04em;
+    }
+    .pm-team-info { flex: 1 1 auto; min-width: 0; }
+    .pm-team-name { font: 700 0.82rem var(--font-main); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pm-captain { font: 600 0.66rem var(--font-mono); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .pm-status-wrap { flex: 0 0 auto; }
+    .pm-status {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font: 800 0.59rem var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pm-status-lead    { background: rgba(245,158,11,0.18); color: #f59e0b; border: 1px solid rgba(245,158,11,0.4); }
+    .pm-status-active  { background: rgba(78,222,163,0.14); color: #4edea3; border: 1px solid rgba(78,222,163,0.35); }
+    .pm-status-watch   { background: rgba(148,163,184,0.1);  color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+    .pm-status-standby { background: rgba(99,102,241,0.1);   color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+    .pm-status-out     { background: rgba(239,68,68,0.1);    color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+    .pm-card-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.3rem;
+      margin-top: 0.7rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .pm-stat { display: flex; flex-direction: column; gap: 0.12rem; }
+    .pm-stat-lbl { font: 600 0.59rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    .pm-stat-val { font: 800 0.82rem var(--font-mono); color: #fff; }
+
+    /* =========================================================
+       TEAM FRANCHISE DASHBOARD  (.tdb-*)
+       ========================================================= */
+    .tdb-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Hero card */
+    .tdb-hero {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(6, 12, 28, 0.82);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+      animation: cardIn var(--dur-slow) var(--ease-out-soft) both;
+    }
+    .tdb-hero-glow { position: absolute; inset: 0; pointer-events: none; }
+    .tdb-hero-accent-line { position: absolute; inset: 0 0 auto 0; height: 3px; }
+    .tdb-hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem 1.75rem;
+      flex-wrap: wrap;
+    }
+    .tdb-logo-ring {
+      flex: 0 0 80px;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 2px solid;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 0 28px rgba(0,0,0,0.5);
+    }
+    .tdb-logo-img { width: 100%; height: 100%; object-fit: cover; }
+    .tdb-logo-fallback {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font: 800 1.3rem var(--font-mono);
+      letter-spacing: 0.04em;
+    }
+    .tdb-hero-text { flex: 1 1 200px; min-width: 0; }
+    .tdb-franchise-name { font: 800 clamp(1.15rem, 2.5vw, 1.75rem) var(--font-main); color: #fff; margin: 0 0 0.3rem; word-break: break-word; }
+    .tdb-captain-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.83rem; }
+    .tdb-captain-name { font-weight: 700; color: #fff; }
+    .tdb-captain-role {
+      font: 700 0.6rem var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+    }
+    .tdb-hero-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.55rem; font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap; }
+    .tdb-meta-dot { opacity: 0.4; }
+
+    /* Purse ring (reuse budget-circle classes from the budget panel) */
+    .tdb-ring-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+      flex: 0 0 80px;
+    }
+    .tdb-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .tdb-ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .tdb-ring-pct { font: 800 1rem var(--font-mono); line-height: 1; }
+    .tdb-ring-lbl { font: 700 0.48rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 2px; }
+
+    /* Stats row */
+    .tdb-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+      gap: 0.65rem;
+      animation: cardIn var(--dur-slow) var(--ease-out-soft) both;
+      animation-delay: 60ms;
+    }
+    .tdb-stat-pill {
+      display: flex; flex-direction: column; gap: 0.25rem;
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(8, 16, 36, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .tdb-stat-pill-lbl { font: 700 0.62rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    .tdb-stat-pill-val { font: 800 1.05rem var(--font-mono); color: #fff; }
+
+    /* Sections */
+    .tdb-section {
+      border-radius: 18px;
+      border: 1px solid var(--glass-border);
+      background: rgba(6, 12, 28, 0.65);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+      animation: cardIn var(--dur-slow) var(--ease-out-soft) both;
+      animation-delay: 120ms;
+    }
+    .tdb-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.025);
+    }
+    .tdb-section-icon { font-size: 18px !important; color: var(--text-muted); }
+    .tdb-section-title { font: 700 0.82rem var(--font-main); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-main); }
+    .tdb-section-badge {
+      margin-left: auto;
+      font: 700 0.65rem var(--font-mono);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+    }
+
+    /* Signings list */
+    .tdb-signings-list { padding: 0.65rem; display: flex; flex-direction: column; gap: 0.4rem; max-height: 420px; overflow-y: auto; }
+    .tdb-empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.83rem; line-height: 1.6; }
+    .tdb-signing-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.7rem;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      transition: background 180ms ease, border-color 180ms ease;
+    }
+    .tdb-signing-row:hover { background: rgba(255,255,255,0.065); border-color: var(--glass-border-subtle); }
+    .tdb-signing-rank { font: 800 0.65rem var(--font-mono); color: var(--text-dim); width: 20px; flex: 0 0 20px; text-align: right; }
+    .tdb-signing-img { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex: 0 0 30px; }
+    .tdb-signing-img-fallback { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,0.06); flex: 0 0 30px; }
+    .tdb-signing-info { flex: 1 1 auto; min-width: 0; }
+    .tdb-signing-name { font: 700 0.83rem var(--font-main); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tdb-signing-cat { font: 600 0.66rem var(--font-mono); color: var(--text-muted); }
+    .tdb-signing-price { font: 800 0.85rem var(--font-mono); color: #4edea3; white-space: nowrap; flex: 0 0 auto; }
+
+    /* Top Signings (admin dash left column) */
+    .tsg-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.6rem;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid transparent;
+      transition: background 180ms ease, border-color 180ms ease;
+    }
+    .tsg-row:hover { background: rgba(255,255,255,0.055); border-color: var(--pm-accent, var(--glass-border)); }
+    .tsg-team { display: flex; align-items: center; gap: 0.4rem; flex: 0 0 8.5rem; min-width: 0; }
+    .tsg-team-name { font: 700 0.72rem var(--font-main); color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tsg-top-player { display: flex; align-items: center; gap: 0.4rem; flex: 1 1 auto; min-width: 0; }
+    .tsg-player-name { font: 700 0.75rem var(--font-main); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tsg-cat { font: 600 0.62rem var(--font-mono); color: var(--text-dim); white-space: nowrap; }
+    .tsg-price { font: 800 0.78rem var(--font-mono); color: #4edea3; white-space: nowrap; flex: 0 0 auto; }
+
   </style>
 </head>
 
@@ -2152,6 +2410,7 @@
           <button class="nav-tab-btn nav-btn-dashboard px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-dashboard')">Dashboard</button>
           <button class="nav-tab-btn nav-btn-arena active px-space-md py-space-xs uppercase tracking-wider transition-all rounded-lg" onclick="switchView('view-arena')">Live Arena</button>
           <button class="nav-tab-btn nav-btn-franchises px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-franchises')">Franchises</button>
+          <button id="nav-btn-my-franchise" class="nav-tab-btn nav-btn-my-franchise px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" style="display:none;" onclick="switchView('view-team-dashboard')">My Franchise</button>
           <button class="nav-tab-btn nav-btn-catalog px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-catalog')">Players &amp; Pool</button>
           <button class="nav-tab-btn nav-btn-schedule px-space-md py-space-xs rounded-lg font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all" onclick="switchView('view-schedule')">Fixtures</button>
         </nav>
@@ -2301,42 +2560,44 @@
               </h3>
               <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-mono">Remaining budget</span>
             </div>
-            <div id="dash-budget-circles-grid" class="flex flex-col gap-space-sm max-h-[620px] overflow-y-auto pr-space-2xs">
+            <div id="dash-budget-circles-grid" class="flex flex-col gap-space-sm max-h-64 overflow-y-auto pr-space-2xs">
               <div class="text-center text-on-surface-variant py-8 font-body-sm">
                 No franchises enrolled yet.
               </div>
             </div>
+            <!-- Top Signings per franchise (admin only) -->
+            <div id="dash-top-signings-section" class="mt-space-md pt-space-md border-t border-white/10" style="display:none;">
+              <div class="flex items-center justify-between mb-space-sm">
+                <h4 class="font-headline-sm text-headline-sm font-bold flex items-center gap-space-xs text-on-surface" style="font-size:0.85rem;">
+                  <span class="material-symbols-outlined" style="font-size:18px;color:#f59e0b;">military_tech</span>
+                  <span>Top Signings per Franchise</span>
+                </h4>
+              </div>
+              <div id="dash-top-signings-list" class="flex flex-col gap-space-xs max-h-72 overflow-y-auto pr-space-2xs"></div>
+            </div>
           </div>
 
-          <!-- Column 2 (Right 5/12): Every Team's Top Sold Players & Unified Purchase Feed -->
+          <!-- Column 2 (Right 5/12): Franchise Paddle Monitor -->
           <div class="dashboard-panel glass-panel lg:col-span-5 bg-surface-container-lowest/60 backdrop-blur-2xl rounded-2xl p-space-lg border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
             <div class="flex justify-between items-center mb-space-md flex-wrap gap-2">
               <h3 class="font-headline-sm text-headline-sm font-bold flex items-center gap-space-xs text-on-surface">
-                <span class="material-symbols-outlined text-tertiary">military_tech</span>
-                <span id="dash-right-col-title">Franchise Signings</span>
+                <span class="material-symbols-outlined" style="color:#f59e0b;">sports_martial_arts</span>
+                <span>Franchise Paddle Monitor</span>
               </h3>
-              <div class="flex gap-1.5 items-center">
-                <button id="dash-view-btn-teams" class="btn-secondary py-1 px-2.5 text-xs font-bold rounded-lg" style="background: var(--accent-indigo); border: none;" onclick="setDashViewMode('teams')">By Team</button>
-                <button id="dash-view-btn-global" class="btn-secondary py-1 px-2.5 text-xs font-bold rounded-lg" onclick="setDashViewMode('global')">🏆 Top Buys</button>
-                <button id="dash-view-btn-unified" class="btn-secondary py-1 px-2.5 text-xs font-bold rounded-lg" onclick="setDashViewMode('unified')">📜 All Records</button>
+              <div class="flex items-center gap-1.5">
+                <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span>
+                <span class="font-label-sm text-label-sm text-emerald-400 font-bold uppercase tracking-wider">Live</span>
               </div>
             </div>
 
-            <!-- Teams Top Solds Container -->
-            <div id="dash-teams-top-solds-container" class="flex flex-col gap-space-sm max-h-[620px] overflow-y-auto pr-space-2xs">
-              <div class="text-center text-on-surface-variant py-8 font-body-sm">
-                No players acquired yet across franchises.
-              </div>
-            </div>
+            <!-- Teams Top Solds Container (hidden, kept for legacy toggle compat) -->
+            <div id="dash-teams-top-solds-container" style="display:none;"></div>
+            <div id="dash-global-top-solds-container" style="display:none;"><div id="dash-top-solds-list"></div></div>
+            <div id="dash-unified-purchase-records" style="display:none;" class="unified-purchase-records"></div>
 
-            <!-- Global Top Solds Container -->
-            <div id="dash-global-top-solds-container" style="display: none;" class="max-h-[620px] overflow-y-auto pr-space-2xs">
-              <div id="dash-top-solds-list"></div>
-            </div>
-
-            <!-- Unified Purchase Feed Container -->
-            <div id="dash-unified-purchase-records" style="display: none;" class="unified-purchase-records">
-              <div class="text-center text-on-surface-variant py-8 font-body-sm">No purchases have been recorded yet.</div>
+            <!-- Paddle Monitor Grid -->
+            <div id="paddle-monitor-grid" class="paddle-monitor-grid">
+              <div class="text-center text-on-surface-variant py-8 font-body-sm">No franchises enrolled yet.</div>
             </div>
           </div>
 
@@ -2744,6 +3005,13 @@
       <!-- =========================================================
            VIEW 2: FRANCHISES & ROSTERS
            ========================================================= -->
+      <!-- =========================================================
+           VIEW: TEAM FRANCHISE DASHBOARD (team role only)
+           ========================================================= -->
+      <div id="view-team-dashboard" class="view-container">
+        <div id="team-dashboard-root"></div>
+      </div>
+
       <div id="view-franchises" class="view-container">
         <div class="flex justify-between items-center mb-space-lg flex-wrap gap-4">
           <div>
@@ -2926,6 +3194,16 @@
         <div>
           <label class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block font-semibold mb-1">Logo URL or Initials</label>
           <input type="text" id="edit-team-logo" class="form-control" placeholder="https://... or CT">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block font-semibold mb-1">Captain Name</label>
+            <input type="text" id="edit-team-captain" class="form-control" placeholder="e.g. Rohit Sharma">
+          </div>
+          <div>
+            <label class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block font-semibold mb-1">Accent Colour</label>
+            <input type="color" id="edit-team-color" class="form-control" style="height:2.6rem;padding:0.2rem 0.4rem;cursor:pointer;" value="#6366f1">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -3501,6 +3779,9 @@
         applyRolePermissions();
         renderCurrentView();
         updatePurseDisplays();
+        // Keep paddle monitor fresh on every state push
+        renderPaddleMonitor(STATE.teams || [], STATE.currentActivePlayer, STATE.activeBids, STATE.activeBidders);
+        if (SESSION.role === 'team' && SESSION.teamId) renderTeamDashboard();
 
         // Ensure loader is hidden once state is received
         const loader = document.getElementById('app-loading-screen');
@@ -3557,6 +3838,8 @@
       // Player Bid Placed
       socket.on('player:bid', (bidData) => {
         handleIncomingBid(bidData);
+        renderPaddleMonitor(STATE.teams || [], STATE.currentActivePlayer, STATE.activeBids, STATE.activeBidders);
+        if (SESSION.role === 'team' && SESSION.teamId) renderTeamDashboard();
       });
 
       // Player Sold Confirmation
@@ -3746,8 +4029,10 @@
       if (hostLabel) hostLabel.textContent = `HOST: ${(SESSION.hostId || 'ADMIN').toUpperCase()}`;
       if (roleBadge) roleBadge.className = 'badge-role ' + SESSION.role;
 
+      const myFranchiseNav = document.getElementById('nav-btn-my-franchise');
       if (SESSION.role === 'admin') {
         roleText.textContent = `Admin (${SESSION.username || 'Manager'})`;
+        if (myFranchiseNav) myFranchiseNav.style.display = 'none';
         if (adminLaunchpad) adminLaunchpad.style.display = 'block';
         const viewerWait = document.getElementById('viewer-waiting-notice');
         if (viewerWait) viewerWait.style.display = 'none';
@@ -3759,6 +4044,7 @@
       } else if (SESSION.role === 'team') {
         const team = getMyTeam();
         roleText.textContent = team ? team.name : `Franchise (${SESSION.teamId})`;
+        if (myFranchiseNav) myFranchiseNav.style.display = 'inline-flex';
         if (adminLaunchpad) adminLaunchpad.style.display = 'none';
         const viewerWait = document.getElementById('viewer-waiting-notice');
         if (viewerWait) viewerWait.style.display = 'block';
@@ -3769,6 +4055,7 @@
         if (headerPurse) headerPurse.classList.add('is-visible');
       } else {
         roleText.textContent = 'Spectator Mode';
+        if (myFranchiseNav) myFranchiseNav.style.display = 'none';
         if (adminLaunchpad) adminLaunchpad.style.display = 'none';
         const viewerWait = document.getElementById('viewer-waiting-notice');
         if (viewerWait) viewerWait.style.display = 'block';
@@ -4011,6 +4298,40 @@
         }
       }
 
+      // 2b. Populate top signings per franchise (admin view, left column)
+      const topSignSection = document.getElementById('dash-top-signings-section');
+      const topSignList = document.getElementById('dash-top-signings-list');
+      if (topSignList) {
+        if (!allSoldItems.length) {
+          if (topSignSection) topSignSection.style.display = 'none';
+        } else {
+          if (topSignSection) topSignSection.style.display = 'block';
+          topSignList.innerHTML = teams.map(team => {
+            const acqs = (teamAcquisitions[team.id] || []).slice().sort((a,b) => b.price - a.price);
+            if (!acqs.length) return '';
+            const top = acqs[0];
+            const accent = team.color || '#6366f1';
+            const logoHtml = team.logo
+              ? `<img src="${escHtml(team.logo)}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex:0 0 24px;" onerror="this.remove()" />`
+              : `<div style="width:24px;height:24px;border-radius:50%;background:${accent}33;color:${accent};font:700 0.6rem var(--font-mono);display:flex;align-items:center;justify-content:center;flex:0 0 24px;">${escHtml(team.id.slice(0,3))}</div>`;
+            return `
+              <div class="tsg-row" style="--tsg-accent:${accent};">
+                <div class="tsg-team">
+                  ${logoHtml}
+                  <span class="tsg-team-name">${escHtml(team.name)}</span>
+                </div>
+                <div class="tsg-top-player">
+                  ${top.image ? `<img src="${escHtml(top.image)}" style="width:22px;height:22px;border-radius:6px;object-fit:cover;flex:0 0 22px;" onerror="this.remove()" />` : ''}
+                  <span class="tsg-player-name">${escHtml(top.name)}</span>
+                  <span class="tsg-cat">${escHtml(top.categoryName)}</span>
+                </div>
+                <span class="tsg-price">৳${top.price.toLocaleString()}</span>
+              </div>
+            `;
+          }).filter(Boolean).join('');
+        }
+      }
+
       // 3. Render Right Column: Every Team's Top Sold Players Breakdown
       const teamsTopSoldsContainer = document.getElementById('dash-teams-top-solds-container');
       if (teamsTopSoldsContainer) {
@@ -4099,6 +4420,8 @@
         }
       }
 
+      renderPaddleMonitor(teams, STATE.currentActivePlayer, STATE.activeBids, STATE.activeBidders);
+
       if (topSoldsContainer) {
         if (!allSoldItems.length) {
           topSoldsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">No players sold yet in this auction. Once players are acquired, they will appear here ranked by highest price.</div>';
@@ -4137,6 +4460,7 @@
       renderScheduleView();
       renderAdminSelectors();
       updatePurseDisplays();
+      if (SESSION.role === 'team' && SESSION.teamId) renderTeamDashboard();
     }
 
     // Active Player Rendering
@@ -5424,6 +5748,8 @@
       document.getElementById('edit-team-purse').value = '500';
       document.getElementById('edit-team-pass').value = '';
       document.getElementById('edit-team-logo').value = '';
+      document.getElementById('edit-team-captain').value = '';
+      document.getElementById('edit-team-color').value = '#6366f1';
       document.getElementById('team-edit-modal').classList.add('open');
     }
 
@@ -5438,6 +5764,8 @@
       document.getElementById('edit-team-purse').value = team.purse !== undefined ? team.purse : 500;
       document.getElementById('edit-team-pass').value = team.password || '';
       document.getElementById('edit-team-logo').value = team.logo || '';
+      document.getElementById('edit-team-captain').value = team.captain || '';
+      document.getElementById('edit-team-color').value = team.color || '#6366f1';
       document.getElementById('team-edit-modal').classList.add('open');
     }
 
@@ -5465,6 +5793,8 @@
       const purse = Number(document.getElementById('edit-team-purse').value) || 500;
       const pass = document.getElementById('edit-team-pass').value.trim();
       const logo = document.getElementById('edit-team-logo').value.trim();
+      const captain = document.getElementById('edit-team-captain').value.trim();
+      const color = document.getElementById('edit-team-color').value || '#6366f1';
 
       if (!id || !name || !pass) {
         showToast("Provide Franchise ID, Name, and Password", "normal");
@@ -5483,12 +5813,11 @@
             name: name,
             purse: purse,
             password: pass,
-            logo: logo
+            logo: logo,
+            captain: captain,
+            color: color
           };
-          // Also emit logo update if logo changed
-          if (logo) {
-            socket.emit('admin:setTeamLogo', { teamId: id, logoUrl: logo });
-          }
+          if (logo) socket.emit('admin:setTeamLogo', { teamId: id, logoUrl: logo });
           showToast(`Franchise ${name} updated`, 'normal');
         }
       } else {
@@ -5503,6 +5832,8 @@
           purse,
           password: pass,
           logo: logo,
+          captain: captain,
+          color: color,
           purchases: {},
           impactUsed: false,
           impactActive: false,
@@ -6355,6 +6686,244 @@
       window.addEventListener('click', () => SOUNDS.init(), { once: true });
       window.addEventListener('load', () => hideAppLoader());
     });
+
+    /* =========================================================
+       FRANCHISE PADDLE MONITOR
+       Shows each team's live bid status in a compact card grid.
+       Rendered in admin and spectator dashboard right column.
+       ========================================================= */
+    function renderPaddleMonitor(teams, activePlayer, activeBids, activeBidders) {
+      const grid = document.getElementById('paddle-monitor-grid');
+      if (!grid) return;
+      if (!teams || !teams.length) {
+        grid.innerHTML = '<div class="pm-empty">No franchises enrolled yet.</div>';
+        return;
+      }
+
+      const bids = activeBids || {};
+      const bidders = activeBidders || {};
+      const playerKey = activePlayer ? (activePlayer.category + ':' + activePlayer.name) : null;
+
+      // Find who holds the current highest bid
+      const currentLeaderId = playerKey ? (bidders[playerKey] || null) : null;
+      const currentBid = playerKey ? (Number(bids[playerKey]) || 0) : 0;
+      const hasActive = !!activePlayer;
+
+      grid.innerHTML = teams.map(team => {
+        const purse = Math.max(0, Number(team.purse) || 0);
+        const purchased = Object.keys(team.purchases || {}).length;
+        const isLeading = currentLeaderId === team.id;
+        const canBid = hasActive && purse > 0;
+        const accent = team.color || '#6366f1';
+
+        // Status label
+        let statusLabel = 'Watching';
+        let statusClass = 'pm-status-watch';
+        if (!hasActive) { statusLabel = 'Standby'; statusClass = 'pm-status-standby'; }
+        else if (isLeading) { statusLabel = 'Leading'; statusClass = 'pm-status-lead'; }
+        else if (!canBid) { statusLabel = 'Out'; statusClass = 'pm-status-out'; }
+        else { statusLabel = 'Active'; statusClass = 'pm-status-active'; }
+
+        const logoHtml = team.logo
+          ? `<img src="${escHtml(team.logo)}" class="pm-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="pm-logo-fallback" style="display:none;background:${accent}22;color:${accent};">${escHtml(team.id.slice(0,3))}</div>`
+          : `<div class="pm-logo-fallback" style="background:${accent}22;color:${accent};">${escHtml(team.id.slice(0,3))}</div>`;
+
+        return `
+          <div class="pm-card ${isLeading ? 'pm-card-leading' : ''}" style="--pm-accent:${accent};">
+            <div class="pm-card-top">
+              <div class="pm-logo-wrap">${logoHtml}</div>
+              <div class="pm-team-info">
+                <div class="pm-team-name">${escHtml(team.name)}</div>
+                ${team.captain ? `<div class="pm-captain">⚡ ${escHtml(team.captain)}</div>` : `<div class="pm-captain" style="opacity:.45;">ID: ${escHtml(team.id)}</div>`}
+              </div>
+              <div class="pm-status-wrap">
+                <span class="pm-status ${statusClass}">${statusLabel}</span>
+              </div>
+            </div>
+            <div class="pm-card-stats">
+              <div class="pm-stat">
+                <span class="pm-stat-lbl">Purse</span>
+                <span class="pm-stat-val" style="color:${purse < 100 ? '#ef4444' : '#4edea3'};">৳${purse.toLocaleString()}</span>
+              </div>
+              <div class="pm-stat">
+                <span class="pm-stat-lbl">Signed</span>
+                <span class="pm-stat-val" style="color:#c0c1ff;">${purchased}</span>
+              </div>
+              <div class="pm-stat">
+                <span class="pm-stat-lbl">${isLeading ? 'Bid' : 'Top'}</span>
+                <span class="pm-stat-val" style="color:${isLeading ? '#f59e0b' : 'var(--text-muted)'};">${isLeading ? '৳' + currentBid.toLocaleString() : '—'}</span>
+              </div>
+            </div>
+            ${isLeading ? `<div class="pm-lead-bar" style="background:linear-gradient(90deg,${accent}88,${accent}22);"></div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* =========================================================
+       TEAM FRANCHISE DASHBOARD
+       Personal view for a logged-in franchise team.
+       Shows logo + captain hero, purse ring, and signing list.
+       ========================================================= */
+    function renderTeamDashboard() {
+      const root = document.getElementById('team-dashboard-root');
+      if (!root) return;
+      const team = getMyTeam();
+      if (!team) {
+        root.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">Franchise data loading…</div>';
+        return;
+      }
+
+      const categories = STATE.categories || [];
+      const soldPrices = STATE.soldPrices || {};
+      const accent = team.color || '#6366f1';
+
+      // Build signings list
+      const signings = [];
+      if (team.purchases) {
+        Object.keys(team.purchases).forEach(catId => {
+          const playerName = team.purchases[catId];
+          const priceKey = catId + ':' + playerName;
+          const cat = categories.find(c => c.id === catId);
+          const price = Number(soldPrices[priceKey]) || (cat ? Number(cat.base) : 0);
+          const catList = (STATE.playersSnapshot && STATE.playersSnapshot[catId]) || [];
+          const found = catList.find(p => p.name === playerName);
+          signings.push({
+            name: playerName,
+            categoryName: cat ? cat.name : catId,
+            price,
+            image: found ? (found.image || '') : ''
+          });
+        });
+      }
+      signings.sort((a, b) => b.price - a.price);
+
+      let totalSpent = signings.reduce((s, i) => s + i.price, 0);
+      const purse = Math.max(0, Number(team.purse) || 0);
+      const basePurse = purse + totalSpent || 500;
+      const pct = Math.min(100, Math.max(0, Math.round((purse / basePurse) * 100)));
+      const circumference = 283;
+      const offset = circumference - (circumference * pct) / 100;
+      let ringColor = pct < 25 ? '#ef4444' : pct < 55 ? '#f59e0b' : '#10b981';
+      const gradId = 'tdb-ring-' + String(team.id).replace(/\W/g,'');
+
+      const logoHtml = team.logo
+        ? `<img src="${escHtml(team.logo)}" class="tdb-logo-img" onerror="this.style.display='none'" />`
+        : `<div class="tdb-logo-fallback" style="background:${accent}33;color:${accent};">${escHtml(team.id.slice(0,3))}</div>`;
+
+      const signingsHtml = signings.length ? signings.map((s, i) => `
+        <div class="tdb-signing-row">
+          <div class="tdb-signing-rank">#${i+1}</div>
+          ${s.image ? `<img src="${escHtml(s.image)}" class="tdb-signing-img" onerror="handleImageFallback(this)" />` : `<div class="tdb-signing-img-fallback"></div>`}
+          <div class="tdb-signing-info">
+            <div class="tdb-signing-name">${escHtml(s.name)}</div>
+            <div class="tdb-signing-cat">${escHtml(s.categoryName)}</div>
+          </div>
+          <div class="tdb-signing-price">৳${s.price.toLocaleString()}</div>
+        </div>
+      `).join('') : `<div class="tdb-empty">No players signed yet — your squad is open.<br>Get bidding in the Live Arena!</div>`;
+
+      root.innerHTML = `
+        <div class="tdb-wrapper">
+
+          <!-- Hero / Identity Card -->
+          <div class="tdb-hero" style="--tdb-accent:${accent};">
+            <div class="tdb-hero-glow" style="background:radial-gradient(ellipse 420px 240px at 30% 50%, ${accent}2a, transparent 70%);"></div>
+            <div class="tdb-hero-accent-line" style="background:linear-gradient(90deg,${accent},${accent}44,transparent);"></div>
+            <div class="tdb-hero-inner">
+              <div class="tdb-logo-ring" style="border-color:${accent}55;">
+                ${logoHtml}
+              </div>
+              <div class="tdb-hero-text">
+                <h2 class="tdb-franchise-name">${escHtml(team.name)}</h2>
+                ${team.captain
+                  ? `<div class="tdb-captain-badge"><span style="color:${accent}">⚡</span> <span class="tdb-captain-name">${escHtml(team.captain)}</span> <span class="tdb-captain-role">Captain</span></div>`
+                  : `<div class="tdb-captain-badge" style="opacity:.5;">ID: ${escHtml(team.id)}</div>`}
+                <div class="tdb-hero-meta">
+                  <span>${signings.length} player${signings.length !== 1 ? 's' : ''} signed</span>
+                  <span class="tdb-meta-dot">·</span>
+                  <span>${categories.length - signings.length} slot${(categories.length - signings.length) !== 1 ? 's' : ''} open</span>
+                  <span class="tdb-meta-dot">·</span>
+                  <span style="color:${ringColor};">৳${purse.toLocaleString()} left</span>
+                </div>
+              </div>
+              <!-- Purse ring -->
+              <div class="tdb-ring-wrap">
+                <svg viewBox="0 0 100 100" class="tdb-ring-svg">
+                  <defs>
+                    <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="${ringColor}" />
+                      <stop offset="100%" stop-color="${accent}" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="45" class="budget-circle-bg"/>
+                  <circle cx="50" cy="50" r="45" class="budget-circle-bar"
+                    style="stroke:url(#${gradId});stroke-dashoffset:${offset};"/>
+                </svg>
+                <div class="tdb-ring-center">
+                  <span class="tdb-ring-pct" style="color:${ringColor};">${pct}%</span>
+                  <span class="tdb-ring-lbl">PURSE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="tdb-stats-row">
+            <div class="tdb-stat-pill">
+              <span class="tdb-stat-pill-lbl">Purse Remaining</span>
+              <span class="tdb-stat-pill-val" style="color:#4edea3;">৳${purse.toLocaleString()}</span>
+            </div>
+            <div class="tdb-stat-pill">
+              <span class="tdb-stat-pill-lbl">Total Spent</span>
+              <span class="tdb-stat-pill-val" style="color:#f59e0b;">৳${totalSpent.toLocaleString()}</span>
+            </div>
+            <div class="tdb-stat-pill">
+              <span class="tdb-stat-pill-lbl">Players Signed</span>
+              <span class="tdb-stat-pill-val" style="color:#c0c1ff;">${signings.length}</span>
+            </div>
+            <div class="tdb-stat-pill">
+              <span class="tdb-stat-pill-lbl">Avg. Signing</span>
+              <span class="tdb-stat-pill-val" style="color:#38bdf8;">৳${signings.length ? Math.round(totalSpent / signings.length).toLocaleString() : 0}</span>
+            </div>
+          </div>
+
+          <!-- Paddle Monitor (own team, shown for team users) -->
+          <div class="tdb-section">
+            <div class="tdb-section-header">
+              <span class="tdb-section-icon material-symbols-outlined">gavel</span>
+              <span class="tdb-section-title">Live Paddle Status</span>
+              <div class="flex items-center gap-1 ml-auto">
+                <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span>
+                <span style="font-size:0.7rem;color:#4edea3;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Live</span>
+              </div>
+            </div>
+            <div id="tdb-paddle-monitor" class="paddle-monitor-grid"></div>
+          </div>
+
+          <!-- Signings -->
+          <div class="tdb-section">
+            <div class="tdb-section-header">
+              <span class="tdb-section-icon material-symbols-outlined">emoji_events</span>
+              <span class="tdb-section-title">Squad Signings</span>
+              <span class="tdb-section-badge">${signings.length}</span>
+            </div>
+            <div class="tdb-signings-list">
+              ${signingsHtml}
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      // Render paddle monitor inside team dashboard too
+      renderPaddleMonitor(STATE.teams || [], STATE.currentActivePlayer, STATE.activeBids, STATE.activeBidders);
+      // Re-target to the tdb paddle slot
+      const tdbPaddle = document.getElementById('tdb-paddle-monitor');
+      const mainPaddle = document.getElementById('paddle-monitor-grid');
+      if (tdbPaddle && mainPaddle) tdbPaddle.innerHTML = mainPaddle.innerHTML;
+    }
+
   </script>
 </body>
 </html>

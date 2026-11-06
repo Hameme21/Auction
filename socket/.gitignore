@@ -1,0 +1,4 @@
+node_modules/
+auction-data.local.json
+auction-data.local.json.tmp
+.env

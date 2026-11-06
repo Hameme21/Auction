@@ -1050,6 +1050,33 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     margin-top: 10px;
   }
 }
+
+#portal { justify-content:flex-start; background:#061321; padding:40px 24px; }
+.room-lobby { width:min(1120px,100%); margin:auto; }
+.lobby-top,.lobby-hero,.room-section-title { display:flex; justify-content:space-between; align-items:center; gap:24px; }
+.lobby-brand { font-family:var(--font-display);font-size:28px;letter-spacing:2px; }.lobby-brand span{color:var(--accent)}
+.room-eyebrow {font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;}
+.lobby-hero {padding:65px 0 40px}.lobby-hero h1{font-size:clamp(52px,7vw,86px)!important;line-height:1;margin:18px 0;letter-spacing:1px}.lobby-hero p:last-child{color:var(--muted);max-width:450px;line-height:1.8}.lobby-hero button{padding:17px 24px;background:var(--accent);box-shadow:0 10px 50px #66ff6320}
+.lobby-stats{display:flex;gap:35px;padding:23px 0;border-top:1px solid #ffffff16;border-bottom:1px solid #ffffff16;color:var(--muted);font-size:12px}.lobby-stats b{color:var(--accent);font-family:var(--font-mono);margin-right:8px}
+.room-section-title{margin:35px 0 22px}.room-section-title h2{font-size:32px;margin-top:6px}#roomSearch{max-width:420px}.room-directory{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-top:10px}.room-tile{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:24px;white-space:normal;min-height:205px;background:linear-gradient(135deg,#102638,#0a1b2b);border:1px solid #ffffff18;box-shadow:none}.room-tile:hover{border-color:var(--accent);transform:translateY(-3px)}.room-tile h3{font-size:28px;margin:20px 0 6px}.room-tile small{color:var(--muted);font-weight:400}.room-tile-footer{display:flex;justify-content:space-between;color:var(--accent);margin-top:25px;font-size:12px}.room-empty{grid-column:1/-1;border:1px dashed #ffffff25;border-radius:14px;text-align:center;padding:40px;color:var(--muted);line-height:1.8}.lobby-foot{font-size:11px;color:var(--muted);text-align:center;margin-top:35px}.room-dialog{color:var(--text);margin:auto;max-height:90vh;}.room-dialog::backdrop{background:#000b;backdrop-filter:blur(10px)}
+@media(max-width:650px){#portal{padding:24px 18px}.lobby-top>.room-eyebrow{display:none}.lobby-hero{align-items:flex-start;flex-direction:column;padding:40px 0 28px}.lobby-stats{gap:16px;flex-direction:column}.room-section-title{gap:10px}.room-dialog{width:calc(100% - 24px)}}
+
+
+.tournament-search { margin-bottom:28px; }
+.tournament-search-row { display:flex; gap:10px; }
+.tournament-search-row #roomSearch { max-width:none; flex:1; min-width:0; margin:0; }
+.tournament-search-row button { flex-shrink:0; }
+.recommendations-heading { margin:26px 0 14px; }
+.recommendations-heading h3,.room-results-heading h3 { font-size:24px; letter-spacing:.5px; }
+.recommendations-heading p { color:var(--muted);font-size:12px;margin-top:6px;line-height:1.6; }
+.room-results-heading { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px 0 14px; }
+#roomSearchCount { color:var(--muted);font-size:12px; }
+.room-recommendation { min-height:180px;border-color:rgba(102,255,99,.25);background:linear-gradient(135deg,#12342d,#0b2132); }
+.room-recommendation strong { font-family:var(--font-display);font-size:27px;letter-spacing:.4px;margin:16px 0 8px; }
+.room-recommendation small { line-height:1.6; }
+.room-recommendation .room-tile-footer { margin-top:auto;padding-top:20px; }
+@media(max-width:480px){.tournament-search-row{flex-wrap:wrap}.tournament-search-row #roomSearch{flex-basis:100%}.tournament-search-row button{min-height:42px}.room-results-heading{align-items:flex-start;flex-direction:column;gap:5px}}
+
 </style>
 </head>
 <body>
@@ -1071,35 +1098,36 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 </div>
 
 <div id="portal">
-  <div style="text-align:center;margin-bottom:32px">
-    <div style="display:inline-flex;align-items:center;gap:4px;margin-bottom:12px">
-      <div style="width:8px;height:8px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 12px var(--accent-glow)"></div>
-      <div style="width:4px;height:4px;border-radius:50%;background:var(--cyan);opacity:0.6"></div>
-    </div>
-    <h1 style="font-family:var(--font-display);font-size:clamp(2rem,6vw,3.8rem);font-weight:800;letter-spacing:0.06em;color:white">AUCTION<span style="color:var(--accent-2)">CMD</span></h1>
-    <p style="color:var(--muted);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;margin-top:6px">Premium live bidding console · 2026</p>
+  <div class="room-lobby">
+    <div class="lobby-top"><div class="lobby-brand">AUCTION<span>CMD</span></div><span class="room-eyebrow">YOUR TOURNAMENT. YOUR ARENA.</span></div>
+    <div class="lobby-hero"><div><p class="room-eyebrow" style="color:var(--accent)">THE AUCTION STARTS HERE</p><h1>One room.<br>Every big signing.</h1><p>Create a tournament, bring your teams together, and let the bidding begin.</p></div><button class="btn-primary" onclick="openCreateRoom()">+ Create auction room</button></div>
+    <div class="lobby-stats"><span><b>01</b> Create your room</span><span><b>02</b> Set teams &amp; player database</span><span><b>03</b> Share access &amp; go live</span></div>
+    <div class="room-section-title"><div><p class="room-eyebrow">FIND YOUR ARENA</p><h2>Auction rooms</h2></div><button class="ghost small" onclick="socket.emit('rooms:list')">Refresh rooms &#8635;</button></div>
+    <form class="tournament-search" role="search" onsubmit="event.preventDefault();renderRooms()">
+      <label for="roomSearch">Search tournaments or room codes</label>
+      <div class="tournament-search-row"><input id="roomSearch" type="search" autocomplete="off" placeholder="Search by tournament name or room code" oninput="renderRooms()"><button class="btn-primary" type="submit">Search</button><button id="clearRoomSearch" class="ghost hidden" type="button" onclick="clearTournamentSearch()">Clear</button></div>
+    </form>
+    <section id="recommendedSection" aria-labelledby="recommendedTitle">
+      <div class="recommendations-heading"><h3 id="recommendedTitle">Recommended tournaments</h3><p id="recommendedDescription">Discover an auction room to join.</p></div>
+      <div id="recommendedRooms" class="room-directory"></div>
+    </section>
+    <div class="room-results-heading"><h3 id="roomResultsTitle">All tournaments</h3><span id="roomSearchCount" role="status" aria-live="polite"></span></div>
+    <div id="roomDirectory" class="room-directory" aria-labelledby="roomResultsTitle"><p class="room-empty">Connecting to the room server...</p></div>
+    <p id="portalMsg" role="status" aria-live="polite" style="color:var(--danger);margin-top:16px"></p>
+    <p class="lobby-foot">One tournament per room &middot; Private team access &middot; Live viewer seats</p>
   </div>
-  <div class="portal-card">
-    <div class="login-role-grid" aria-label="Choose login role">
-      <button type="button" class="login-role-btn" data-login-role="manager" onclick="selectLoginRole('manager')">Manager</button>
-      <button type="button" class="login-role-btn" data-login-role="team" onclick="selectLoginRole('team')">Teams</button>
-      <button type="button" class="login-role-btn" data-login-role="listener" onclick="selectLoginRole('listener')">Viewer</button>
-    </div>
-    <div id="managerForm" class="hidden">
-      <label>Host ID</label>
-      <input id="mUser" placeholder="Session identifier…">
-      <label>Security Key</label>
-      <input id="mPass" type="password" placeholder="Password…">
-      <button onclick="managerLogin()" class="btn-primary" style="width:100%;padding:13px;margin-top:6px;font-family:var(--font-display);letter-spacing:0.05em">Launch Auction Room</button>
-      <button onclick="managerRegister()" class="ghost small" style="width:100%;margin-top:12px">Create Host Account</button>
-    </div>
-    <div id="participantForm" class="hidden">
-      <label>Target Host ID</label>
-      <input id="pHostId" placeholder="Enter host session key…">
-      <button id="participantConnectBtn" onclick="connectToHost()" class="btn-primary" style="width:100%;padding:13px;margin-top:6px;font-family:var(--font-display);letter-spacing:0.05em">Enter Auction Room</button>
-    </div>
-    <div id="portalMsg" style="margin-top:14px;font-size:12px;font-weight:600;color:var(--danger)"></div>
-  </div>
+  <dialog id="roomDialog" class="portal-card room-dialog"><button class="ghost small" onclick="document.getElementById('roomDialog').close()" style="float:right" aria-label="Close room dialog">&times;</button><p class="room-eyebrow" id="roomDialogEyebrow">NEW TOURNAMENT</p><h2 id="roomDialogTitle" style="font-size:32px;margin:12px 0">Create auction room</h2>
+    <form id="createRoomForm" onsubmit="event.preventDefault();createRoom()">
+      <label for="roomName">Tournament name</label><input id="roomName" required maxlength="80" placeholder="e.g. Premier Cricket League 2026">
+      <label for="roomAdminPassword">Admin password</label><input id="roomAdminPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password" placeholder="At least 8 characters">
+      <label for="roomViewerPassword">Viewer password</label><input id="roomViewerPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password" placeholder="Share this with your viewers">
+      <p style="color:var(--muted);margin-bottom:20px;line-height:1.7">You will set up teams, their passwords, purses, and player databases inside your room.</p><button class="btn-primary" type="submit" style="width:100%">Create room &amp; set up tournament &rarr;</button>
+    </form>
+    <div id="joinRoomForm" class="hidden"><p id="selectedRoomCode" class="mono" style="color:var(--muted);margin-bottom:20px"></p><div class="login-role-grid"><button type="button" class="login-role-btn" data-login-role="manager" onclick="selectLoginRole('manager')">Admin</button><button type="button" class="login-role-btn" data-login-role="team" onclick="selectLoginRole('team')">Team</button><button type="button" class="login-role-btn" data-login-role="listener" onclick="selectLoginRole('listener')">Viewer</button></div>
+      <form id="managerForm" onsubmit="event.preventDefault();managerLogin()"><input id="mUser" type="hidden"><label for="mPass">Admin password</label><input id="mPass" type="password" required autocomplete="current-password" placeholder="Enter your admin password"><button class="btn-primary" style="width:100%">Open tournament dashboard &rarr;</button></form>
+      <div id="participantForm" class="hidden"><input id="pHostId" type="hidden"><p style="color:var(--muted);margin-bottom:20px">Choose your team and enter its password, or take a viewer seat with the password from your admin.</p><button id="participantConnectBtn" onclick="connectToHost()" class="btn-primary" style="width:100%">Continue as Team</button></div>
+    </div><p id="roomDialogMsg" role="alert" style="color:var(--danger);margin-top:16px"></p>
+  </dialog>
 </div>
 
 <div id="teamAuthOverlay" class="hidden">
@@ -1120,7 +1148,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       <label>Security Key</label>
       <input type="password" id="loginPass" placeholder="Enter team passphrase…">
     </div>
-    <button onclick="enterAuction()" class="btn-primary" style="width:100%;padding:13px;font-family:var(--font-display);letter-spacing:0.05em">Authenticate</button>
+    <button onclick="enterAuction()" class="btn-primary" style="width:100%;padding:13px;font-family:var(--font-display);letter-spacing:0.05em">Enter auction room &rarr;</button>
+    <button class="ghost" onclick="location.reload()" style="width:100%;margin-top:12px">&larr; Back to rooms</button>
     <div id="teamAuthMsg" style="margin-top:14px;font-size:12px;font-weight:600;color:var(--danger)"></div>
   </div>
 </div>
@@ -1341,7 +1370,8 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
             <button id="btnSaveTeams" class="green" style="padding:10px 20px;font-family:var(--font-display);letter-spacing:0.04em">Sync Team DB ›</button>
           </div>
         </div>
-        <div id="teamsConfigContainer" style="max-height:70vh;overflow-y:auto;padding:2px"></div>
+        <div class="glass" style="padding:20px;margin-bottom:20px"><h3 style="font-size:23px;margin-bottom:12px">Room access</h3><p id="roomAccessInfo" class="mono" style="color:var(--muted);margin-bottom:12px"></p><label for="updateViewerPassword">New viewer password</label><input id="updateViewerPassword" type="password" minlength="8" placeholder="At least 8 characters"><button class="ghost" onclick="saveViewerPassword()">Update viewer password</button><button class="ghost" onclick="copyRoomLink()" style="margin-left:8px">Copy room link</button></div>
+              <div id="teamsConfigContainer" style="max-height:70vh;overflow-y:auto;padding:2px"></div>
       </div>
     </div>
 
@@ -1485,9 +1515,17 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   <audio id="hammerAudio" src="hammer.wav"></audio>
 </div>
 
-<script src="https://cdn.socket.io/4.7.4/socket.io.min.js" onerror="window.__socketIoLoadFailed=true"></script>
+<!-- auction-server-config -->
 <script>
-const BACKEND_URL = "https://auction-socket-39c2.onrender.com";
+// The Node server supplies its origin. IDE previews and local files use port 3000.
+const isLocalAuctionPreview = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '[::1]' || /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(location.hostname);
+const BACKEND_URL = window.AUCTION_BACKEND_URL || (isLocalAuctionPreview
+  ? `${location.protocol === 'https:' ? 'https:' : 'http:'}//${location.hostname || 'localhost'}:3000`
+  : 'https://auction-socket-39c2.onrender.com');
+// Load the client from the same backend, including when using an IDE static server.
+document.write('<script src="' + BACKEND_URL + '/socket.io/socket.io.js" onerror="window.__socketIoLoadFailed=true"><\/script>');
+</script>
+<script>
 const CLOUDINARY_CLOUD_NAME = "drdfnqwgp";
 const CLOUDINARY_UPLOAD_PRESET = "Auction_uploads";
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -1563,6 +1601,7 @@ function updateSavedSection(id) {
 }
 
 function finishEnterApp(sectionId) {
+  document.getElementById('roomDialog').close();
   document.documentElement.classList.remove('restore-session');
   hideAppLoading();
   portal.classList.add('hidden');
@@ -1848,7 +1887,7 @@ function applyParticipantAuthRole(role) {
   loginRole.value = role === 'team' ? 'team' : 'listener';
   loginRole.classList.toggle('hidden', isFixedRole);
   roleLabel.classList.toggle('hidden', isFixedRole);
-  title.textContent = role === 'team' ? 'Teams Login' : 'Viewer Login';
+  title.textContent = role === 'team' ? 'Enter as a team' : 'Enter as a viewer';
   toggleTeamPass();
 }
 
@@ -1866,17 +1905,105 @@ window.selectLoginRole = (role) => {
   if (connectBtn) connectBtn.textContent = role === 'listener' ? 'Continue as Viewer' : 'Continue as Team';
   setTimeout(() => document.getElementById(role === 'manager' ? 'mUser' : 'pHostId')?.focus(), 0);
 };
+let availableRooms = [];
+const tournamentIdeas = [
+  { name: 'Premier Cricket League', description: 'Bring your franchises together for a cricket player auction.' },
+  { name: 'Campus Champions Cup', description: 'Build teams for your school or university tournament.' },
+  { name: 'Community Super League', description: 'Start a friendly auction for your local clubs and teams.' }
+];
+function makeRecommendedTournament(room, idea = false) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'room-tile room-recommendation';
+  card.onclick = () => idea ? openCreateRoom(room.name) : openAuctionRoom(room.id);
+  const reason = idea ? 'TOURNAMENT IDEA' : room.live ? 'LIVE NOW' : 'BUILDING THE LINEUP';
+  const description = idea ? room.description : `${Number(room.teams)} teams registered. ${room.live ? 'Follow the bidding as it happens.' : 'Join your team or take a viewer seat.'}`;
+  card.innerHTML = `<span class="room-eyebrow">${reason}</span><strong>${escapeHTML(room.name)}</strong><small>${escapeHTML(description)}</small><div class="room-tile-footer"><span>${idea ? 'Create your own room' : 'Password access'}</span><span>${idea ? 'Get started' : 'Enter room'} &rarr;</span></div>`;
+  return card;
+}
+window.clearTournamentSearch = () => {
+  document.getElementById('roomSearch').value = '';
+  renderRooms();
+  document.getElementById('roomSearch').focus();
+};
+window.renderRooms = () => {
+  const query = document.getElementById('roomSearch').value.trim();
+  const normalize = value => String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const terms = normalize(query).split(/\s+/).filter(Boolean);
+  const rooms = availableRooms.filter(room => terms.every(term => normalize(room.name + ' ' + room.id).includes(term)));
+  document.getElementById('clearRoomSearch').classList.toggle('hidden', !query);
+  document.getElementById('roomResultsTitle').textContent = query ? 'Search results' : 'All tournaments';
+  document.getElementById('roomSearchCount').textContent = `${rooms.length} tournament${rooms.length === 1 ? '' : 's'}${query ? ' found' : ' available'}`;
+  const recommended = document.getElementById('recommendedRooms');
+  recommended.replaceChildren();
+  document.getElementById('recommendedSection').classList.toggle('hidden', !!query);
+  document.getElementById('recommendedDescription').textContent = availableRooms.length
+    ? 'Live auctions first, followed by rooms with the most teams.'
+    : 'No rooms yet. Pick a tournament idea to create your first room.';
+  const suggestions = availableRooms.length
+    ? [...availableRooms].sort((a, b) => Number(b.live) - Number(a.live) || Number(b.teams) - Number(a.teams) || a.name.localeCompare(b.name)).slice(0, 3)
+    : tournamentIdeas;
+  suggestions.forEach(room => recommended.append(makeRecommendedTournament(room, !availableRooms.length)));
+  const list = document.getElementById('roomDirectory');
+  list.replaceChildren();
+  if (!rooms.length) {
+    const empty = document.createElement('div');
+    empty.className = 'room-empty';
+    const copy = document.createElement('p');
+    copy.textContent = query ? `No tournaments match "${query}". Try a different name or room code.` : 'Your next tournament starts here. Create the first auction room.';
+    empty.append(copy);
+    if (query) {
+      const clear = document.createElement('button');
+      clear.type = 'button'; clear.className = 'ghost small'; clear.style.marginTop = '16px';
+      clear.textContent = 'Show all tournaments'; clear.onclick = clearTournamentSearch;
+      empty.append(clear);
+    }
+    list.append(empty);
+  }
+  rooms.forEach(room => {
+    const card = document.createElement('button');
+    card.type = 'button'; card.className = 'room-tile'; card.onclick = () => openAuctionRoom(room.id);
+    card.innerHTML = `<span class="room-eyebrow">${room.live ? 'LIVE BIDDING' : 'TOURNAMENT ROOM'}</span><h3>${escapeHTML(room.name)}</h3><small class="mono">${escapeHTML(room.id)}</small><div class="room-tile-footer"><span>${Number(room.teams)} teams &middot; Password access</span><span>Enter room &rarr;</span></div>`;
+    list.append(card);
+  });
+};
+window.openCreateRoom = (suggestedName = '') => {
+  document.getElementById('roomName').value = suggestedName;
+  document.getElementById('createRoomForm').classList.remove('hidden'); document.getElementById('joinRoomForm').classList.add('hidden');
+  document.getElementById('roomDialogTitle').textContent='Create auction room'; document.getElementById('roomDialogEyebrow').textContent='NEW TOURNAMENT'; document.getElementById('roomDialogMsg').textContent=''; document.getElementById('roomDialog').showModal();
+};
+window.openAuctionRoom = id => {
+  const room=availableRooms.find(r=>r.id===id); if(!room)return;
+  document.getElementById('createRoomForm').classList.add('hidden'); document.getElementById('joinRoomForm').classList.remove('hidden');
+  document.getElementById('roomDialogTitle').textContent=room.name; document.getElementById('roomDialogEyebrow').textContent='ENTER YOUR ARENA'; document.getElementById('selectedRoomCode').textContent='ROOM / '+id;
+  document.getElementById('mUser').value=id; document.getElementById('pHostId').value=id; document.getElementById('mPass').value=''; document.getElementById('roomDialogMsg').textContent=''; selectLoginRole('manager'); document.getElementById('roomDialog').showModal();
+};
+window.saveViewerPassword = () => { const password=document.getElementById('updateViewerPassword').value; if(password.length<8)return showToast('Use at least 8 characters'); socket.emit('room:viewer_password',{password}); };
+socket.on('team:database_saved', d => showToast(d.count + ' players added to the tournament database'));
+socket.on('room:password_saved', () => {document.getElementById('updateViewerPassword').value='';showToast('Viewer password updated');});
+window.copyRoomLink = async () => { const url=new URL(location.href);url.searchParams.set('room',CURRENT_USER.hostId);try{await navigator.clipboard.writeText(url.href);showToast('Room link copied');}catch{showToast(url.href);} };
+window.createRoom = () => {
+  if(!socket.connected) { document.getElementById('roomDialogMsg').textContent='Server is connecting. Please try again shortly.'; return; }
+  const password=document.getElementById('roomAdminPassword').value;
+  pendingAuthSession={kind:'manager',password};
+  socket.emit('room:create',{name:document.getElementById('roomName').value.trim(),password,viewerPassword:document.getElementById('roomViewerPassword').value});
+};
+let roomLinkOpened=false;
+socket.on('rooms:list', rooms => { availableRooms=rooms; renderRooms(); const id=new URLSearchParams(location.search).get('room'); if(id && !roomLinkOpened && !getSavedSession()){roomLinkOpened=true;openAuctionRoom(id);} });
+socket.on('connect_error', () => { document.getElementById('portalMsg').textContent='Cannot reach the room server. Start the updated server or check your connection.'; });
 window.switchTab = (tab) => selectLoginRole(tab === 'participant' ? 'team' : tab);
 window.managerLogin = () => { const u = document.getElementById('mUser').value.trim(), p = document.getElementById('mPass').value; if (u && p) { pendingAuthSession = { kind: 'manager', username: u, password: p }; socket.emit('manager:login', { username: u, password: p }); } };
-window.managerRegister = () => { const u = document.getElementById('mUser').value.trim(), p = document.getElementById('mPass').value; if (u && p) { pendingAuthSession = { kind: 'manager', username: u, password: p }; socket.emit('manager:register', { username: u, password: p }); } };
+
 window.connectToHost = () => { const h = document.getElementById('pHostId').value.trim(), role = selectedLoginRole === 'listener' ? 'listener' : 'team'; if (h) { pendingAuthSession = { kind: 'participant', hostId: h, role }; socket.emit('participant:connect', h); } };
 window.toggleTeamPass = () => {
   const isTeam = document.getElementById('loginRole').value === 'team';
   document.getElementById('teamSelectGroup').classList.toggle('hidden', !isTeam);
-  document.getElementById('passGroup').classList.toggle('hidden', !isTeam);
+  document.getElementById('passGroup').classList.remove('hidden');
+  document.querySelector('#passGroup label').textContent = isTeam ? 'Team password' : 'Viewer password';
+  document.getElementById('loginPass').placeholder = isTeam ? 'Enter team password' : 'Enter viewer password';
   if (!isTeam) document.getElementById('loginTeamLogo').classList.add('hidden');
 };
-window.enterAuction = () => { const role = document.getElementById('loginRole').value, teamId = document.getElementById('loginTeamId').value, pass = document.getElementById('loginPass').value; pendingAuthSession = { kind: 'participant', hostId: CURRENT_USER.hostId, role, teamId, password: pass }; socket.emit('team:login', { hostId: CURRENT_USER.hostId, teamId, password: pass, role }); };
+window.enterAuction = () => { const role = document.getElementById('loginRole').value, teamId = document.getElementById('loginTeamId').value, pass = document.getElementById('loginPass').value; pendingAuthSession = { kind: 'participant', hostId: CURRENT_USER.hostId, role, teamId, password: pass }; if(role === 'team' && !teamId) {document.getElementById('teamAuthMsg').textContent='Select your team first.';return;} socket.emit('team:login', { hostId: CURRENT_USER.hostId, teamId, password: pass, role }); };
 window.previewTeamLogo = () => { const t = STATE.teams.find(x => x.id === document.getElementById('loginTeamId').value), img = document.getElementById('loginTeamLogo'); if (t?.logo) { img.src = t.logo; img.classList.remove('hidden'); } else img.classList.add('hidden'); };
 window.selectLoginTeam = (teamId) => {
   document.getElementById('loginTeamId').value = teamId;
@@ -2081,14 +2208,15 @@ function handleTimerExpiry() {
   }
 }
 
-socket.on('connect', tryRestoreSession);
-if (socket.connected) tryRestoreSession();
-socket.on('auth:portal_error', msg => { document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); portal.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('portalMsg').textContent = msg; });
+socket.on('connect', () => { socket.emit('rooms:list'); tryRestoreSession(); });
+if (socket.connected) { socket.emit('rooms:list'); tryRestoreSession(); }
+socket.on('auth:portal_error', msg => { document.documentElement.classList.remove('restore-session'); restoringSession = false; pendingAuthSession = null; localStorage.removeItem(SESSION_KEY); portal.classList.remove('hidden'); appContainer.classList.add('hidden'); document.getElementById('portalMsg').textContent = msg; document.getElementById('roomDialogMsg').textContent = msg; });
 socket.on('auth:portal_success', d => { const el = document.getElementById('portalMsg'); el.style.color = 'var(--emerald)'; el.textContent = d.msg; });
 socket.on('manager:logged_in', data => {
   CURRENT_USER.hostId = data.username;
   CURRENT_USER.role = 'admin';
   STATE = data.state;
+  document.getElementById('roomAccessInfo').textContent = (STATE.room?.name || data.username) + ' / ' + data.username;
   const saved = getSavedSession();
   saveSession({ ...(pendingAuthSession || saved || {}), kind: 'manager', username: data.username, password: (pendingAuthSession || saved || {}).password || '' });
   restoringSession = false;
@@ -2096,6 +2224,9 @@ socket.on('manager:logged_in', data => {
   finishEnterApp(getSavedSession()?.sectionId);
 });
 socket.on('init:teams_available', data => {
+  if (CURRENT_USER.role) return;
+  if (data.notFound) { document.getElementById('portalMsg').textContent = 'Room not found. Refresh the room list.'; return; }
+  document.getElementById('roomDialog').close();
   CURRENT_USER.hostId = data.hostId;
   STATE.teams = data.teams || [];
   const sel = document.getElementById('loginTeamId');
@@ -2333,6 +2464,7 @@ socket.on('player:sold', data => {
 });
 
 socket.on('bidding:started', () => {
+    if (!activePlayer) return;
     STATE.biddingActive = true;
     updatePopupPrice(document.getElementById('popupPrice').textContent, STATE.activeBidders ? STATE.activeBidders[`${activePlayer.category}:${activePlayer.name}`] : null);
     showToast('▶ Bidding has started!');
@@ -2886,6 +3018,12 @@ function renderDatabase() {
   const container = document.getElementById('categoriesContainer');
   container.innerHTML = '';
   const isAdmin = CURRENT_USER.role === 'admin';
+  if (CURRENT_USER.role === 'team') {
+    const submit = document.createElement('form'); submit.className='glass'; submit.style.cssText='padding:20px;margin-bottom:20px';
+    submit.innerHTML='<h3 style="font-size:24px;margin-bottom:12px">Submit your player database</h3><p style="color:var(--muted);margin-bottom:16px">Add one player per line. Your players will join this tournament auction pool.</p><label for="submitCategory">Category</label><select id="submitCategory"></select><label for="submitNames">Player names</label><textarea id="submitNames" required rows="4" placeholder="One player name per line"></textarea><button class="btn-primary">Submit players</button>';
+    const select=submit.querySelector('select'); STATE.categories.forEach(cat=>select.add(new Option(cat.name,cat.id)));
+    submit.onsubmit=event=>{event.preventDefault();socket.emit('team:submit_database',{category:select.value,names:submit.querySelector('textarea').value.split(/\r?\n/).map(n=>n.trim()).filter(Boolean)});};container.append(submit);
+  }
   if (!STATE.categories.length) { container.innerHTML = '<div style="color:var(--muted);font-size:12px">No categories established.</div>'; return; }
   STATE.categories.forEach(cat => {
     const wrap = document.createElement('div');
@@ -3454,6 +3592,9 @@ window.resetTeam = (tid) => {
 document.getElementById('clearLog').onclick = () => document.getElementById('log').innerHTML = '';
 
 document.getElementById('btnSaveTeams').onclick = () => {
+  const rows=[...document.querySelectorAll('#teamsConfigContainer .team-config-card')];
+  if(rows.some(r=>!r.querySelector('.t-id').value.trim()||!r.querySelector('.t-name').value.trim()||!r.querySelector('.t-pass').value.trim()||Number(r.querySelector('.t-purse').value)<0))return showToast('Every team needs an ID, name, password, and valid purse');
+  if(new Set(rows.map(r=>r.querySelector('.t-id').value.trim().toUpperCase())).size!==rows.length)return showToast('Team IDs must be unique');
   const teams = [];
   document.querySelectorAll('#teamsConfigContainer .team-config-card').forEach(r => {
     const id = r.querySelector('.t-id').value.trim();

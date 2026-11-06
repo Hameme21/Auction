@@ -1,0 +1,23 @@
+{
+  "name": "auction-app",
+  "version": "1.0.0",
+  "description": "Live Auction System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/rooms.cjs"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase-admin": "^11.11.0",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "socket.io-client": "^4.8.4"
+  }
+}

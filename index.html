@@ -509,7 +509,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 @media (min-width: 900px) {
   #appContainer { padding-left: 250px; padding-top: 96px; }
   #appContainer::before {
-    content: "PREMIER LEAGUE AUCTION";
+    content: attr(data-tournament-title);
     position: fixed;
     left: 250px;
     right: 0;
@@ -1082,6 +1082,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .frontend-connection::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}.frontend-connection[data-state="connected"]{color:#83fba0;border-color:#31563d}.frontend-connection[data-state="disconnected"],.frontend-connection[data-state="error"]{color:#ffaaaa;border-color:#734149}.frontend-connection button{padding:3px 7px;font-size:10px;color:inherit}.delete-tournament-card{padding:20px;margin:20px 0;border:1px solid #ef444450;border-radius:14px;background:#ef444408}.delete-tournament-card p{color:var(--muted);line-height:1.7;margin:10px 0 16px}#deleteTournamentDialog{color:var(--text);margin:auto;max-height:90vh}#deleteTournamentDialog::backdrop{background:#000b;backdrop-filter:blur(8px)}
 @media(max-width:767px){body:has(#appContainer:not(.hidden)) .frontend-connection{bottom:calc(80px + env(safe-area-inset-bottom))}.frontend-connection{font-size:10px;padding:8px 10px}#deleteTournamentDialog{width:calc(100% - 24px)}}
 
+.bid-announcement{width:100%;padding:13px 16px;margin-top:14px;border:1px solid rgba(71,233,255,.3);border-radius:10px;background:rgba(71,233,255,.07);color:var(--cyan);font-size:14px;font-weight:600;line-height:1.6;overflow-wrap:anywhere}.bid-announcement[data-actor="admin"]{border-color:rgba(255,194,10,.35);background:rgba(255,194,10,.07);color:var(--amber)}
 </style>
 </head>
 <body>
@@ -1172,7 +1173,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
   </div>
 </div>
 
-<div id="appContainer" class="hidden" data-live-ticker="LIVE UPDATE: WAITING FOR NEXT PLAYER" style="min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1">
+<div id="appContainer" class="hidden" data-tournament-title="Auction" data-live-ticker="LIVE UPDATE: WAITING FOR NEXT PLAYER" style="min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1">
   <div id="toastContainer"></div>
   <input type="file" id="globalFileInput" accept="image/*" style="display:none">
 
@@ -1181,7 +1182,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
       <span class="brand-logo" style="background:none;box-shadow:none;">
   <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2300111f'/%3E%3Cpath d='M12 12h40v14c0 13-8 22-20 26C20 48 12 39 12 26V12Z' fill='%23102135' stroke='%2366ff63' stroke-width='3'/%3E%3Cpath d='M22 38h20' stroke='%23ffc20a' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M26 22l12 12M38 22L26 34' stroke='%2366ff63' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" alt="AuctionCMD" style="width:100%;height:100%;object-fit:contain;">
 </span>
-      <span style="font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:0.06em;color:white">AUCTION<span style="color:var(--accent-2)"> COMMAND</span></span>
+      <span id="tournamentHeading" style="font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:0.06em;color:white">Auction</span>
     </div>
     <nav id="topNav" style="display:flex;gap:2px;overflow-x:auto;flex:1;justify-content:center" class="hide-scrollbar hidden"></nav>
     <div class="header-right">
@@ -1318,6 +1319,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
                 <button class="bid-step-btn bid-step-up" onclick="adjustBid('inc')" aria-label="Increase bid">+</button>
               </div>
 
+              <div id="bidAnnouncement" class="bid-announcement" role="status" aria-live="polite" aria-atomic="true">Waiting for the first bid.</div>
               <div id="adminActionButtons" class="hidden" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px">
                 <button class="green" onclick="socket.emit('admin:start_bidding')" id="btnStartBidding" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">▶ START BIDDING</button>
                 <button class="yellow" onclick="triggerSoldFromPopup()" style="padding:12px;font-family:var(--font-display);letter-spacing:0.05em;font-size:13px">🔨 GAVEL DROP</button>
@@ -2135,7 +2137,7 @@ function getLiveBidContext() {
   const currentPrice = Number(document.getElementById('popupPrice')?.textContent) || 0;
   const key = activePlayer ? `${activePlayer.category}:${activePlayer.name}` : '';
   const highBidderId = key && STATE.activeBidders ? STATE.activeBidders[key] : null;
-  return { cat, base, inc, currentPrice, highBidderId, nextBid: highBidderId ? currentPrice + inc : base };
+  return { cat, base, inc, currentPrice, highBidderId, nextBid: highBidderId || currentPrice > base ? currentPrice + inc : base };
 }
 
 function getNextCategoryReserve(team, activeCategoryId) {
@@ -2239,9 +2241,6 @@ function resetAndStartTimer() {
   if (btn) btn.textContent = '⏸️';
   updateTimerUI();
   
-  if (CURRENT_USER.role === 'admin' && STATE.biddingActive) {
-    socket.emit('admin:timer_control', { paused: false, time: 30 });
-  }
 }
 
 function updateTimerUI() {
@@ -2341,20 +2340,27 @@ socket.on('code_shuffle:started', () => {
   updateLiveIndicator();
 });
 
+function showBidAnnouncement(bid) {
+  const notice = document.getElementById('bidAnnouncement');
+  notice.textContent = bid?.bidText || bid?.adjustmentText || 'Waiting for the first bid.';
+  notice.dataset.actor = bid?.actor || (bid?.isAdjustment ? 'admin' : 'team');
+}
 socket.on('player:bid', pl => {
   const key = `${pl.category}:${pl.name}`;
-  const bidderId = pl.teamId || pl.highBidderId || null;
+  const bidderId = pl.highBidderId ?? pl.teamId ?? null;
   if (!STATE.activeBids) STATE.activeBids = {};
   if (!STATE.activeBidders) STATE.activeBidders = {};
   STATE.activeBids[key] = pl.price;
   STATE.activeBidders[key] = bidderId;
-  if (activePlayer?.name === pl.name) { 
-    updatePopupPrice(pl.price, bidderId); 
-    resetAndStartTimer(); 
+  const team = STATE.teams.find(x => x.id === bidderId);
+  const fallback = pl.isAdjustment ? `Admin adjusted the bid to \u09f3${pl.price}` : `${team ? team.name : 'Admin'} bid \u09f3${pl.price}`;
+  const bid = { ...pl, bidText: pl.bidText || pl.adjustmentText || fallback };
+  if (activePlayer?.name === pl.name && activePlayer.category === pl.category) {
+    activePlayer.lastBidEvent = bid;
+    updatePopupPrice(pl.price, bidderId);
+    showBidAnnouncement(bid);
   }
-  const t = STATE.teams.find(x => x.id === bidderId);
-  const bidderName = t ? t.name : 'Admin Forced Bid';
-  log(`<span style="color:white;font-weight:700">${pl.name}</span> <span style="color:var(--muted)">bid by</span> <span style="color:var(--cyan);font-weight:700">${bidderName}</span> → <span style="color:var(--emerald);font-weight:700">৳${pl.price}</span>`);
+  log(`<span style="color:white;font-weight:700">${escapeHTML(pl.name)}</span>: <span style="color:var(--cyan);font-weight:700">${escapeHTML(bid.bidText)}</span>`);
 });
 
 socket.on('admin:toast', d => showToast(d.msg));
@@ -2373,8 +2379,9 @@ socket.on('timer:sync', data => {
 });
 
 socket.on('popup:open', player => {
-  STATE.biddingActive = false;
+  STATE.biddingActive = !!player.biddingActive;
   activePlayer = player;
+  showBidAnnouncement(player.lastBidEvent);
   allowActivePlayerCodeQueue = false;
   blockedBidToastKey = '';
   const liveMain = document.getElementById('liveAuctionMain');
@@ -2801,8 +2808,17 @@ function renderAdminTeamsSummary() {
     }
 }
 
+function updateTournamentHeading() {
+  const name = String(STATE.room?.name || '').trim();
+  const title = name ? (/\bauction$/i.test(name) ? name : name + ' Auction') : 'Auction';
+  appContainer.dataset.tournamentTitle = title;
+  document.getElementById('tournamentHeading').textContent = title;
+  document.title = title;
+}
+
 function renderAll() {
   if (appContainer.classList.contains('hidden')) return;
+  updateTournamentHeading();
   renderScoreboards();
   if (CURRENT_USER.role === 'team') renderMyTeam();
   if (CURRENT_USER.role === 'listener') renderViewerRosters();
@@ -3478,7 +3494,7 @@ window.updatePopupPrice = (p, highBidderId) => {
         const inc = Number(cat?.increment) || 0;
         const base = Number(cat?.base) || 0;
         const currentBid = Number(p) || 0;
-        const nextBid = highBidderId ? currentBid + inc : base;
+        const nextBid = highBidderId || currentBid > base ? currentBid + inc : base;
 
         const bidBtn = document.getElementById('btnTeamBid');
         if (bidBtn) {
@@ -3513,7 +3529,7 @@ window.adjustBid = (dir) => {
   let cur = Number(document.getElementById('popupPrice').textContent) || 0;
   let step = Number(cat?.increment) || 0;
   let next = dir === 'inc' ? cur + step : cur - step;
-  if (next >= Number(cat?.base || 0)) socket.emit('player:bid', { category: activePlayer.category, name: activePlayer.name, price: next, teamId: null });
+  if (socket.connected && next >= Number(cat?.base || 0)) socket.emit('admin:adjust_bid', { category: activePlayer.category, name: activePlayer.name, delta: dir === 'inc' ? step : -step });
 };
 
 // Team Live Action "BID"

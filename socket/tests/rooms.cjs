@@ -39,7 +39,16 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  pending=event(team,'auction:enter');team.emit('team:login',{hostId:id,role:'team',teamId:'TIGERS',password:'team-test-2026'});await pending;
  pending=event(viewer,'popup:open');admin.emit('admin:select_player',{category:'CAT_BAT',name:'Player One',base:50,currentPrice:50});assert.equal((await pending).name,'Player One');
  pending=event(team,'bidding:started');admin.emit('admin:start_bidding');await pending;
- pending=event(viewer,'player:bid');team.emit('player:bid',{category:'CAT_BAT',name:'Player One',price:60,teamId:'TIGERS'});assert.equal((await pending).price,60);
+ pending=event(viewer,'player:bid');await page.evaluate(()=>adjustBid('inc'));let adjustment=await pending;assert.equal(adjustment.actor,'admin');assert.equal(adjustment.action,'increased');assert.equal(adjustment.price,60);
+ await page.waitForFunction(()=>document.getElementById('bidAnnouncement').textContent.includes('Admin increased'));
+ await teamPage.waitForFunction(()=>document.getElementById('bidAnnouncement').textContent.includes('Admin increased'));
+ pending=event(viewer,'player:bid');await page.evaluate(()=>adjustBid('dec'));adjustment=await pending;assert.equal(adjustment.action,'decreased');assert.equal(adjustment.price,50);
+ await teamPage.waitForFunction(()=>document.getElementById('bidAnnouncement').textContent.includes('Admin decreased'));
+ pending=event(viewer,'player:bid');team.emit('player:bid',{category:'CAT_BAT',name:'Player One',price:60,teamId:'TIGERS'});const acceptedBid=await pending;assert.equal(acceptedBid.price,60);assert.equal(acceptedBid.actor,'team');assert.equal(acceptedBid.bidText,'Dhaka Tigers bid \u09f360');
+ await page.waitForFunction(()=>document.getElementById('bidAnnouncement').textContent==='Dhaka Tigers bid \u09f360');
+ await teamPage.reload();await teamPage.waitForFunction(()=>document.getElementById('bidAnnouncement').textContent==='Dhaka Tigers bid \u09f360');
+ assert.equal(await teamPage.evaluate(()=>STATE.biddingActive),true);
+
  pending=event(viewer,'player:sold');admin.emit('player:sold',{category:'CAT_BAT',name:'Player One',price:60,teamId:'TIGERS'});const sale=await pending;assert.equal(sale.teams[0].password,undefined);assert.equal(leaked,false);
  // Viewer UI and responsive lobby.
  const viewerPage=await browser.newPage({viewport:{width:390,height:844}});await viewerPage.goto(url);await viewerPage.waitForSelector('.room-tile');assert.equal(await viewerPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
@@ -76,5 +85,5 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  for(const c of clients)c.disconnect();await stop();await start();const check=await connect();listing=event(check,'rooms:list');check.emit('rooms:list');assert.equal((await listing).some(r=>r.id===id),false);
  pending=event(check,'auth:portal_error');check.emit('manager:login',{username:id,password:'admin-test-2026'});await pending;
  assert.deepEqual(errors,[]);
- console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, restart persistence, frontend connection status, deletion authorization, admin deletion UI, participant revocation, unrelated room preservation, persistent deletion, optional default viewer PIN, leading-zero PINs, invalid PIN rejection, and PIN reset.');
+ console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, restart persistence, frontend connection status, deletion authorization, admin deletion UI, participant revocation, unrelated room preservation, persistent deletion, optional default viewer PIN, leading-zero PINs, invalid PIN rejection, PIN reset, admin increase/decrease announcements, team bid announcements, and bid message restoration.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{for(const c of clients)c.disconnect();if(browser)await browser.close();await stop();if(fs.existsSync(dataFile))fs.unlinkSync(dataFile);});

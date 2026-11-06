@@ -880,6 +880,9 @@ io.on('connection', (socket) => {
             socket.join(`admin:${effectiveUser.toLowerCase()}`);
             const hostLeague = getLeague(effectiveUser);
             socket.emit('manager:logged_in', { username: effectiveUser, state: publicState(hostLeague, true) });
+            if (hostLeague.currentActivePlayer) socket.emit('popup:open', {...hostLeague.currentActivePlayer, biddingActive:hostLeague.biddingActive});
+            const timer = getHostTimer(effectiveUser);
+            socket.emit('timer:sync', {paused:timer.paused,time:timer.time});
         } else {
             socket.emit('auth:portal_error', 'Invalid Credentials');
         }
@@ -911,7 +914,9 @@ io.on('connection', (socket) => {
         socket.data={hostId:effectiveHost,role,teamId:role==='team'?team.id:null};
         socket.join(`host:${effectiveHost.toLowerCase()}`);
         socket.emit('auction:enter',{role,teamId:socket.data.teamId,hostId:effectiveHost,state:publicState(hostLeague)});
-        if(hostLeague.currentActivePlayer)socket.emit('popup:open',hostLeague.currentActivePlayer);
+        if(hostLeague.currentActivePlayer)socket.emit('popup:open',{...hostLeague.currentActivePlayer,biddingActive:hostLeague.biddingActive});
+        const timer = getHostTimer(effectiveHost);
+        socket.emit('timer:sync',{paused:timer.paused,time:timer.time});
     });
 
     socket.on('admin:timer_control', (data) => {
@@ -1382,51 +1387,25 @@ io.on('connection', (socket) => {
         immediateSaveToFirebase();
     });
 
-    socket.on('admin:adjust_bid', ({ category, name, price, delta, action }) => {
-        if (socket.data.role !== 'admin') return;
-        const hostId = socket.data.hostId || 'admin';
-        const hostKey = hostId.toString().toLowerCase();
+    socket.on('admin:adjust_bid', ({ category, name, price, delta }) => {
+        const hostId = socket.data.hostId;
         const league = getLeague(hostId);
-
-        if (!league.activeBids) league.activeBids = {};
+        const player = league.currentActivePlayer;
+        const cat = league.categories.find(c => c.id === category);
+        if (!cat || !player || player.category !== category || player.name !== name) return;
         const key = `${category}:${name}`;
-        const newPrice = Math.max(0, Number(price) || 0);
+        const previousPrice = Number(league.activeBids[key] ?? player.currentPrice ?? cat.base);
+        const newPrice = typeof delta === 'number' && Number.isFinite(delta) ? previousPrice + delta : Number(price);
+        if (!Number.isFinite(newPrice) || newPrice < Number(cat.base) || newPrice === previousPrice) return;
+        const action = newPrice > previousPrice ? 'increased' : 'decreased';
+        const currentBidder = league.activeBidders[key] || null;
+        const team = league.teams.find(t => t.id === currentBidder);
+        const bidText = `Admin ${action} the bid to \u09f3${newPrice}`;
+        const bid = { category, name, price:newPrice, previousPrice, highBidderId:currentBidder, teamId:currentBidder, teamName:team?.name || 'Admin', isAdjustment:true, actor:'admin', action, bidText, adjustmentText:bidText };
         league.activeBids[key] = newPrice;
-        if (league.currentActivePlayer && league.currentActivePlayer.name === name) {
-            league.currentActivePlayer.currentPrice = newPrice;
-            league.currentActivePlayer.adminAdjusted = true;
-        }
-
-        const currentBidder = league.activeBidders ? league.activeBidders[key] : null;
-        const bidderTeam = currentBidder ? (league.teams || []).find(t => t.id === currentBidder) : null;
-        
-        const actionVerb = action || (delta >= 0 ? 'increased' : 'decreased');
-        const textMsg = `Auctioneer ${actionVerb} bid to ৳${newPrice}`;
-
-        const bidPayload = {
-            category,
-            name,
-            price: newPrice,
-            highBidderId: currentBidder,
-            teamId: currentBidder,
-            teamName: bidderTeam ? bidderTeam.name : (currentBidder || 'Admin Desk'),
-            isAdjustment: true,
-            adjustmentText: `📢 ${textMsg}`
-        };
-
-        if (hostKey === 'admin') {
-            if (!STATE.activeBids) STATE.activeBids = {};
-            STATE.activeBids[key] = newPrice;
-            if (STATE.currentActivePlayer && STATE.currentActivePlayer.name === name) {
-                STATE.currentActivePlayer.currentPrice = newPrice;
-                STATE.currentActivePlayer.adminAdjusted = true;
-            }
-            io.to('host:admin').emit('player:bid', bidPayload);
-            io.to('host:admin').emit('admin:toast', { msg: `📢 ${textMsg}` });
-        }
-
-        io.to(`host:${hostKey}`).emit('player:bid', bidPayload);
-        io.to(`host:${hostKey}`).emit('admin:toast', { msg: `📢 ${textMsg}` });
+        player.currentPrice = newPrice; player.adminAdjusted = true; player.lastBidEvent = bid;
+        if (league.biddingActive && !getHostTimer(hostId).paused) startHostTimer(hostId, 30);
+        io.to(`host:${hostId.toLowerCase()}`).emit('player:bid', bid);
         immediateSaveToFirebase();
     });
 
@@ -1478,7 +1457,10 @@ io.on('connection', (socket) => {
             return;
         }
         const validPrice = Number(data.price);
-        if (isNaN(validPrice) || validPrice <= 0) return;
+        if (!Number.isFinite(validPrice) || validPrice <= 0) return;
+        const category = league.categories.find(c => c.id === data.category);
+        if (!category || !league.currentActivePlayer || league.currentActivePlayer.category !== data.category || league.currentActivePlayer.name !== data.name) return;
+        if (validPrice < Number(category.base)) return;
 
         const key = `${data.category}:${data.name}`;
         const team = data.teamId ? (league.teams || []).find(t => t.id === data.teamId) : null;
@@ -1515,6 +1497,15 @@ io.on('connection', (socket) => {
 
         const currentTopBid = Number(league.activeBids && league.activeBids[key]) || 0;
         const currentTopBidder = league.activeBidders ? league.activeBidders[key] : null;
+        if (data.teamId) {
+            const step = Number(category.increment);
+            const minimum = Object.prototype.hasOwnProperty.call(league.activeBids, key) ? currentTopBid + step : Number(category.base);
+            const steps = (validPrice - Number(category.base)) / step;
+            if (!(step > 0) || validPrice < minimum || Math.abs(steps - Math.round(steps)) > 0.000001) {
+                return socket.emit('admin:toast', {msg:'Bid must follow the category increment and exceed the current bid.'});
+            }
+        }
+
 
         if (currentTopBidder && currentTopBidder !== 'ADMIN' && validPrice <= currentTopBid && data.teamId && data.teamId !== 'ADMIN') {
             socket.emit('admin:toast', { msg: `⚠️ Bid must be higher than current bid (৳${currentTopBid})` });
@@ -1539,7 +1530,8 @@ io.on('connection', (socket) => {
             startHostTimer(hostId, 30);
         }
 
-        const bidPayload = { ...data, price: validPrice, highBidderId: league.activeBidders[key], teamName: team ? team.name : 'Admin Desk' };
+        const bidPayload = { category:data.category, name:data.name, teamId:data.teamId || null, price:validPrice, highBidderId:league.activeBidders[key], teamName:team ? team.name : 'Admin', isAdjustment:false, actor:team ? 'team' : 'admin', action:'bid', bidText:`${team ? team.name : 'Admin'} bid \u09f3${validPrice}` };
+        league.currentActivePlayer.lastBidEvent = bidPayload;
         io.to(`host:${hostKey}`).emit('player:bid', bidPayload);
 
         if (hostKey === 'admin') {
@@ -1553,7 +1545,6 @@ io.on('connection', (socket) => {
                     STATE.currentActivePlayer.adminAdjusted = false;
                 }
             }
-            io.to('host:admin').emit('player:bid', bidPayload);
         }
         
         // AUTO-SELL CHECK:

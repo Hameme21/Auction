@@ -45,3 +45,16 @@ The Docker image includes `socket/status.html`. Push it together with the update
 Dockerfile and server before deploying. Local file storage inside the container
 is temporary unless backed by a persistent disk; keep Firebase configured for
 persistent tournament data across redeploys.
+
+
+## Frontend status and tournament deletion
+
+The frontend is https://auction-three-lake.vercel.app/. Its connection badge is
+visible in the lobby and inside rooms, with reconnect controls when offline.
+The backend status page links to this frontend.
+
+An authenticated admin can delete their tournament from Team Config > Delete
+tournament. The confirmation requires the exact tournament name and admin
+password. Deletion removes that room and its saved auction data, revokes its
+connected participants, and refreshes the room directory. Other rooms remain.
+Deploy the updated frontend on Vercel and backend on Render together.

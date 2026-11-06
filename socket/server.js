@@ -58,6 +58,7 @@ const PORT = process.env.PORT || 3000;
 // =========================================================
 let MANAGERS = { 'admin': 'admin' };
 let LEAGUES = {};
+const DELETING_ROOMS = new Set();
 
 function findManagerKey(hostId) {
     if (!hostId) return null;
@@ -601,12 +602,12 @@ function debouncedSaveToFirebase() {
     }, 1500); 
 }
 
-async function immediateSaveToFirebase() {
+async function immediateSaveToFirebase({ throwOnError = false } = {}) {
     try {
         LEAGUES['admin'] = STATE;
         if(!DOC_REF) {saveLocalState();return;}
         await DOC_REF.set({ managers: MANAGERS, leagues: LEAGUES, defaultLeague: STATE });
-    } catch (e) {}
+    } catch (e) { if (throwOnError) throw e; }
 }
 
 async function loadFromFirebase() {
@@ -806,6 +807,7 @@ io.on('connection', (socket) => {
     // Join live channels only after authentication.
     // State is delivered only after room authentication.
     socket.use(([event],next) => {
+        if(DELETING_ROOMS.has(socket.data.hostId) && !['status:ping','rooms:list'].includes(event))return;
         if(['team:activateImpact','rtm:lockImpact','rtm:invoke','rtm:respond'].includes(event)&&!['team','admin'].includes(socket.data.role))return socket.emit('auth:team_error','Authenticated team access required');
         if(event.startsWith('admin:') && socket.data.role!=='admin')return socket.emit('auth:team_error','Admin access required');
         if(['players:save','players:clear','schedule:save','schedule:reset'].includes(event) && socket.data.role!=='admin')return socket.emit('auth:team_error','Team or admin access required');
@@ -822,6 +824,36 @@ io.on('connection', (socket) => {
         for(const room of socket.rooms)if(room!==socket.id)socket.leave(room);
         socket.data={role:'admin',hostId:id,teamId:null};socket.join(`host:${id.toLowerCase()}`);socket.join(`admin:${id.toLowerCase()}`);
         await immediateSaveToFirebase();socket.emit('manager:logged_in',{username:id,state:publicState(league,true)});io.emit('rooms:list',roomList());
+    });
+    socket.on('room:delete', async (data = {}, acknowledge) => {
+        if (typeof acknowledge !== 'function') return;
+        const hostId = socket.data.hostId;
+        const league = LEAGUES[hostId];
+        if (socket.data.role !== 'admin' || !league?.room) return acknowledge({ok:false,error:'Only this tournament admin can delete it.'});
+        if (typeof data.password !== 'string' || data.password.length > 128 || !matchesPassword(data.password, MANAGERS[hostId])) return acknowledge({ok:false,error:'Incorrect admin password.'});
+        if (data.name !== league.room.name) return acknowledge({ok:false,error:'The tournament name does not match.'});
+        DELETING_ROOMS.add(hostId);
+        const wasBidding = league.biddingActive;
+        const timer = getHostTimer(hostId); const remaining = timer.time; const wasPaused = timer.paused;
+        pauseHostTimer(hostId);
+        const credential = MANAGERS[hostId];
+        delete LEAGUES[hostId]; delete MANAGERS[hostId];
+        try {
+            await immediateSaveToFirebase({throwOnError:true});
+        } catch (error) {
+            LEAGUES[hostId] = league; MANAGERS[hostId] = credential; DELETING_ROOMS.delete(hostId);
+            if (wasBidding && !wasPaused) startHostTimer(hostId, remaining);
+            return acknowledge({ok:false,error:'Could not save the deletion. The tournament has been kept. Please try again.'});
+        }
+        for (const client of io.sockets.sockets.values()) {
+            if (client.data.hostId !== hostId) continue;
+            client.emit('room:deleted', {hostId,name:league.room.name});
+            client.leave(`host:${hostId.toLowerCase()}`); client.leave(`admin:${hostId.toLowerCase()}`);
+            client.data = {};
+        }
+        for (const key of Object.keys(TIMERS)) if (key.toLowerCase() === hostId.toLowerCase()) delete TIMERS[key];
+        DELETING_ROOMS.delete(hostId);
+        acknowledge({ok:true}); io.emit('rooms:list',roomList());
     });
     socket.on('room:viewer_password',async ({password}={})=>{
         if(socket.data.role!=='admin'||typeof password!=='string'||password.length<8||password.length>128)return;

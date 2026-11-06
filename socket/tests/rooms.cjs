@@ -45,6 +45,28 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  const viewerPage=await browser.newPage({viewport:{width:390,height:844}});await viewerPage.goto(url);await viewerPage.waitForSelector('.room-tile');assert.equal(await viewerPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await viewerPage.getByRole('heading',{name:'Test Premier League'}).click();await viewerPage.locator('[data-login-role="listener"]').click();await viewerPage.locator('#participantConnectBtn').click();await viewerPage.waitForSelector('#teamAuthOverlay:not(.hidden)');assert.equal(await viewerPage.locator('#passGroup').isVisible(),true);await viewerPage.locator('#loginPass').fill('viewer-test-2026');await viewerPage.getByRole('button',{name:'Enter auction room'}).click();await viewerPage.waitForSelector('#appContainer:not(.hidden)');
  await page.reload();await page.waitForSelector('#appContainer:not(.hidden)');assert.deepEqual(errors,[]);
+ await page.waitForSelector('#frontendConnection[data-state="connected"]');
+ await page.evaluate(()=>socket.disconnect());await page.waitForSelector('#frontendConnection[data-state="disconnected"]');
+ await page.locator('#frontendReconnect').click();await page.waitForSelector('#frontendConnection[data-state="connected"]');
+
  for(const c of clients)c.disconnect();await stop();await start();const restored=await connect();pending=event(restored,'manager:logged_in');restored.emit('manager:login',{username:id,password:'admin-test-2026'});state=(await pending).state;assert.equal(state.teams.length,2);assert.equal(state.playersSnapshot.CAT_BAT.length,2);
- console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, and restart persistence.');
+
+ const other=await connect();pending=event(other,'manager:logged_in');other.emit('room:create',{name:'Keep This Tournament',password:'keep-admin-2026',viewerPassword:'keep-viewer-2026'});const otherId=(await pending).username;
+ const denied=await connect();pending=event(denied,'auction:enter');denied.emit('team:login',{hostId:id,role:'listener',password:'viewer-test-2026'});await pending;
+ const rejected=await new Promise(resolve=>denied.emit('room:delete',{name:'Test Premier League',password:'admin-test-2026'},resolve));assert.equal(rejected.ok,false);
+ await page.waitForFunction(()=>socket.connected);await page.evaluate(()=>showSection('sectionTeamConfig'));
+ await page.getByRole('button',{name:'Delete tournament',exact:true}).click();
+ await page.locator('#deleteTournamentConfirm').fill('Test Premier League');await page.locator('#deleteTournamentPassword').fill('wrong-password');
+ await page.getByRole('button',{name:'Permanently delete tournament',exact:true}).click();await page.waitForFunction(()=>document.getElementById('deleteTournamentError').textContent==='Incorrect admin password.');
+ let listing=event(other,'rooms:list');other.emit('rooms:list');assert.equal((await listing).some(r=>r.id===id),true);
+ await page.locator('#deleteTournamentPassword').fill('admin-test-2026');
+ const removed=event(denied,'room:deleted');await page.getByRole('button',{name:'Permanently delete tournament',exact:true}).click();assert.equal((await removed).hostId,id);
+ await page.waitForSelector('#portal:not(.hidden)');await page.waitForFunction(()=>!localStorage.getItem('auctioncmd.session.v1'));
+ assert.equal(await page.locator('#deleteTournamentDialog').isVisible(),false);
+ listing=event(other,'rooms:list');other.emit('rooms:list');const remaining=await listing;assert.equal(remaining.some(r=>r.id===id),false);assert.equal(remaining.some(r=>r.id===otherId),true);
+ const after=await new Promise(resolve=>denied.emit('room:delete',{name:'Keep This Tournament',password:'keep-admin-2026'},resolve));assert.equal(after.ok,false);
+ for(const c of clients)c.disconnect();await stop();await start();const check=await connect();listing=event(check,'rooms:list');check.emit('rooms:list');assert.equal((await listing).some(r=>r.id===id),false);
+ pending=event(check,'auth:portal_error');check.emit('manager:login',{username:id,password:'admin-test-2026'});await pending;
+ assert.deepEqual(errors,[]);
+ console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, restart persistence, frontend connection status, deletion authorization, admin deletion UI, participant revocation, unrelated room preservation, and persistent deletion.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{for(const c of clients)c.disconnect();if(browser)await browser.close();await stop();if(fs.existsSync(dataFile))fs.unlinkSync(dataFile);});

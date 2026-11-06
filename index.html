@@ -1077,6 +1077,11 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 .room-recommendation .room-tile-footer { margin-top:auto;padding-top:20px; }
 @media(max-width:480px){.tournament-search-row{flex-wrap:wrap}.tournament-search-row #roomSearch{flex-basis:100%}.tournament-search-row button{min-height:42px}.room-results-heading{align-items:flex-start;flex-direction:column;gap:5px}}
 
+
+.frontend-connection{position:fixed;bottom:16px;left:16px;z-index:5500;display:flex;align-items:center;gap:9px;padding:10px 13px;border:1px solid #8f723b;border-radius:12px;background:#0b1b29f5;box-shadow:0 5px 24px #0005;font-size:11px;color:#f3d58e;max-width:calc(100vw - 32px)}
+.frontend-connection::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}.frontend-connection[data-state="connected"]{color:#83fba0;border-color:#31563d}.frontend-connection[data-state="disconnected"],.frontend-connection[data-state="error"]{color:#ffaaaa;border-color:#734149}.frontend-connection button{padding:3px 7px;font-size:10px;color:inherit}.delete-tournament-card{padding:20px;margin:20px 0;border:1px solid #ef444450;border-radius:14px;background:#ef444408}.delete-tournament-card p{color:var(--muted);line-height:1.7;margin:10px 0 16px}#deleteTournamentDialog{color:var(--text);margin:auto;max-height:90vh}#deleteTournamentDialog::backdrop{background:#000b;backdrop-filter:blur(8px)}
+@media(max-width:767px){body:has(#appContainer:not(.hidden)) .frontend-connection{bottom:calc(80px + env(safe-area-inset-bottom))}.frontend-connection{font-size:10px;padding:8px 10px}#deleteTournamentDialog{width:calc(100% - 24px)}}
+
 </style>
 </head>
 <body>
@@ -1096,6 +1101,19 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
     <div class="loading-bar"><span></span></div>
   </div>
 </div>
+
+<div id="frontendConnection" class="frontend-connection" data-state="connecting"><span id="frontendConnectionText" role="status" aria-live="polite">Connecting to auction server...</span><button id="frontendReconnect" type="button" class="ghost small hidden" onclick="reconnectAuctionServer()">Reconnect</button></div>
+<dialog id="deleteTournamentDialog" class="portal-card">
+  <h2 style="font-size:30px;margin-bottom:12px">Delete tournament?</h2>
+  <p style="color:var(--muted);line-height:1.7;margin-bottom:20px">This permanently deletes this room, its teams, player database, and auction history. Everyone in the room will return to the lobby.</p>
+  <p id="deleteTournamentName" class="mono" style="margin-bottom:18px;overflow-wrap:anywhere"></p>
+  <form onsubmit="event.preventDefault();deleteTournament()">
+    <label for="deleteTournamentConfirm">Type the full tournament name</label><input id="deleteTournamentConfirm" required autocomplete="off">
+    <label for="deleteTournamentPassword">Admin password</label><input id="deleteTournamentPassword" type="password" required autocomplete="current-password">
+    <p id="deleteTournamentError" role="alert" style="color:var(--danger);margin-bottom:14px"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button id="confirmDeleteTournament" class="red" type="submit">Permanently delete tournament</button><button class="ghost" type="button" onclick="document.getElementById('deleteTournamentDialog').close()">Cancel</button></div>
+  </form>
+</dialog>
 
 <div id="portal">
   <div class="room-lobby">
@@ -1371,6 +1389,7 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
           </div>
         </div>
         <div class="glass" style="padding:20px;margin-bottom:20px"><h3 style="font-size:23px;margin-bottom:12px">Room access</h3><p id="roomAccessInfo" class="mono" style="color:var(--muted);margin-bottom:12px"></p><label for="updateViewerPassword">New viewer password</label><input id="updateViewerPassword" type="password" minlength="8" placeholder="At least 8 characters"><button class="ghost" onclick="saveViewerPassword()">Update viewer password</button><button class="ghost" onclick="copyRoomLink()" style="margin-left:8px">Copy room link</button></div>
+              <div class="delete-tournament-card"><h3 style="font-size:24px">Delete tournament</h3><p>Permanently remove this tournament and all of its auction data.</p><button type="button" class="red" onclick="openDeleteTournament()">Delete tournament</button></div>
               <div id="teamsConfigContainer" style="max-height:70vh;overflow-y:auto;padding:2px"></div>
       </div>
     </div>
@@ -1545,6 +1564,24 @@ function createOfflineSocket() {
   };
 }
 const socket = window.io ? io(BACKEND_URL, { transports: ["websocket"] }) : createOfflineSocket();
+function updateFrontendConnection(state, message) {
+  document.getElementById('frontendConnection').dataset.state = state;
+  document.getElementById('frontendConnectionText').textContent = message;
+  document.getElementById('frontendReconnect').classList.toggle('hidden', state === 'connected' || state === 'connecting');
+}
+window.reconnectAuctionServer = () => {
+  if (!socket.connect) { location.reload(); return; }
+  updateFrontendConnection('connecting', 'Connecting to auction server...'); socket.connect();
+};
+socket.on('connect', () => {
+  updateFrontendConnection('connected', 'Auction server connected');
+  if (document.getElementById('portalMsg').textContent.startsWith('Cannot reach the room server')) document.getElementById('portalMsg').textContent = '';
+});
+socket.on('disconnect', () => { restoringSession = false; updateFrontendConnection('disconnected', 'Server disconnected. Live bidding unavailable.'); });
+socket.on('connect_error', () => updateFrontendConnection('error', 'Connection failed. Retrying...'));
+socket.io?.on('reconnect_attempt', () => updateFrontendConnection('reconnecting', 'Reconnecting to auction server...'));
+if (socket.connected) updateFrontendConnection('connected', 'Auction server connected');
+else if (!window.io) updateFrontendConnection('error', 'Socket client unavailable');
 if (!window.io) {
   document.documentElement.classList.remove('restore-session');
   window.__hideAuctionLoader?.(650);
@@ -1978,6 +2015,35 @@ window.openAuctionRoom = id => {
   document.getElementById('roomDialogTitle').textContent=room.name; document.getElementById('roomDialogEyebrow').textContent='ENTER YOUR ARENA'; document.getElementById('selectedRoomCode').textContent='ROOM / '+id;
   document.getElementById('mUser').value=id; document.getElementById('pHostId').value=id; document.getElementById('mPass').value=''; document.getElementById('roomDialogMsg').textContent=''; selectLoginRole('manager'); document.getElementById('roomDialog').showModal();
 };
+window.openDeleteTournament = () => {
+  if (CURRENT_USER.role !== 'admin' || !STATE.room) return;
+  document.getElementById('deleteTournamentName').textContent = STATE.room.name;
+  document.getElementById('deleteTournamentConfirm').value = '';
+  document.getElementById('deleteTournamentPassword').value = '';
+  document.getElementById('deleteTournamentError').textContent = '';
+  document.getElementById('confirmDeleteTournament').disabled = false;
+  document.getElementById('deleteTournamentDialog').showModal();
+};
+window.deleteTournament = () => {
+  const error = document.getElementById('deleteTournamentError');
+  if (!socket.connected) { error.textContent = 'Reconnect to the server before deleting a tournament.'; return; }
+  const name = document.getElementById('deleteTournamentConfirm').value;
+  if (name !== STATE.room?.name) { error.textContent = 'The tournament name does not match.'; return; }
+  document.getElementById('confirmDeleteTournament').disabled = true;
+  error.textContent = 'Deleting tournament...';
+  socket.timeout(15000).emit('room:delete', { name, password: document.getElementById('deleteTournamentPassword').value }, (timeout, result) => {
+    document.getElementById('confirmDeleteTournament').disabled = false;
+    if (timeout || !result?.ok) error.textContent = timeout ? 'No confirmation received. Reconnect and check the room list before trying again.' : result.error;
+  });
+};
+socket.on('room:deleted', data => {
+  if (CURRENT_USER.hostId !== data.hostId) return;
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.setItem('auctioncmd.roomNotice', 'Tournament "' + data.name + '" was deleted by its admin.');
+  location.replace(location.pathname);
+});
+const roomNotice = sessionStorage.getItem('auctioncmd.roomNotice');
+if (roomNotice) { document.getElementById('portalMsg').textContent = roomNotice; sessionStorage.removeItem('auctioncmd.roomNotice'); }
 window.saveViewerPassword = () => { const password=document.getElementById('updateViewerPassword').value; if(password.length<8)return showToast('Use at least 8 characters'); socket.emit('room:viewer_password',{password}); };
 socket.on('team:database_saved', d => showToast(d.count + ' players added to the tournament database'));
 socket.on('room:password_saved', () => {document.getElementById('updateViewerPassword').value='';showToast('Viewer password updated');});

@@ -1,0 +1,9 @@
+.git
+.vscode
+**/node_modules
+**/.env
+**/.env.*
+**/auction-data.local.json*
+preview
+socket/tests
+**/npm-debug.log*

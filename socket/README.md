@@ -27,3 +27,21 @@ Run `npm test` for the isolated browser and socket integration checks. Tests use
 installed Google Chrome and a temporary server on port 3107, and verify room
 creation, passwords, team database submissions, viewer access, live bidding,
 room isolation, mobile layout, session restore, and restart persistence.
+
+
+## Render backend status page
+
+Keep the existing Docker service. Set Root Directory to empty, Dockerfile Path
+ to `socket/Dockerfile`, and Docker Build Context Directory to `.`. Leave Docker
+Command empty and use `/api/health` as the health check path.
+
+On Render (`RENDER=true`), `/` shows the backend status page. `/status` and
+`/status.html` also show it in every environment. `/index.html` continues to serve
+the auction interface. The frontend can stay on Vercel and connect to this Render
+service. The status page checks its own socket connection and HTTP health; it
+does not verify the Vercel frontend connection or Firestore reachability.
+
+The Docker image includes `socket/status.html`. Push it together with the updated
+Dockerfile and server before deploying. Local file storage inside the container
+is temporary unless backed by a persistent disk; keep Firebase configured for
+persistent tournament data across redeploys.

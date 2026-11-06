@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 
 // Serve static assets and index.html if accessed directly
 app.get(['/', '/index.html'], (req, res) => {
+    if (req.path === '/' && process.env.RENDER === 'true') return res.sendFile(path.join(__dirname, 'status.html'));
     const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
     res.type('html').send(html.replace('<!-- auction-server-config -->',
         '<script>window.AUCTION_BACKEND_URL = location.origin;</script>'));
@@ -152,7 +153,7 @@ function broadcastLeagueUpdate(hostId, league) {
 
 
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ ok: true, status: 'Server is running', service: 'Auction Socket Backend', uptime: Math.floor(process.uptime()), timestamp: Date.now() });
+    res.status(200).json({ ok: true, status: 'Server is running', service: 'Auction Socket Backend', uptime: Math.floor(process.uptime()), storageMode: db ? 'firestore' : 'local-file', timestamp: Date.now() });
 });
 
 app.get('/api/verify-host/:hostId', (req, res) => {
@@ -177,21 +178,7 @@ app.get('/api/verify-host/:hostId', (req, res) => {
     });
 });
 
-app.get('/status', (req, res) => {
-    const isFirebaseConnected = admin.apps.length > 0;
-    res.status(200).send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Auction Socket Server Status</title>
-</head>
-<body style="font-family: sans-serif; background: #090d16; color: #fff; padding: 2rem;">
-  <h1>Auction Socket Server</h1>
-  <p>Status: Active on port ${PORT}</p>
-  <p>Database: ${isFirebaseConnected ? 'Firebase Firestore' : 'In-Memory Mode'}</p>
-</body>
-</html>`);
-});
+app.get(['/status', '/status.html'], (req, res) => res.sendFile(path.join(__dirname, 'status.html')));
 
 let db = null;
 let DOC_REF = null;
@@ -812,6 +799,9 @@ function executeSale(data, hostId) {
 }
 
 io.on('connection', (socket) => {
+    socket.on('status:ping', acknowledge => {
+        if (typeof acknowledge === 'function') acknowledge({ ok: true });
+    });
     socket.data.hostId = 'admin';
     // Join live channels only after authentication.
     // State is delivered only after room authentication.

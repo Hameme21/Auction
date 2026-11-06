@@ -817,7 +817,9 @@ io.on('connection', (socket) => {
     socket.on('rooms:list',()=>socket.emit('rooms:list',roomList()));
     socket.on('room:create',async ({name,password,viewerPassword}={})=>{
         if(typeof name!=='string'||name.trim().length<3||name.trim().length>80)return socket.emit('auth:portal_error','Tournament name must be 3?80 characters');
-        if([password,viewerPassword].some(p=>typeof p!=='string'||p.length<8||p.length>128))return socket.emit('auth:portal_error','Both passwords must be 8?128 characters');
+        if(typeof password!=='string'||password.length<8||password.length>128)return socket.emit('auth:portal_error','Admin password must be 8-128 characters');
+        if(viewerPassword == null || viewerPassword === '') viewerPassword = '1234';
+        if(typeof viewerPassword!=='string'||!/^[0-9]{4}$/.test(viewerPassword))return socket.emit('auth:portal_error','Viewer password must be exactly 4 digits');
         const id='ROOM-'+crypto.randomBytes(4).toString('hex').toUpperCase();
         MANAGERS[id]=hashPassword(password);const league=createCleanLeague();league.playersSnapshot={};
         league.room={name:name.trim(),viewerPassword:hashPassword(viewerPassword),createdAt:Date.now()};LEAGUES[id]=league;
@@ -856,7 +858,9 @@ io.on('connection', (socket) => {
         acknowledge({ok:true}); io.emit('rooms:list',roomList());
     });
     socket.on('room:viewer_password',async ({password}={})=>{
-        if(socket.data.role!=='admin'||typeof password!=='string'||password.length<8||password.length>128)return;
+        if(socket.data.role!=='admin')return;
+        if(password == null || password === '') password = '1234';
+        if(typeof password!=='string'||!/^[0-9]{4}$/.test(password))return socket.emit('room:password_error','Viewer password must be exactly 4 digits');
         const league=getLeague(socket.data.hostId);if(!league.room)return;
         league.room.viewerPassword=hashPassword(password);await immediateSaveToFirebase();socket.emit('room:password_saved');
     });

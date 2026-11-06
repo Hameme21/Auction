@@ -58,3 +58,10 @@ tournament. The confirmation requires the exact tournament name and admin
 password. Deletion removes that room and its saved auction data, revokes its
 connected participants, and refreshes the room directory. Other rooms remain.
 Deploy the updated frontend on Vercel and backend on Render together.
+
+
+Viewer passwords for new rooms and password updates must contain exactly four
+numeric digits. Admins can leave the viewer password empty when creating a room
+to use `1234`, or submit an empty update to reset it to `1234`. Admin passwords
+still require at least eight characters. Existing viewer credentials remain
+valid until the admin changes them.

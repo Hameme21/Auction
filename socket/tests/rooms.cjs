@@ -22,7 +22,7 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.stack));
  await page.goto(url);await page.waitForSelector('.room-empty');
  await page.getByRole('button',{name:'+ Create auction room',exact:true}).click();
- await page.locator('#roomName').fill('Test Premier League');await page.locator('#roomAdminPassword').fill('admin-test-2026');await page.locator('#roomViewerPassword').fill('viewer-test-2026');
+ await page.locator('#roomName').fill('Test Premier League');await page.locator('#roomAdminPassword').fill('admin-test-2026');await page.locator('#roomViewerPassword').fill('5678');assert.equal(await page.locator('#roomViewerPassword').getAttribute('required'),null);assert.equal(await page.locator('#roomViewerPassword').getAttribute('maxlength'),'4');
  await page.getByRole('button',{name:'Create room & set up tournament'}).click();await page.waitForSelector('#appContainer:not(.hidden)');
  const session=await page.evaluate(()=>JSON.parse(localStorage.getItem('auctioncmd.session.v1')));const id=session.username;assert.match(id,/^ROOM-/);
  const admin=await connect();let pending=event(admin,'manager:logged_in');admin.emit('manager:login',{username:id,password:'admin-test-2026'});const auth=await pending;assert.deepEqual(auth.state.playersSnapshot,{});assert.equal(auth.state.room.viewerPassword,undefined);
@@ -32,7 +32,7 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  const teamPage=await browser.newPage();await teamPage.goto(url);await teamPage.getByRole('heading',{name:'Test Premier League'}).click();await teamPage.locator('[data-login-role="team"]').click();await teamPage.locator('#participantConnectBtn').click();await teamPage.locator('#loginTeamId').selectOption('TIGERS');await teamPage.locator('#loginPass').fill('team-test-2026');await teamPage.getByRole('button',{name:'Enter auction room'}).click();await teamPage.waitForSelector('#appContainer:not(.hidden)');
  await teamPage.evaluate(()=>showSection('sectionPlayerDatabase'));await teamPage.locator('#submitNames').fill('Player One\nPlayer Two\nPlayer One');pending=event(admin,'state:updated');await teamPage.getByRole('button',{name:'Submit players',exact:true}).click();let state=await pending;assert.equal(state.playersSnapshot.CAT_BAT.length,2);
  const viewer=await connect();pending=event(viewer,'auth:team_error');viewer.emit('team:login',{hostId:id,role:'listener',password:'wrong'});await pending;
- pending=event(viewer,'auction:enter');viewer.emit('team:login',{hostId:id,role:'listener',password:'viewer-test-2026'});const access=await pending;assert.equal(access.state.teams[0].password,undefined);assert.equal(access.state.room.viewerPassword,undefined);
+ pending=event(viewer,'auction:enter');viewer.emit('team:login',{hostId:id,role:'listener',password:'5678'});const access=await pending;assert.equal(access.state.teams[0].password,undefined);assert.equal(access.state.room.viewerPassword,undefined);
  pending=event(viewer,'auth:team_error');viewer.emit('admin:updateConfig',{teams:[]});await pending;
  // Live actions stay inside the selected room.
  const outsider=await connect();let leaked=false;outsider.on('popup:open',()=>leaked=true);outsider.on('state:updated',()=>leaked=true);
@@ -43,7 +43,7 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  pending=event(viewer,'player:sold');admin.emit('player:sold',{category:'CAT_BAT',name:'Player One',price:60,teamId:'TIGERS'});const sale=await pending;assert.equal(sale.teams[0].password,undefined);assert.equal(leaked,false);
  // Viewer UI and responsive lobby.
  const viewerPage=await browser.newPage({viewport:{width:390,height:844}});await viewerPage.goto(url);await viewerPage.waitForSelector('.room-tile');assert.equal(await viewerPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
- await viewerPage.getByRole('heading',{name:'Test Premier League'}).click();await viewerPage.locator('[data-login-role="listener"]').click();await viewerPage.locator('#participantConnectBtn').click();await viewerPage.waitForSelector('#teamAuthOverlay:not(.hidden)');assert.equal(await viewerPage.locator('#passGroup').isVisible(),true);await viewerPage.locator('#loginPass').fill('viewer-test-2026');await viewerPage.getByRole('button',{name:'Enter auction room'}).click();await viewerPage.waitForSelector('#appContainer:not(.hidden)');
+ await viewerPage.getByRole('heading',{name:'Test Premier League'}).click();await viewerPage.locator('[data-login-role="listener"]').click();await viewerPage.locator('#participantConnectBtn').click();await viewerPage.waitForSelector('#teamAuthOverlay:not(.hidden)');assert.equal(await viewerPage.locator('#passGroup').isVisible(),true);await viewerPage.locator('#loginPass').fill('5678');await viewerPage.getByRole('button',{name:'Enter auction room'}).click();await viewerPage.waitForSelector('#appContainer:not(.hidden)');
  await page.reload();await page.waitForSelector('#appContainer:not(.hidden)');assert.deepEqual(errors,[]);
  await page.waitForSelector('#frontendConnection[data-state="connected"]');
  await page.evaluate(()=>socket.disconnect());await page.waitForSelector('#frontendConnection[data-state="disconnected"]');
@@ -51,8 +51,16 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
 
  for(const c of clients)c.disconnect();await stop();await start();const restored=await connect();pending=event(restored,'manager:logged_in');restored.emit('manager:login',{username:id,password:'admin-test-2026'});state=(await pending).state;assert.equal(state.teams.length,2);assert.equal(state.playersSnapshot.CAT_BAT.length,2);
 
- const other=await connect();pending=event(other,'manager:logged_in');other.emit('room:create',{name:'Keep This Tournament',password:'keep-admin-2026',viewerPassword:'keep-viewer-2026'});const otherId=(await pending).username;
- const denied=await connect();pending=event(denied,'auction:enter');denied.emit('team:login',{hostId:id,role:'listener',password:'viewer-test-2026'});await pending;
+ const other=await connect();pending=event(other,'manager:logged_in');other.emit('room:create',{name:'Keep This Tournament',password:'keep-admin-2026'});const otherId=(await pending).username;
+ const defaultViewer=await connect();pending=event(defaultViewer,'auction:enter');defaultViewer.emit('team:login',{hostId:otherId,role:'listener',password:'1234'});await pending;
+ pending=event(other,'room:password_error');other.emit('room:viewer_password',{password:'123'});await pending;
+ pending=event(other,'room:password_saved');other.emit('room:viewer_password',{password:'0123'});await pending;
+ const pinViewer=await connect();pending=event(pinViewer,'auction:enter');pinViewer.emit('team:login',{hostId:otherId,role:'listener',password:'0123'});await pending;
+ pending=event(other,'room:password_saved');other.emit('room:viewer_password',{password:''});await pending;
+ const resetViewer=await connect();pending=event(resetViewer,'auction:enter');resetViewer.emit('team:login',{hostId:otherId,role:'listener',password:'1234'});await pending;
+ const invalidRoom=await connect();pending=event(invalidRoom,'auth:portal_error');invalidRoom.emit('room:create',{name:'Invalid PIN Room',password:'admin-test-2026',viewerPassword:'abcd'});await pending;
+
+ const denied=await connect();pending=event(denied,'auction:enter');denied.emit('team:login',{hostId:id,role:'listener',password:'5678'});await pending;
  const rejected=await new Promise(resolve=>denied.emit('room:delete',{name:'Test Premier League',password:'admin-test-2026'},resolve));assert.equal(rejected.ok,false);
  await page.waitForFunction(()=>socket.connected);await page.evaluate(()=>showSection('sectionTeamConfig'));
  await page.getByRole('button',{name:'Delete tournament',exact:true}).click();
@@ -68,5 +76,5 @@ async function stop(){if(server){const done=once(server,'exit');server.kill();aw
  for(const c of clients)c.disconnect();await stop();await start();const check=await connect();listing=event(check,'rooms:list');check.emit('rooms:list');assert.equal((await listing).some(r=>r.id===id),false);
  pending=event(check,'auth:portal_error');check.emit('manager:login',{username:id,password:'admin-test-2026'});await pending;
  assert.deepEqual(errors,[]);
- console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, restart persistence, frontend connection status, deletion authorization, admin deletion UI, participant revocation, unrelated room preservation, and persistent deletion.');
+ console.log('PASS: room creation, admin restore, team setup, wrong passwords, invalid roles, team database deduplication, viewer entry, secret redaction, authorization, mobile layout, room-scoped live selection, bidding, sale, restart persistence, frontend connection status, deletion authorization, admin deletion UI, participant revocation, unrelated room preservation, persistent deletion, optional default viewer PIN, leading-zero PINs, invalid PIN rejection, and PIN reset.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{for(const c of clients)c.disconnect();if(browser)await browser.close();await stop();if(fs.existsSync(dataFile))fs.unlinkSync(dataFile);});

@@ -20,6 +20,34 @@ window.setTimeout(function() {
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@400;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- 3D Animation Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Animation configuration - updated on updateFrontendConnection state
+window.ANIMATION_CONFIG = {
+  typingSpeed: 800,           // ms per digit for bid counter
+  pulseIntensity: 0.25,       // scale multiplier
+  pulseDuration: 0.4,         // seconds
+  glowIntensity: 0.35,        // glow opacity
+  cameraTiltAmplitude: 12,    // degrees for 3D tilt
+  particleCount: 60
+};
+
+// Feature flag - enable/disabled based on preferences
+window.ANIMATION_FEATURES = {
+  enabled: true,
+  reducedMotion: false
+};
+
+// Check for reduced motion preference
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  window.ANIMATION_FEATURES.enabled = false;
+  window.ANIMATION_FEATURES.reducedMotion = true;
+}
+</script>
+
 <style>
 :root {
   --bg: #00111f;
@@ -55,6 +83,247 @@ html { scroll-behavior: smooth; }
 body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(circle at 18% 12%, rgba(47,125,246,0.28), transparent 28%), radial-gradient(circle at 82% 8%, rgba(37,212,255,0.18), transparent 24%), linear-gradient(180deg, #020917 0%, #06182e 50%, #020917 100%); pointer-events: none; z-index: 0; animation: ambientShift 12s ease-in-out infinite alternate; }
 body::after { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(148,197,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(148,197,255,0.035) 1px, transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(to bottom, rgba(0,0,0,0.58), transparent 72%); pointer-events: none; z-index: 0; }
+
+/* 3D WebGL Background Container */
+#threeCanvasContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--bg-opacity, 1);
+}
+
+/* 3D Tilt Card Base */
+.card-3d {
+  transform-style: preserve-3d;
+  perspective: 1400px;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.card-3d-content {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* 3D Depth Effects */
+.depth-glow {
+  box-shadow:
+    0 0 30px rgba(102,255,99,0.1),
+    0 0 60px rgba(47,125,246,0.08),
+    inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.depth-lift {
+  box-shadow:
+    0 24px 60px rgba(0,8,28,0.6),
+    0 0 40px rgba(47,125,246,0.15);
+}
+
+/* Glassmorphism - Enhanced */
+.glass-3d {
+  background:
+    linear-gradient(180deg, rgba(16,32,50,0.9) 0%, rgba(3,12,26,0.95) 100%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 20px 60px rgba(0,8,28,0.4),
+    0 0 30px rgba(47,125,246,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(47,125,246,0.15) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.glass-3d:hover::before {
+  opacity: 1;
+}
+
+/* Bid Flash Animation */
+.bid-flash {
+  animation: bidFlash 0.6s ease-out;
+  position: relative;
+}
+
+.bid-flash::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--flash-color, var(--accent)), transparent);
+  opacity: 0;
+  z-index: -1;
+  filter: blur(4px);
+  animation: bidFlashGlow 0.6s ease-out;
+}
+
+@keyframes bidFlash {
+  0% { transform: scale(0.98); opacity: 0.95; }
+  30% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bidFlashGlow {
+  0% { opacity: 0.8; transform: scale(0.9); }
+  50% { opacity: 0.4; }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+/* Bid Pulse Animation */
+.bid-pulse {
+  animation: bidPulse 0.5s ease-in-out;
+}
+
+@keyframes bidPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); filter: brightness(1.2); }
+}
+
+/* Bid History Entry Animation */
+.bid-entry {
+  animation: bidEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bidEntry {
+  from {
+    opacity: 0;
+    transform: translateY(12px) translateZ(-50px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+    filter: blur(0);
+  }
+}
+
+/* Sold Animation Enhancements */
+.sold-stamp {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 15vw, 8rem);
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  animation: soldStampIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow:
+    0 0 30px var(--sold-color),
+    0 0 60px var(--sold-color),
+    0 10px 40px rgba(0,0,0,0.6);
+}
+
+@keyframes soldStampIn {
+  0% {
+    transform: translateZ(-100px) rotate(-15deg) scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: translateZ(20px) rotate(3deg) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateZ(0) rotate(0deg) scale(1);
+  }
+}
+
+.sold-overlay-flash {
+  animation: soldOverlayFlash 0.8s ease-out forwards;
+}
+
+@keyframes soldOverlayFlash {
+  0% { opacity: 0; }
+  30% { opacity: 1; backdrop-filter: blur(20px); }
+  100% { opacity: 0; backdrop-filter: blur(0); }
+}
+
+/* Particle Burst Container */
+#particleBurstContainer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8999;
+  overflow: hidden;
+}
+
+/* Team Budget Update Animation */
+.budget-update {
+  animation: budgetUpdate 0.5s ease-out;
+}
+
+@keyframes budgetUpdate {
+  0% { transform: scale(1); color: var(--emerald); }
+  25% { transform: scale(1.1); color: var(--accent-2); }
+  50% { transform: scale(0.95); color: var(--accent); }
+  100% { transform: scale(1); color: var(--emerald); }
+}
+
+/* High Bidder Border Glow */
+.high-bidder-glow {
+  transition: all 0.3s ease;
+}
+
+.high-bidder-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--flash-color), var(--accent));
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.high-bidder-glow.is-winning::before {
+  opacity: 0.6;
+  animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* 3D Button Press Effect */
+.btn-3d {
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-3d:hover::before {
+  opacity: 1;
+}
+
+.btn-3d:active {
+  transform: scale(0.97);
+}
+
+.btn-3d:active::before {
+  opacity: 0;
+}
 
 ::-webkit-scrollbar { width: 4px; height: 4px; } 
 ::-webkit-scrollbar-track { background: transparent; } 
@@ -300,6 +569,52 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .dashboard-section-label::after { content: ''; height: 1px; flex: 1; background: rgba(255,255,255,0.08); }
 
 #auctionPlayerPopup { flex: 1; min-height: 380px; border-radius: var(--radius-lg); overflow: hidden; position: relative; border: 1px solid rgba(120,183,255,0.28); box-shadow: 0 24px 80px rgba(0,8,28,0.48); display: flex; flex-direction: column; animation: livePop 0.35s cubic-bezier(0.16,1,0.3,1); }
+
+/* 3D Player Card Base */
+.live-card-content {
+  transform-style: preserve-3d;
+  perspective: 1400px;
+}
+
+/* Card Glass Effect */
+.live-card-glass {
+  background: linear-gradient(180deg, rgba(16,33,53,0.96), rgba(8,42,78,0.92));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(102,255,99,0.18);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 20px 60px rgba(0,8,28,0.45),
+    0 0 40px rgba(47,125,246,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+/* Photo Frame 3D */
+.live-photo-frame {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.live-photo-frame.hover-3d:hover {
+  transform: translateZ(20px) rotateX(2deg) rotateY(-1deg);
+  box-shadow: 0 30px 70px rgba(0,8,28,0.5), 0 0 50px rgba(47,125,246,0.2);
+}
+
+/* Photo Glow Ring Animation */
+.photo-glow {
+  animation: photoGlowRing 3s ease-in-out infinite;
+}
+
+@keyframes photoGlowRing {
+  0%, 100% {
+    box-shadow: 0 22px 70px rgba(0,8,28,0.48), 0 0 18px rgba(47,125,246,0.18), 0 0 0 rgba(37,212,255,0), inset 0 0 28px rgba(37,212,255,0.1);
+  }
+  50% {
+    box-shadow: 0 24px 80px rgba(0,8,28,0.52), 0 0 36px rgba(47,125,246,0.34), 0 0 76px rgba(37,212,255,0.26), inset 0 0 38px rgba(37,212,255,0.2);
+  }
+}
 @media (max-width: 767px) { #auctionPlayerPopup { min-height: 300px; } }
 .live-card-content { position: relative; z-index: 20; padding: 20px; width: 100%; display: flex; flex-direction: column; gap: 14px; min-height: 100%; perspective: 1400px; }
 .live-card-content.card-flipping { animation: liveCardFlip 0.56s cubic-bezier(0.2,0.82,0.22,1); transform-style: preserve-3d; will-change: transform, opacity; }
@@ -394,6 +709,71 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes loadingSpin { to { transform: rotate(360deg); } }
 @keyframes loadingBar { 0% { transform: translateX(-105%); } 55%,100% { transform: translateX(245%); } }
 @keyframes softGlow { 0%,100% { box-shadow: 0 0 0 rgba(37,212,255,0); } 50% { box-shadow: 0 0 28px rgba(37,212,255,0.22); } }
+
+/* Enhanced Entry Animations */
+.panel-in-3d {
+  animation: panelIn3d 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+@keyframes panelIn3d {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateZ(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+.card-enter-3d {
+  animation: cardEnter3d 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+@keyframes cardEnter3d {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotateX(10deg) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0) scale(1);
+  }
+}
+
+/* RTM Badge Animation */
+.rtm-badge-enter {
+  animation: rtmBadgeEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes rtmBadgeEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Timer Warning Pulse */
+.timer-warning-pulse {
+  animation: timerWarningPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerWarningPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 24px rgba(239,68,68,0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 48px rgba(239,68,68,0.4);
+  }
+}
 @keyframes shimmer { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
 
 header .header-right { display: flex; align-items: center; gap: 8px; }
@@ -1534,6 +1914,12 @@ input:focus, textarea:focus, select:focus { border-color: rgba(102,255,99,0.72);
 
   <img id="hammer" src="hammer.png" alt="">
   <audio id="hammerAudio" src="hammer.wav"></audio>
+
+  <!-- 3D WebGL Background -->
+  <div id="threeCanvasContainer"></div>
+
+  <!-- Live Particle Burst Container -->
+  <div id="particleBurstContainer"></div>
 </div>
 
 <!-- auction-server-config -->
@@ -2361,6 +2747,16 @@ socket.on('player:bid', pl => {
     showBidAnnouncement(bid);
   }
   log(`<span style="color:white;font-weight:700">${escapeHTML(pl.name)}</span>: <span style="color:var(--cyan);font-weight:700">${escapeHTML(bid.bidText)}</span>`);
+
+  // NEW: Trigger animations on bid
+  if (window.ANIMATION_FEATURES.enabled && activePlayer?.name === pl.name) {
+    // Animate bid history entry with slide-in
+    animateBidHistory(
+      `<span style="color:white;font-weight:700">${escapeHTML(pl.name)}</span>: <span style="color:var(--cyan);font-weight:700">${escapeHTML(bid.bidText)}</span>`,
+      team ? team.name : (bidderId || 'Admin'),
+      pl.price
+    );
+  }
 });
 
 socket.on('admin:toast', d => showToast(d.msg));
@@ -3826,6 +4222,644 @@ const dlCSV = () => {
 };
 document.getElementById('btnExportAdmin').onclick = dlCSV;
 document.getElementById('btnExportTeam').onclick = dlCSV;
+
+// ============================================
+// 3D ANIMATION SYSTEM (GSAP + Three.js)
+// ============================================
+
+// Initialize Three.js WebGL background
+function initThreeBackground() {
+  if (!window.ANIMATION_FEATURES.enabled) return null;
+
+  const container = document.getElementById('threeCanvasContainer');
+  if (!container) return null;
+
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  camera.position.z = 50;
+
+  // Create particle system
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = window.ANIMATION_CONFIG.particleCount;
+  const posArray = new Float32Array(particlesCount * 3);
+  const sizesArray = new Float32Array(particlesCount);
+
+  for(let i = 0; i < particlesCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 150;
+    if (i % 3 === 1) posArray[i] = (Math.random() - 0.5) * 50; // Y coordinates more compressed
+  }
+  for(let i = 0; i < particlesCount; i++) {
+    sizesArray[i] = Math.random() * 2 + 0.5;
+  }
+
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizesArray, 1));
+
+  // Custom particle shader for glowing effect
+  const particlesMaterial = new THREE.PointsMaterial({
+    size: 1.5,
+    color: 0x47e9ff,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
+  });
+
+  const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+  scene.add(particlesMesh);
+
+  // Create floating grid lines
+  const gridGroup = new THREE.Group();
+  const gridSize = 60;
+  const gridDivisions = 10;
+
+  for (let i = 0; i < 3; i++) {
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x66ff63, 0x102135);
+    gridHelper.position.y = -15 + (i * 8);
+    gridHelper.position.z = -10 + (i * 10);
+    gridHelper.rotation.x = 0.15;
+    gridHelper.material.transparent = true;
+    gridHelper.material.opacity = 0.15;
+    gridGroup.add(gridHelper);
+  }
+
+  scene.add(gridGroup);
+
+  // Ambient light for subtle 3D effects
+  const ambientLight = new THREE.AmbientLight(0x47e9ff, 0.3);
+  ambientLight.position.set(10, 10, 10);
+  scene.add(ambientLight);
+
+  // Mouse tracking for subtle parallax
+  let mouseX = 0;
+  let mouseY = 0;
+  let targetRotationX = 0;
+  let targetRotationY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX - window.innerWidth / 2) * 0.01;
+    mouseY = (e.clientY - window.innerHeight / 2) * 0.01;
+  });
+
+  // Touch support for mobile parallax
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 0) {
+      mouseX = (e.touches[0].clientX - window.innerWidth / 2) * 0.01;
+      mouseY = (e.touches[0].clientY - window.innerHeight / 2) * 0.01;
+    }
+  });
+
+  // Animation loop
+  let time = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.003;
+
+    // Gentle particle movement
+    const positions = particlesGeometry.attributes.position.array;
+    for(let i = 0; i < particlesCount; i++) {
+      const idx = i * 3;
+      positions[idx + 1] += Math.sin(time + positions[idx]) * 0.02;
+    }
+    particlesGeometry.attributes.position.needsUpdate = true;
+
+    // Subtle grid rotation
+    gridGroup.rotation.y = Math.sin(time * 0.2) * 0.05;
+    gridGroup.position.z = -10 + Math.sin(time * 0.3) * 2;
+
+    // Camera parallax
+    targetRotationX = mouseY * 0.5;
+    targetRotationY = mouseX * 0.5;
+    camera.position.x += (mouseX - camera.position.x) * 0.02;
+    camera.position.y += (-mouseY - camera.position.y) * 0.02;
+    camera.lookAt(scene.position);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Handle resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  return { scene, camera, renderer };
+}
+
+// Initialize Three.js when available
+window.addEventListener('load', () => {
+  if (window.THREE && !window.threeInitialized) {
+    initThreeBackground();
+    window.threeInitialized = true;
+  }
+});
+
+// ============================================
+// GSAP ANIMATION HELPERS
+// ============================================
+
+/**
+ * Animate bid price with rolling number counter
+ * @param {HTMLElement} element - Element to animate
+ * @param {number} targetValue - Final value
+ * @param {Object} options - GSAP animation options
+ */
+function animatePriceCounter(element, targetValue, options = {}) {
+  if (window.ANIMATION_FEATURES.reducedMotion) {
+    element.textContent = targetValue;
+    return;
+  }
+
+  const current = parseFloat(element.textContent) || 0;
+  const duration = options.duration || 0.4;
+  const ease = options.ease || 'power2.out';
+
+  gsap.to({ val: 0 }, {
+    val: 1,
+    duration: duration,
+    ease: ease,
+    onUpdate: function() {
+      const easedProgress = this.targets()[0].val;
+      element.textContent = Math.floor(current + (targetValue - current) * easedProgress).toLocaleString();
+    }
+  });
+}
+
+/**
+ * Create bid flash effect with team color
+ * @param {string} teamId - Team ID for color
+ */
+function triggerBidFlash(teamId) {
+  if (window.ANIMATION_FEATURES.reducedMotion) return;
+
+  const team = STATE.teams.find(t => t.id === teamId);
+  const flashColor = team ? 'var(--accent)' : 'var(--cyan)';
+  document.documentElement.style.setProperty('--flash-color', flashColor);
+
+  const popup = document.getElementById('auctionPlayerPopup');
+  if (popup) {
+    popup.classList.toggle('bid-flash', true);
+
+    // Remove class after animation
+    setTimeout(() => {
+      popup.classList.toggle('bid-flash', false);
+      document.documentElement.style.removeProperty('--flash-color');
+    }, 1000);
+  }
+}
+
+/**
+ * Trigger pulse animation on element
+ * @param {HTMLElement} element - Element to pulse
+ * @param {string} intensity - Scale intensity (default: medium)
+ */
+function triggerPulse(element, intensity = 'medium') {
+  if (window.ANIMATION_FEATURES.reducedMotion || !element) return;
+
+  const scaleMap = { 'low': 1.03, 'medium': 1.08, 'high': 1.15 };
+  const scale = scaleMap[intensity] || scaleMap['medium'];
+  const duration = 0.3 + (intensity === 'high' ? 0.2 : 0);
+
+  gsap.fromTo(element,
+    { scale: 1 },
+    {
+      scale: scale,
+      duration: duration * 0.5,
+      ease: 'power2.out'
+    }
+  );
+
+  gsap.fromTo(element,
+    { scale: scale },
+    {
+      scale: 1,
+      duration: duration * 0.5,
+      ease: 'back.out(1.2)'
+    }
+  );
+}
+
+/**
+ * Create particle burst effect on element
+ * @param {HTMLElement} targetElement - Element to center burst around
+ * @param {string} color - Burst color (default: var(--accent))
+ */
+function createParticleBurst(targetElement, color = 'var(--accent)') {
+  if (window.ANIMATION_FEATURES.reducedMotion) return;
+
+  const container = document.getElementById('particleBurstContainer');
+  if (!container) return;
+
+  const rect = targetElement.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // Create particles
+  const particleCount = 24;
+  const burstRadius = Math.max(rect.width, rect.height) * 3;
+
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (i / particleCount) * Math.PI * 2;
+    const particle = document.createElement('div');
+    particle.innerHTML = '✦';
+    particle.style.cssText = `
+      position: fixed;
+      left: ${centerX}px;
+      top: ${centerY}px;
+      color: ${color};
+      font-size: ${Math.random() * 12 + 12}px;
+      pointer-events: none;
+      z-index: 9001;
+      opacity: 1;
+      transform-origin: center center;
+    `;
+    container.appendChild(particle);
+
+    // Animate particle
+    const destX = centerX + Math.cos(angle) * burstRadius * Math.random();
+    const destY = centerY + Math.sin(angle) * burstRadius * Math.random();
+
+    gsap.to(particle, {
+      x: destX - centerX,
+      y: destY - centerY,
+      rotation: Math.random() * 720,
+      opacity: 0,
+      duration: 0.6 + Math.random() * 0.4,
+      ease: 'power2.out',
+      onComplete: () => particle.remove()
+    });
+  }
+
+  // Center flash
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position: fixed;
+    left: ${centerX}px;
+    top: ${centerY}px;
+    width: 20px;
+    height: 20px;
+    background: ${color};
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9002;
+  `;
+  container.appendChild(flash);
+
+  gsap.fromTo(flash,
+    { scale: 0, opacity: 1 },
+    {
+      scale: Math.max(rect.width, rect.height),
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+      onComplete: () => flash.remove()
+    }
+  );
+}
+
+/**
+ * Animate bid history entry
+ * @param {string} message - Bid message
+ * @param {string} ownerName - Bidding team name
+ * @param {number} price - Bid amount
+ * @param {number} delay - Delay before animation (ms)
+ */
+function animateBidHistory(message, ownerName, price, delay = 0) {
+  if (window.ANIMATION_FEATURES.reducedMotion) return;
+
+  setTimeout(() => {
+    const log = document.getElementById('log');
+    if (!log) return;
+
+    const entry = document.createElement('div');
+    entry.className = 'bid-entry';
+    entry.innerHTML = `<span style="color:var(--accent-2)">›</span> ${message}`;
+
+    log.prepend(entry);
+
+    // Limit entries
+    while (log.children.length > 50) {
+      log.removeChild(log.lastChild);
+    }
+
+    // Fade out old entries
+    gsap.to(log.children[1], {
+      opacity: 0.5,
+      duration: 4,
+      onComplete: () => {
+        if (log.children[1]) log.removeChild(log.children[1]);
+      }
+    });
+  }, delay);
+}
+
+/**
+ * Animate budget update with color feedback
+ * @param {HTMLElement} element - Budget element
+ * @param {number} oldBudget - Previous budget
+ * @param {number} newBudget - New budget
+ */
+function animateBudgetUpdate(element, oldBudget, newBudget) {
+  if (window.ANIMATION_FEATURES.reducedMotion) {
+    element.textContent = `৳${newBudget}`;
+    return;
+  }
+
+  element.classList.add('budget-update');
+  element.textContent = `৳${newBudget}`;
+
+  // Reset animation class
+  setTimeout(() => {
+    element.classList.remove('budget-update');
+  }, 500);
+}
+
+/**
+ * Trigger team border glow based on bidding status
+ * @param {string} teamId - Team ID
+ * @param {boolean} isWinning - Whether team is currently winning
+ */
+function updateTeamGlow(teamId, isWinning) {
+  // Find all team score tiles matching this ID
+  const tiles = document.querySelectorAll(`[data-team-id="${teamId}"]`);
+  tiles.forEach(tile => {
+    if (isWinning) {
+      tile.classList.add('high-bidder-glow', 'is-winning');
+      tile.style.setProperty('--flash-color', 'var(--accent)');
+    } else {
+      tile.classList.remove('high-bidder-glow', 'is-winning');
+    }
+  });
+}
+
+/**
+ * Enhanced sold animation with GSAP
+ * @param {Object} soldData - Sold item data
+ */
+function animateSoldEvent(soldData) {
+  const { category, name, price, teamId, isRTM, isDirect } = soldData;
+  const t = STATE.teams.find(x => x.id === teamId);
+
+  const stampEl = document.getElementById('animTitle');
+  const playerEl = document.getElementById('animPlayer');
+  const teamEl = document.getElementById('animTeam');
+  const priceEl = document.getElementById('animPrice');
+
+  const label = isRTM ? 'RTM!' : (isDirect ? 'RETAINED!' : 'SOLD!');
+  const colorVar = isRTM ? 'var(--rtm)' : (isDirect ? 'var(--accent-2)' : 'var(--amber)');
+  const saleLabel = isRTM ? 'RTM' : (isDirect ? 'RETAINED' : 'SOLD');
+
+  if (stampEl) {
+    stampEl.textContent = label;
+    stampEl.style.color = colorVar;
+
+    // Remove existing animation class
+    stampEl.classList.remove('sold-stamp');
+    // Force reflow
+    void stampEl.offsetWidth;
+    // Add with GSAP timing
+    gsap.fromTo(stampEl,
+      { scale: 0, opacity: 0, rotation: -15 },
+      { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: 'back.out(1.7)' }
+    );
+  }
+
+  if (playerEl) playerEl.textContent = name;
+  if (teamEl) teamEl.textContent = t ? t.name : teamId;
+  if (priceEl) {
+    priceEl.textContent = `৳${price}`;
+    createParticleBurst(priceEl, colorVar.split('(')[0].replace('var(', ''));
+  }
+
+  const overlay = document.getElementById('soldAnimationOverlay');
+  if (overlay) {
+    overlay.classList.add('sold-overlay-flash');
+
+    // Launch particles from center
+    const center = overlay.getBoundingClientRect();
+    for (let i = 0; i < 12; i++) {
+      setTimeout(() => {
+        const particle = document.createElement('div');
+        particle.innerHTML = '●';
+        particle.style.cssText = `
+          position: fixed;
+          left: ${center.left + center.width/2}px;
+          top: ${center.top + center.height/2}px;
+          color: ${gsap.utils.parseCSSColor(colorVar) || '#66ff63'}";
+          font-size: ${Math.random() * 16 + 16}px;
+          pointer-events: none;
+          z-index: 9003;
+          opacity: 1;
+        `;
+        document.getElementById('particleBurstContainer').appendChild(particle);
+
+        const angle = (i / 12) * Math.PI * 2;
+        const distance = 150 + Math.random() * 100;
+
+        gsap.to(particle, {
+          x: Math.cos(angle) * distance,
+          y: Math.sin(angle) * distance,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          onComplete: () => particle.remove()
+        });
+      }, i * 30);
+    }
+  }
+}
+
+/**
+ * Animate code reveal with flourish
+ * @param {Object} context - Reveal context object
+ */
+function animateCodeReveal(revealEl, codeSymbolEl, codeAttrs = '') {
+  if (window.ANIMATION_FEATURES.reducedMotion) return;
+
+  const code = codeAttrs.getAttribute ? codeAttrs.getAttribute('aria-label') : '';
+  codeAttrs.classList.remove('hidden');
+
+  // Spin in animation
+  gsap.fromTo(codeAttrs,
+    {
+      rotationY: -90,
+      opacity: 0
+    },
+    {
+      rotationY: 0,
+      opacity: 1,
+      duration: 0.7,
+      ease: 'back.out(1.2)'
+    }
+  );
+
+  // Entrance for individual slots
+  const slots = codeSymbolEl.querySelectorAll('.code-reel');
+  slots.forEach((slot, i) => {
+    gsap.fromTo(slot,
+      {
+        y: -20,
+        opacity: 0,
+        filter: 'blur(8px)'
+      },
+      {
+        y: 0,
+        opacity: 1,
+        filter: 'blur(0)',
+        duration: 0.4,
+        delay: i * 0.15,
+        ease: 'power2.out'
+      }
+    );
+  });
+}
+
+// ============================================
+// INTEGRATE ANIMATIONS WITH EXISTING WEBSOCKET EVENTS
+// ============================================
+
+// Store reference to original bid update function
+const originalUpdateBid = window.updatePopupPrice;
+
+// Override updatePopupPrice to add animation triggers
+window.updatePopupPrice = function(p, highBidderId) {
+  // Call original function first
+  const result = originalUpdateBid ? originalUpdateBid.apply(this, arguments) : undefined;
+
+  // Then add our animations
+  if (window.ANIMATION_FEATURES.enabled && activePlayer && p) {
+    // Pulse winning team glow
+    if (highBidderId) {
+      setTimeout(() => updateTeamGlow(highBidderId, false), 500);
+      setTimeout(() => updateTeamGlow(highBidderId, highBidderId === CURRENT_USER.teamId), 800);
+    }
+
+    // Animate viewer price
+    const viewerPriceEl = document.getElementById('viewerPrice');
+    if (viewerPriceEl) {
+      animatePriceCounter(viewerPriceEl, p);
+    }
+
+    // Animate popup price with rolling counter
+    const priceEl = document.getElementById('popupPrice');
+    if (priceEl) {
+      animatePriceCounter(priceEl, p);
+    }
+
+    // Pulse animation on price
+    triggerPulse(priceEl, 'medium');
+
+    // Bid flash on auction popup
+    if (highBidderId) {
+      triggerBidFlash(highBidderId);
+    }
+  }
+
+  return result;
+};
+
+// Hook into log function to add animated bid history
+const originalLog = window.log;
+window.log = function(msg) {
+  originalLog.apply(this, arguments);
+  // Animation handled via animateBidHistory when socket event fires
+};
+socket.on('player:sold', function(data) {
+  const { category, name, price, teamId, isDirect, isRTM } = data.payload;
+  STATE.teams = data.teams;
+  if (!STATE.soldPrices) STATE.soldPrices = {};
+  STATE.soldPrices[`${category}:${name}`] = price;
+  if (isDirect && !isRTM) { if (!STATE.directSigns) STATE.directSigns = {}; STATE.directSigns[`${category}:${name}`] = true; }
+  if (isRTM) { if (!STATE.rtmEvents) STATE.rtmEvents = {}; STATE.rtmEvents[`${category}:${name}`] = true; }
+
+  activePlayer = null; updateLiveIndicator();
+  allowActivePlayerCodeQueue = false;
+  liveRevealToken++;
+  blockedBidToastKey = '';
+  const popup = document.getElementById('auctionPlayerPopup');
+  popup.classList.remove('is-code-mode');
+  popup.classList.add('hidden'); popup.style.opacity = ''; popup.style.filter = ''; popup.style.pointerEvents = '';
+  document.getElementById('livePlayerBody')?.classList.remove('is-preparing-player');
+  document.getElementById('livePlayerLoader')?.classList.add('hidden');
+  document.getElementById('liveCodeReveal')?.classList.add('hidden');
+  document.querySelector('#popupImgContainer .live-photo-frame')?.classList.remove('photo-glow');
+  document.getElementById('liveAuctionMain')?.classList.remove('is-player-active', 'is-revealing-player');
+  document.getElementById('auctionIdleState').classList.remove('hidden');
+  document.getElementById('auctionIdleState')?.classList.remove('admin-code-active');
+
+  const t = STATE.teams.find(x => x.id === teamId);
+  const titleEl = document.getElementById('animTitle');
+  if (titleEl) {
+    if (isRTM) { titleEl.textContent = 'RTM!'; titleEl.style.color = 'var(--rtm)'; }
+    else if (isDirect) { titleEl.textContent = 'RETAINED!'; titleEl.style.color = 'var(--accent-2)'; }
+    else { titleEl.textContent = 'SOLD!'; titleEl.style.color = 'var(--amber)'; }
+  }
+
+  const animPlayer = document.getElementById('animPlayer');
+  if (animPlayer) animPlayer.textContent = name;
+  const animTeam = document.getElementById('animTeam');
+  if (animTeam) animTeam.textContent = t ? t.name : teamId;
+  const animPrice = document.getElementById('animPrice');
+  if (animPrice) {
+    animPrice.textContent = `৳${price}`;
+    if (window.ANIMATION_FEATURES.enabled) {
+      createParticleBurst(animPrice, 'var(--accent)');
+    }
+  }
+  document.getElementById('soldAnimationOverlay').classList.remove('hidden');
+
+  // NEW: GSAP-enhanced animation
+  if (window.ANIMATION_FEATURES.enabled) {
+    animateSoldEvent({ category, name, price, teamId, isRTM, isDirect });
+  } else {
+    // Original hammer animation
+    const hammer = document.getElementById('hammer');
+    hammer.style.display = 'block'; hammer.classList.remove('swing');
+    void hammer.offsetWidth; hammer.classList.add('swing');
+    const audio = document.getElementById('hammerAudio');
+    if (audio) { audio.pause(); audio.currentTime = 0; audio.play().catch(() => {}); }
+
+    setTimeout(() => {
+      document.getElementById('soldAnimationOverlay').classList.add('hidden');
+      renderAll();
+    }, 3500);
+  }
+
+  const label = isRTM ? 'RTM' : (isDirect ? 'RETAINED' : 'SOLD');
+  log(`<span style="font-weight:700;color:white">${label}</span>: ${name} → <span style="color:var(--accent-2);font-weight:700">${t ? t.name : teamId}</span> ৳${price}`);
+});
+
+// ============================================
+// MOBILE OPTIMIZATIONS - Disable 3D on small screens
+// ============================================
+
+// Check viewport and adjust animation behavior
+function handleViewportSize() {
+  const isSmallMobile = window.innerWidth < 768;
+  const isLargeTablet = window.innerWidth >= 1200;
+
+  if (isSmallMobile) {
+    window.ANIMATION_FEATURES.enabled = false;
+    window.ANIMATION_FEATURES.reducedMotion = true;
+  } else {
+    if (isLargeTablet && window.ANIMATION_FEATURES.reducedMotion) {
+      window.ANIMATION_FEATURES.enabled = true;
+      window.ANIMATION_FEATURES.reducedMotion = false;
+    }
+  }
+}
+
+window.addEventListener('resize', handleViewportSize);
+handleViewportSize();
 </script>
 </body>
 </html>
